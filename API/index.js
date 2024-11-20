@@ -1,7 +1,7 @@
 const express = require("express");
 const dotenv = require("dotenv"); 
 const bodyParser = require('body-parser'); // Import body-parser
-const path = require('path');
+
 
 const authRoute = require("./contollers/auth");
 const ProductRoute = require("./contollers/product");
@@ -44,7 +44,7 @@ app.use("/api/shop/location",locationroute)
 app.use("/api/wish",wishroute)
 app.use("/api/review",reviewroute)
 app.use("/api/stats",statsroute)
-app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+
 app.use('/api/upload', fileUploadRouter);
 app.use('/api/notification', notificationroute);
 

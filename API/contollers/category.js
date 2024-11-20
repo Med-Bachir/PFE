@@ -3,35 +3,97 @@ const connection = require('../db');
 const { query } = require("../utils/promiseQuery.js");
 const router = require("express").Router();
 
+const { v2: cloudinary } = require('cloudinary');
+
+
+// Cloudinary Configuration
+cloudinary.config({
+    cloud_name: 'dr95wrssj',
+    api_key: '419664968851868',
+    api_secret: '61D8e5oyWfCQLWBohKa-9t7HxZg'
+});
+
+
 // CREATE a new category
 router.post("/add-cat", verifyTokenAndAdmin, async (req, res) => {
     try {
         const { categoryname, image } = req.body;
-        const result = await query("INSERT INTO CATEGORIES (categoryname, categoryimage) VALUES (?, ?)", [categoryname, image]);
-        res.status(200).json({ idCATEGORIES: result.insertId, categoryname, image });
+
+        // Upload the image to Cloudinary
+        const uploadResult = await cloudinary.uploader.upload(image, {
+            public_id: 'Cat',
+        });
+        
+
+        // Store the uploaded URL in the database
+        const result = await query(
+            "INSERT INTO CATEGORIES (categoryname, categoryimage) VALUES (?, ?)",
+            [categoryname, uploadResult.secure_url]
+        );
+
+        res.status(200).json({
+            idCATEGORIES: result.insertId,
+            categoryname,
+            image: uploadResult.secure_url
+        });
     } catch (error) {
         console.error("Error creating category:", error);
         res.status(500).json({ error: "Internal server error" });
     }
 });
+
+// CREATE a new subcategory
 router.post("/add-sub", verifyTokenAndAdmin, async (req, res) => {
     try {
-        const { idCat , subname, image } = req.body;
-        console.log(req.body)
-        const result = await query("INSERT INTO subcategories (name, image , category_id) VALUES (?, ? , ?)", [subname, image , idCat]);
-        res.status(200).json({ id: result.insertId, subname, image , idCat });
+        const { idCat, subname, image } = req.body;
+
+        // Upload the image to Cloudinary
+        const uploadResult = await cloudinary.uploader.upload(image, {
+            public_id: 'Cat',
+        });
+
+        // Store the uploaded URL in the database
+        const result = await query(
+            "INSERT INTO subcategories (name, image, category_id) VALUES (?, ?, ?)",
+            [subname, uploadResult.secure_url, idCat]
+        );
+
+        res.status(200).json({
+            id: result.insertId,
+            subname,
+            image: uploadResult.secure_url,
+            idCat
+        });
     } catch (error) {
-        console.error("Error creating category:", error);
+        console.error("Error creating subcategory:", error);
         res.status(500).json({ error: "Internal server error" });
     }
 });
+
+// CREATE a new type
 router.post("/add-type", verifyTokenAndAdmin, async (req, res) => {
     try {
-        const { idSub , typename, image } = req.body;
-        const result = await query("INSERT INTO types (name, image , id_Sub) VALUES (?, ? , ?)", [typename, image , idSub]);
-        res.status(200).json({ id: result.insertId, typename, image , idSub });
+        const { idSub, typename, image } = req.body;
+
+        // Upload the image to Cloudinary
+        const uploadResult = await cloudinary.uploader.upload(image, {
+            public_id: 'Taj',
+        });
+
+        // Store the uploaded URL in the database
+        const result = await query(
+            "INSERT INTO types (name, image, id_Sub) VALUES (?, ?, ?)",
+            [typename, uploadResult.secure_url, idSub]
+        );
+
+        res.status(200).json({
+            id: result.insertId,
+            typename,
+            image: uploadResult.secure_url,
+            idSub
+        });
     } catch (error) {
-        console.error("Error creating category:", error);
+        console.error("Error creating type:", error);
         res.status(500).json({ error: "Internal server error" });
     }
 });
@@ -330,3 +392,6 @@ router.delete("/:id", verifyTokenAndAdmin, async (req, res) => {
 
 
 module.exports = router ;
+
+
+

@@ -5,6 +5,16 @@ const connection = require('../db');
 const router = require("express").Router();
 
 const Fuse = require('fuse.js');
+const { v2: cloudinary } = require('cloudinary');
+
+
+// Cloudinary Configuration
+cloudinary.config({
+    cloud_name: 'dr95wrssj',
+    api_key: '419664968851868',
+    api_secret: '61D8e5oyWfCQLWBohKa-9t7HxZg'
+});
+
 
 //ADD PRODUCT TO THE SHOP 
 router.post("/add-product/:shopId", verifyTokenAndAuthorizationA_S, async (req, res) => {
@@ -12,14 +22,27 @@ router.post("/add-product/:shopId", verifyTokenAndAuthorizationA_S, async (req, 
 
 
   try {
-      const { productname, productdesc, productprice, productimage, productcolor, productsize,discount , catID , subID , typeID, qte } = req.body;
+      const { productname, productdesc, productprice, productimage, discount , catID , subID , typeID, qte , attribute } = req.body;
       const shopId = req.params.shopId;
-
+      const uploadResult = await cloudinary.uploader.upload(productimage, {
+        public_id: 'Product',
+    });
 
       // Function to insert the product into the database
+      const insertProductQuery = "INSERT INTO PRODUCT (productname, productdesc, productprice, productimage,  discount ,id_Category , id_SubCategory, id_Type , attributes) VALUES (?, ?, ?, ?, ?, ?, ?,?, ?)";
+      const insertProductValues = [
+          productname, 
+          productdesc, 
+          productprice, 
+          uploadResult.secure_url, 
+          
+          discount, 
+          catID, 
+          subID, 
+          typeID, 
+          JSON.stringify(attribute) // Convert the attributes object to a JSON string
+      ];
       
-          const insertProductQuery = "INSERT INTO PRODUCT (productname, productdesc, productprice, productimage, productcolor, productsize, discount ,id_Category , id_SubCategory, id_Type) VALUES (?, ?, ?, ?, ?, ?, ? ,? , ? ,?)";
-          const insertProductValues = [productname, productdesc, productprice, productimage, productcolor, productsize, discount, catID , subID , typeID];
 
           connection.query(insertProductQuery, insertProductValues, (err, productResult) => {
               if (err) {

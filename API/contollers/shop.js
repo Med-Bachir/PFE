@@ -3,6 +3,16 @@ const connection = require('../db');
 const { query } = require("../utils/promiseQuery.js");
 const router = require("express").Router();
 
+const { v2: cloudinary } = require('cloudinary');
+
+
+// Cloudinary Configuration
+cloudinary.config({
+    cloud_name: 'dr95wrssj',
+    api_key: '419664968851868',
+    api_secret: '61D8e5oyWfCQLWBohKa-9t7HxZg'
+});
+
 // CREATE SHOP
 router.post("/create-shop/:id_Owner", verifyTokenAndAuthorizationA_S, async (req, res) => {
     try {
@@ -13,6 +23,15 @@ router.post("/create-shop/:id_Owner", verifyTokenAndAuthorizationA_S, async (req
         const checkExistingRequestQuery = "SELECT * FROM SHOP WHERE id_Owner = ? AND status = 'close'";
         const checkExistingRequestValues = [id_Owner];
 
+        const uploadResultImage = await cloudinary.uploader.upload(shopimage, {
+            public_id: 'ShopImage',
+        });
+        const uploadResultCover = await cloudinary.uploader.upload(shopcover, {
+            public_id: 'Cover',
+        });
+
+        console.log(uploadResultCover)
+    
         connection.query(checkExistingRequestQuery, checkExistingRequestValues, (err, existingRequestResult) => {
             if (err) {
                 console.error("Error checking existing request:", err);
@@ -43,7 +62,7 @@ router.post("/create-shop/:id_Owner", verifyTokenAndAuthorizationA_S, async (req
 
                 // Insert shop into the database with status as "Pending"
                 const insertShopQuery = "INSERT INTO SHOP (id_Owner, shopname, shopimage, shopdesc, status, shopcover, number, id_Location, createdAt) VALUES (?, ?, ?, ?, ?, ?, ?, ?, NOW())";
-                const insertShopValues = [id_Owner, shopname, shopimage, shopdesc, 'Waiting', shopcover, number, id_Location];
+                const insertShopValues = [id_Owner, shopname, uploadResultImage.secure_url, shopdesc, 'Waiting', uploadResultCover.secure_url, number, id_Location];
 
                 connection.query(insertShopQuery, insertShopValues, (err, shopResult) => {
                     if (err) {

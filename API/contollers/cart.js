@@ -112,7 +112,7 @@ router.put("/update/:userId/:productId",verifyToken , async(req,res)=>{
     const userId = req.params.userId; // Extracting userId from params
     const idP = req.params.productId;
     const qte = req.body.quantity;
-    console.log(req.body)
+    
     try {
      
       // Query to get the user's cart items
@@ -131,15 +131,7 @@ router.put("/update/:userId/:productId",verifyToken , async(req,res)=>{
     }
   })
 
-  //GET ALL Carts
-  router.get("/",verifyTokenAndAdmin,async (req,res)=>{
-    try {
-        const carts = await Cart.find();
-        res.status(200).json(carts);
-    } catch (err) {
-        res.status(500).json(err)
-    }
-  })
+ 
 
 
 

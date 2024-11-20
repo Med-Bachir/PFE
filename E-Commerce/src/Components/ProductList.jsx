@@ -268,14 +268,18 @@ const tableTagsAdmin = [
       
     <Qte style={{flex : 1 ,textAlign:'center'}}>{product.quantity}</Qte>
     
-    <Size style={{flex : 1, textAlign:'center' }}>{product.productsize}</Size>
+    <Size style={{flex : 1, textAlign:'center' }}>{product?.attributes ? (
+  // Parse the JSON string from attributes to an object
+  JSON.parse(product?.attributes).size
+) : null}</Size>
     <Color style={{flex : 1, textAlign:'center' }}>
-      {product.productcolor.split(',').map((item) => (
+      {JSON.parse(product?.attributes)?.color.split(',').map((item) => (
         <Circl color={item} />
         
       ))
 
     }</Color>
+
     
     
     </ProductDet>

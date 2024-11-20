@@ -150,16 +150,17 @@ const AddProduct = () => {
   const [subsID, setSubsID] = useState(null);
   const [types, setTypes] = useState(null);
   const [type, setType] = useState(null);
-  const [typesID, setTypesID] = useState(null);
+  const [catname, setCatName] = useState(null);
+  const [subname, setSubName] = useState(null);
+
+  const [typename, setTypesName] = useState(null);
+  const [att , setAtt] = useState({})
 
 
   
 
-  const categoryname = Object.values(selectedValues).join(',');
-  const productsize = Object.values(checkedList).join(',');
-  const productcolor = Object.values(tags).join(',');
+  
 
- 
 
   const CheckboxGroup = Checkbox.Group;
   const checkAll = plainOptions.length === checkedList.length;
@@ -247,38 +248,36 @@ const AddProduct = () => {
     }
   };
 
-  const handlNameChange = (e) => {
+  
+
+  const handlNameChange = (e ) => {
     e.preventDefault();
     setProduct((prev) => ({ ...prev, [e.target.name]: e.target.value }));
-   
+ setAtt({ size : Object.values(checkedList).join(',') , color :Object.values(tags).join(',')})
+    console.log(att)
     const productDetails = {
       ...product,
-      productsize: productsize,
-      categoryname: categoryname,
       productimage:logoImageUrl,
-      productcolor:productcolor,
       shopname:shops,
       catID : cat ,
       subID : sub , 
-      typeID : type
+      typeID : type , 
+      attribute : att
     };
     console.log(productDetails)
   };
   const handleSubmit = async () => {
-    const categoryname = Object.values(selectedValues).join(',');
-    const productsize = Object.values(checkedList).join(',');
-    const productcolor = Object.values(tags).join(',');
-
+    
+    setAtt({ size : Object.values(checkedList).join(',') , color :Object.values(tags).join(',')})
 
     const productDetails = {
       ...product,
-      productsize: productsize,
       productimage:logoImageUrl,
-      productcolor:productcolor,
       shopname:shops,
       catID : cat ,
       subID : sub , 
-      typeID : type
+      typeID : type , 
+      attribute : att
     };
 
     try {
@@ -331,29 +330,35 @@ const AddProduct = () => {
   console.log(shops)
   };
 
-  const handleChangeField = (event, field) => {
+  
+  const handleChangeField = (event, field, name) => {
     const value = event.target.value;
   
     switch (field) {
       case 'cat':
-        setCat(value);
-          
+        setCat(value); // Only update the ID here
+        setCatName(cats.find(cat => cat.idCATEGORIES === value).categoryname)
+    console.log(catname)
         break;
       case 'sub':
         setSub(value);
+        setSubName(subs.find(sub => sub.id === value).name)
+    console.log(subname)
         break;
       case 'type':
         setType(value);
+        setTypesName(name);
         break;
       default:
         console.warn(`Unhandled field: ${field}`);
     }
+  
+    // You can now directly access the category name from the 'cats' array
     
-
-  
-  
-    console.log({ cat, sub, type });
+    
   };
+  
+
   
 
 
@@ -453,104 +458,7 @@ const AddProduct = () => {
             <Label>
               Name <Span style={{ color: 'red' }}>*</Span>
             </Label>
-            <InputText name="productname" onChange={handlNameChange}></InputText>
-          </InputContainer>
-          <InputContainer>
-            <Label>Color</Label>
-            <div style={{ display: 'flex', gap: '4px 0', flexWrap: 'wrap' }}>
-              {tags.map((tag, index) => {
-                if (editInputIndex === index) {
-                  return (
-                    <Input
-                      ref={editInputRef}
-                      key={tag}
-                      size="small"
-                      style={{ width: 64, height: 22, marginInlineEnd: 8, verticalAlign: 'top' }}
-                      value={editInputValue}
-                      onChange={handleEditInputChange}
-                      onBlur={handleEditInputConfirm}
-                      onPressEnter={handleEditInputConfirm}
-                    />
-                  );
-                }
-                const isLongTag = tag.length > 20;
-                const tagElem = (
-                  <Tag
-                    color={tag}
-                    key={tag}
-                    closable={index !== 0}
-                    style={{
-                      userSelect: 'none'
-                    }}
-                    onClose={() => handleClose(tag)}
-                  >
-                    <span
-                      onDoubleClick={(e) => {
-                        if (index !== 0) {
-                          setEditInputIndex(index);
-                          setEditInputValue(tag);
-                          e.preventDefault();
-                        }
-                      }}
-                    >
-                      {isLongTag ? `${tag.slice(0, 20)}...` : tag}
-                    </span>
-                  </Tag>
-                );
-                return isLongTag ? (
-                  <Tooltip title={tag} key={tag}>
-                    {tagElem}
-                  </Tooltip>
-                ) : (
-                  tagElem
-                );
-              })}
-              {inputVisible ? (
-                <Input
-                  ref={inputRef}
-                  type="text"
-                  size="small"
-                  style={{ width: 64, height: 22, marginInlineEnd: 8, verticalAlign: 'top' }}
-                  value={inputValue}
-                  onChange={handleInputChange}
-                  onBlur={handleInputConfirm}
-                  onPressEnter={handleInputConfirm}
-                />
-              ) : (
-                <Tag style={tagPlusStyle} icon={<PlusOutlined />} onClick={showInput}>
-                  New Color
-                </Tag>
-              )}
-            </div>
-          </InputContainer>
-          <InputContainer>
-            <Label>Size</Label>
-            <Checkbox indeterminate={indeterminate} onChange={onCheckAllChange} checked={checkAll}>
-              Check all
-            </Checkbox>
-            <Divider />
-            <CheckboxGroup options={plainOptions} value={checkedList} onChange={onChange} />
-          </InputContainer>
-
-          <InputContainer>
-            <Label>Description</Label>
-            <Area type="textarea" name='productdesc' onChange={handlNameChange} ></Area>
-          </InputContainer>
-          <InputContainer>
-            <Label>
-              Price <Span style={{ color: 'red' }}>*</Span>
-            </Label>
-            <InputText name='productprice' type="number" onChange={handlNameChange}></InputText>
-          </InputContainer>
-          <InputContainer>
-           
-           
-          </InputContainer>
-          <InputContainer>
-            <Label>
-              Discount <Span style={{ color: 'red' }}></Span>
-            </Label>
-            <InputText name='discount' type="number" onChange={handlNameChange}></InputText>
+            <InputText name="productname" onChange={(e) => handlNameChange(e) }></InputText>
           </InputContainer>
           <InputContainer>
           <Label>Category</Label>
@@ -560,12 +468,14 @@ const AddProduct = () => {
           labelId="demo-simple-select-helper-label"
           id="demo-simple-select-helper"
           value={cat}
+          
           label="Categories"
-          onChange={(e) => handleChangeField(e, 'cat')}
+          onChange={(e) => handleChangeField(e, 'cat' , cats.find((cat) => cat.idCATEGORIES === e.target.value)?.categoryname)}
         >
           {cats?.map((cat) => (
 
-            <MenuItem value={cat?.idCATEGORIES}>{cat.categoryname}</MenuItem>
+          
+            <MenuItem name={cat?.categoryname} value={cat?.idCATEGORIES}>{cat.categoryname}</MenuItem>
           ) )}
           
         </Select>
@@ -618,6 +528,227 @@ const AddProduct = () => {
       </FormControl>
           </InputContainer>
       :''}
+     {catname !== 'Cloths' ? (
+  catname === 'Electronics' ? (
+    <>
+      <InputContainer>
+      {subname == 'Mobiles' || subname == 'Tablets' ? 
+      <InputContainer>
+      <Label>
+      Camera<Span style={{ color: 'red' }}>*</Span>
+    </Label>
+    <InputText
+      name="camera"
+      type="number"
+      onChange={handlNameChange}
+      placeholder="48 , 108"
+    />
+  </InputContainer>
+      : null}
+        <Label>
+          RAM <Span style={{ color: 'red' }}>*</Span>
+        </Label>
+        <InputText
+          name="RAM"
+          type="number"
+          onChange={handlNameChange}
+          placeholder="RAM (GB)"
+        />
+      </InputContainer>
+      <InputContainer>
+        <Label>
+          CPU <Span style={{ color: 'red' }}>*</Span>
+        </Label>
+        <InputText
+          name="CPU"
+          type="text"
+          onChange={handlNameChange}
+          placeholder="ex: Intel Core i7"
+        />
+      </InputContainer>
+      <InputContainer>
+        <Label>
+          GPU <Span style={{ color: 'red' }}>*</Span>
+        </Label>
+        <InputText
+          name="GPU"
+          type="text"
+          onChange={handlNameChange}
+          placeholder="ex: RTX 4090 Ti "
+        />
+      </InputContainer>
+      <InputContainer>
+        <Label>
+          Battery Capacity <Span style={{ color: 'red' }}>*</Span>
+        </Label>
+        <InputText
+          name="Battery"
+          type="number"
+          onChange={handlNameChange}
+          placeholder="in MW"
+        />
+      </InputContainer>
+      <InputContainer>
+        <Label>
+          Storage <Span style={{ color: 'red' }}>*</Span>
+        </Label>
+        <InputText
+          name="Storage"
+          type="number"
+          onChange={handlNameChange}
+          placeholder="in GB"
+        />
+      </InputContainer>
+      <InputContainer>
+        <Label>
+          Screen Size <Span style={{ color: 'red' }}>*</Span>
+        </Label>
+        <InputText
+          name="screen"
+          type="number"
+          onChange={handlNameChange}
+          placeholder="15, 14"
+        />
+      </InputContainer>
+    </>
+  ) : null
+) : (
+  <>
+    <InputContainer>
+      <Label>Color</Label>
+      <div style={{ display: 'flex', gap: '4px 0', flexWrap: 'wrap' }}>
+        {tags.map((tag, index) => {
+          if (editInputIndex === index) {
+            return (
+              <Input
+                ref={editInputRef}
+                key={tag}
+                size="small"
+                style={{
+                  width: 64,
+                  height: 22,
+                  marginInlineEnd: 8,
+                  verticalAlign: 'top',
+                }}
+                value={editInputValue}
+                onChange={(e) => {
+                  handleEditInputChange(e);
+                  handleInputChange(e);
+                  handlNameChange(e);
+                }}
+                onBlur={handleEditInputConfirm}
+                onPressEnter={(e) => handleEditInputConfirm(e)}
+              />
+            );
+          }
+          const isLongTag = tag.length > 20;
+          const tagElem = (
+            <Tag
+              color={tag}
+              key={tag}
+              closable={index !== 0}
+              style={{ userSelect: 'none' }}
+              onClose={() => handleClose(tag)}
+            >
+              <span
+                onDoubleClick={(e) => {
+                  if (index !== 0) {
+                    setEditInputIndex(index);
+                    setEditInputValue(tag);
+                    e.preventDefault();
+                  }
+                }}
+              >
+                {isLongTag ? `${tag.slice(0, 20)}...` : tag}
+              </span>
+            </Tag>
+          );
+          return isLongTag ? (
+            <Tooltip title={tag} key={tag}>
+              {tagElem}
+            </Tooltip>
+          ) : (
+            tagElem
+          );
+        })}
+        {inputVisible ? (
+          <Input
+            ref={inputRef}
+            type="text"
+            size="small"
+            name="color"
+            style={{
+              width: 64,
+              height: 22,
+              marginInlineEnd: 8,
+              verticalAlign: 'top',
+            }}
+            value={inputValue}
+            onChange={(e) => {
+              handleInputChange(e);
+              handlNameChange(e);
+            }}
+            onBlur={handleInputConfirm}
+            onPressEnter={(e) => {
+              handleInputConfirm(e);
+              handlNameChange(e);
+            }}
+          />
+        ) : (
+          <Tag style={tagPlusStyle} icon={<PlusOutlined />} onClick={showInput}>
+            New Color
+          </Tag>
+        )}
+      </div>
+    </InputContainer>
+    <InputContainer>
+      <Label>Size</Label>
+      <Checkbox
+        name="size"
+        indeterminate={indeterminate}
+        onClick={(e) => {
+          onCheckAllChange(e);
+          handlNameChange(e);
+        }}
+        checked={checkAll}
+      >
+        Check all
+      </Checkbox>
+      <Divider />
+      <CheckboxGroup
+        name="size"
+        options={plainOptions}
+        value={checkedList}
+        onClick={(e) => {
+          handlNameChange(e);
+        }}
+        onChange={onChange}
+      />
+    </InputContainer>
+    <InputContainer>
+      <Label>Description</Label>
+      <Area type="textarea" name="productdesc" onChange={handlNameChange} />
+    </InputContainer>
+  </>
+)}
+
+          <InputContainer>
+            <Label>
+              Price <Span style={{ color: 'red' }}>*</Span>
+            </Label>
+            <InputText name='productprice' type="number" onChange={handlNameChange}></InputText>
+          </InputContainer>
+          <InputContainer>
+           
+           
+          </InputContainer>
+          <InputContainer>
+            <Label>
+              Discount <Span style={{ color: 'red' }}></Span>
+            </Label>
+            <InputText name='discount' type="number" onChange={handlNameChange}></InputText>
+          </InputContainer>
+         
           <InputContainer>
           <Label>Shops</Label>
           <FormControl sx={{  width:'100%'}}>
