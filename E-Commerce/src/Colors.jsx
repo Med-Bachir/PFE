@@ -1,0 +1,11 @@
+export const whiteTextColor = "#FEFCFF" ;
+export const blackColor = "#070D0D" ;
+export const hovredText = "#8f8f8f" ;
+export const gradientBackground = "background: rgb(0,0,0); background: -moz-linear-gradient(36deg, rgba(0,0,0,1) 0%, rgba(52,52,52,1) 100%); background: -webkit-linear-gradient(36deg, rgba(0,0,0,1) 0%, rgba(52,52,52,1) 100%); background: linear-gradient(36deg, rgba(0,0,0,1) 0%, rgba(52,52,52,1) 100%);"
+export const blackbackground = "#00001A";
+export const boxSadow = "rgba(0, 0, 0, 0.04) 0px 3px 5px;"
+export const secondText = "#b6b6b6";
+export const selected = '#ccccff6d';
+export const selectedText = '#8F8FB3';
+export const successText = '#50BA6A';
+export const successBackground = '#BEF6CC';

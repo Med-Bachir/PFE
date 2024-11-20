@@ -1,0 +1,41 @@
+/*.ant-menu-item-selected {
+  background-color: rgba(128, 128, 128, 0.055) !important;
+  color: teal !important;
+}
+
+.ant-menu-item.ant-menu-item-selected[aria-expanded="true"]
+  > .ant-menu-submenu-label {
+  background-color: teal !important;
+  color: white;
+}
+*/
+
+
+/* antDesign.css */
+.ant-menu-item-selected.ant-menu-item-selected {
+    background-color: rgba(128, 128, 128, 0.055) !important;
+    color: teal !important;
+  
+}
+
+
+
+.ant-menu-item.ant-menu-item-selected {
+  background-color: teal;
+}
+
+.ant-menu-submenu.ant-menu-submenu-selected > .ant-menu-submenu-title {
+  color: teal !important;
+}
+
+.ant-menu-submenu.ant-menu-submenu-selected > .ant-menu-submenu-title:hover {
+  color: teal !important;
+}
+
+.ant-menu-item.ant-menu-item-selected > .ant-menu-item > .ant-menu-submenu-title {
+  color: teal !important;
+}
+
+.ant-menu-item.ant-menu-item-selected > .ant-menu-item > .ant-menu-submenu-title:hover {
+  color: teal !important;
+}

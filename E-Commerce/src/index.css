@@ -1,0 +1,108 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+
+*{
+  box-sizing: border-box;
+margin: 0;
+  
+  
+}
+
+
+
+:root {
+  font-family: "Poppins", sans-serif;
+  line-height: 1.5;
+  font-weight: 400;
+
+  color-scheme: light dark;
+  color: rgba(255, 255, 255, 0.87);
+  background-color: #242424;
+
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+
+
+a{
+  text-decoration: none;
+  color: black;
+}
+
+html{
+  width: 100%;
+
+}
+body {
+  height: 100vh;
+  margin: 0;
+
+
+overflow-x: hidden;
+}
+
+body::-webkit-scrollbar {
+  width: 8px;               /* width of the entire scrollbar */
+}
+body::-webkit-scrollbar-track {
+  background: rgba(31, 31, 31, 0.196);        /* color of the tracking area */
+}
+body::-webkit-scrollbar-thumb {
+  background-color: rgba(31, 31, 31, 0.404);    /* color of the scroll thumb */
+  border-radius: 20px;       /* roundness of the scroll thumb */
+   /* creates padding around scroll thumb */
+}
+
+h1 {
+  font-size: 3.2em;
+  line-height: 1.1;
+}
+
+button {
+  border-radius: 8px;
+  border: none;
+  padding: 0.6em 1.2em;
+  font-size: 1em;
+  font-weight: 500;
+  font-family: inherit;
+  background-color: #1a1a1a;
+  cursor: pointer;
+  transition: 200ms;
+}
+
+
+
+
+
+
+@media (prefers-color-scheme: light) {
+  :root {
+    color: #213547;
+    background-color: #ffffff;
+  }
+ 
+  button {
+    background-color: #f9f9f9;
+  }
+}
+.ant-upload{
+  width: 100%;
+
+
+
+}
+
+:where(.css-dev-only-do-not-override-1k979oh).ant-upload-wrapper.ant-upload-picture-card-wrapper .ant-upload.ant-upload-select{
+  width: 100%;
+  border: 2px dashed #c0c0c0;
+  height: fit-content;
+  padding: 20px;
+
+ 
+  
+}

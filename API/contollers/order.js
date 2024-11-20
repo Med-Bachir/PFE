@@ -1,0 +1,549 @@
+const {verifyTokenAndSeller,verifyTokenAndAuthorizationA_S ,verifyTokenAndAuthorizationA_C, verifyTokenAndAdminandSeller, verifyToken,verifyTokenAndAuthorization, verifyTokenAndAdmin } = require("./verifytoken");
+const connection = require('../db');
+const { query } = require("../utils/promiseQuery.js");
+const router = require("express").Router();
+
+
+router.post('/checkout/:userId', async (req, res) => {
+  const userId = req.params.userId;
+  const { state, postalcode, city , phonenumber , type } = req.body.orderDetails;
+  
+
+  
+
+  // Validate required fields in request
+ 
+
+  console.log(req.body)
+  console.log(state)
+  /*const { shippingname, shippingimg, shippingprice, availability } = shippingDetails;
+    // Expecting phone in the main request body
+
+  if (!state || !postal_code || !city || !phonenumber || !shippingname || !shippingimg || !shippingprice || !availability) {
+    return res.status(400).json({ error: "Incomplete address, phone, or shipping details." });
+  }
+*/
+  const cartQuery = `
+    SELECT c.id_Product, c.color, c.size, c.quantity, p.productprice
+    FROM CART c , product p
+    WHERE id_Client = ? AND c.id_Product = p.idPRODUCT
+  `;
+
+  try {
+    const cartProducts = await new Promise((resolve, reject) => {
+      connection.query(cartQuery, [userId], (err, results) => {
+        if (err) {
+          console.error("Error fetching cart products:", err);
+          reject(err);
+        } else {
+          resolve(results);
+        }
+      });
+    });
+
+    if (!cartProducts || cartProducts.length === 0) {
+      return res.status(400).json({ error: "No products found in the cart." });
+    }
+
+    connection.beginTransaction(async (err) => {
+      if (err) {
+        return res.status(500).json({ error: "Transaction start failed." });
+      }
+
+      try {
+        // Insert address into ADDRESS table
+        const addressInsertQuery = `
+          INSERT INTO ADDRESS (state, postal_code, city)
+          VALUES (?, ?, ?)
+        `;
+        const addressResult = await new Promise((resolve, reject) => {
+          connection.query(addressInsertQuery, [state, postalcode, city], (err, results) => {
+            if (err) reject(err);
+            else resolve(results);
+          });
+        });
+        const addressId = addressResult.insertId;
+/*
+        // Insert shipping details into SHIPPING table
+        const shippingInsertQuery = `
+          INSERT INTO SHIPPING (shippingname, shippingimg, shippingprice, availability)
+          VALUES (?, ?, ?, ?)
+        `;
+        const shippingResult = await new Promise((resolve, reject) => {
+          connection.query(shippingInsertQuery, [shippingname, shippingimg, shippingprice, availability], (err, results) => {
+            if (err) reject(err);
+            else resolve(results);
+          });
+        });
+        const shippingId = shippingResult.insertId;*/
+
+        // Define values for the ORDER table
+        const qteValue = cartProducts.reduce((sum, item) => sum + item.quantity, 0);
+        const estimatedTimeValue = new Date(); // Placeholder, adjust as needed
+        const createdAtValue = new Date();
+        const discountValue = 0; // Placeholder discount logic
+        const progressValue = 'Waiting'; // Starting status for order
+        const currentplaceValue = 'Store Storage'; // Example starting point
+        
+
+        // Insert order details into ORDER table, including phone, currentplace, and type
+        const orderInsertQuery = `
+          INSERT INTO \`ORDER\` (id_User, id_Adrress, qte, estimtedtime, createdAt, discount, id_Shipping, progress, currentplace, phone, type)
+          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        `;
+        const orderResult = await new Promise((resolve, reject) => {
+          connection.query(orderInsertQuery, [userId, addressId, qteValue, estimatedTimeValue, createdAtValue, discountValue, 1, progressValue, currentplaceValue, phonenumber, type], (err, results) => {
+            if (err) reject(err);
+            else resolve(results);
+          });
+        });
+        const orderId = orderResult.insertId;
+
+        // Insert order items into ORDERITEM table
+        const orderItemsQuery = `
+          INSERT INTO ORDERITEM (id_Order, id_Product, qte, color, size)
+          VALUES (?, ?, ?, ?, ?)
+        `;
+        for (const product of cartProducts) {
+          const { id_Product, color, size, quantity } = product;
+          console.log(quantity)
+          await new Promise((resolve, reject) => {
+            connection.query(orderItemsQuery, [orderId, id_Product, quantity, color, size], (err, results) => {
+              if (err) reject(err);
+              else resolve(results);
+            });
+          });
+        }
+
+        // Delete products from CART table
+        const deleteCartQuery = `
+          DELETE FROM CART
+          WHERE id_Client = ? AND id_Product IN (?)
+        `;
+        await new Promise((resolve, reject) => {
+          connection.query(deleteCartQuery, [userId, cartProducts.map(p => p.id_Product)], (err, results) => {
+            if (err) reject(err);
+            else resolve(results);
+          });
+        });
+
+        connection.commit((err) => {
+          if (err) {
+            return connection.rollback(() => {
+              res.status(500).json({ error: "Transaction commit failed." });
+            });
+          }
+          res.status(200).json({ message: "Order placed successfully.", orderId });
+        });
+      } catch (error) {
+        connection.rollback(() => {
+          console.error("Transaction error:", error);
+          res.status(500).json({ error: "Transaction failed.", details: error });
+        });
+      }
+    });
+  } catch (error) {
+    console.error("Error retrieving cart products:", error);
+    res.status(500).json({ error: "Error retrieving cart products.", details: error });
+  }
+});
+
+
+router.put("/client/update-order-stats/:id", verifyTokenAndAuthorizationA_S, async (req, res) => {
+  const orderId = req.params.id;
+  const { status, currentplace, userId } = req.body; // Ensure userId is included in the request body
+
+  try {
+    const updateOrderStatusQuery = `
+      UPDATE \`order\`
+      SET progress = ?, currentplace = ?
+      WHERE idORDER = ?;
+    `;
+
+    connection.query(updateOrderStatusQuery, [status, currentplace, orderId], (err, results) => {
+      if (err) {
+        console.error("Error updating order status:", err);
+        return res.status(500).json({ error: "Failed to update order status." });
+      }
+
+      // Insert a notification for the user
+      const insertNotificationQuery = `
+        INSERT INTO notification (text, type, reciver)
+        VALUES (?, ?, ?);
+      `;
+
+      const notificationText = `Your order #${orderId} status has been updated to "${status}" at "${currentplace}".`;
+      const notificationType = "order_update"; // You can define notification types as needed
+
+      connection.query(insertNotificationQuery, [notificationText, notificationType, userId], (err, results) => {
+        if (err) {
+          console.error("Error sending notification:", err);
+          return res.status(500).json({ error: "Failed to send notification." });
+        }
+
+        res.status(200).json({ message: "Order status updated and notification sent successfully." });
+      });
+    });
+  } catch (err) {
+    console.error("Internal server error:", err);
+    res.status(500).json({ error: "Internal server error." });
+  }
+});
+
+
+// Route to get order stats for a client
+router.get('/client/:clientId/order-stats', verifyToken, async (req, res) => {
+  const clientId = req.params.clientId;
+
+  try {
+    const getOrderStatsQuery = `
+    SELECT 
+    o.idORDER,
+    o.id_User,
+    o.progress AS status,
+    DATE_FORMAT(o.createdAt, '%Y-%m-%d') AS dateOrder,
+    DATE_FORMAT(DATE_ADD(o.estimtedtime, INTERVAL 2 DAY), '%Y-%m-%d') AS estimatedTime,
+    o.qte AS amount,
+    o.currentplace AS place,
+    (oi.qte * p.productprice) AS totalPrice,
+    s.shippingname AS typeShipping,
+    a.state, a.postal_code, a.city,
+    s.shippingprice AS priceShipping,
+    p.idPRODUCT, p.productname, p.productdesc, p.productprice, p.productimage, 
+    oi.qte,oi.color,oi.size
+FROM 
+    \`ORDER\` o
+JOIN 
+    ORDERITEM oi ON o.idORDER = oi.id_Order
+JOIN 
+    PRODUCT p ON oi.id_Product = p.idPRODUCT
+JOIN 
+    SHIPPING s ON o.id_Shipping = s.idSHIPPING
+JOIN 
+    ADDRESS a ON o.id_Adrress = a.idADDRESS
+WHERE 
+    o.id_User = ?;
+    `;
+
+    connection.query(getOrderStatsQuery, [clientId], (err, results) => {
+      if (err) {
+        console.error("Error fetching order stats:", err);
+        res.status(500).json({ error: "Failed to fetch order stats." });
+        return;
+      }
+
+      if (results.length > 0) {
+        const orders = {};
+        results.forEach(row => {
+          const orderId = row.idORDER;
+          if (!orders[orderId]) {
+            orders[orderId] = {
+              orderId: orderId,
+              user:row.id_User,
+              status: row.status,
+              dateOrder: row.dateOrder,
+              estimatedTime: row.estimatedTime,
+              amount: row.amount,
+              totalPrice: row.totalPrice,
+              typeShipping: row.typeShipping,
+              state: row.state,
+              postalCode: row.postal_code,
+              priceShipping: row.priceShipping,
+              place:row.place,
+              city:row.city,
+              products: []
+            };
+          }
+          orders[orderId].products.push({
+            id: row.idPRODUCT,
+            
+            name: row.productname,
+            description: row.productdesc,
+            price: row.productprice,
+            image: row.productimage,
+            color: row.color,
+            size: row.size,
+            quantity:row.qte
+          });
+        });
+
+        const formattedResults = Object.values(orders);
+
+        res.status(200).json(formattedResults);
+      } else {
+        res.status(404).json({ error: "No orders found for this client" });
+      }
+    });
+  } catch (err) {
+    console.error("Internal server error:", err);
+    res.status(500).json({ error: "Internal server error." });
+  }
+});
+
+
+
+
+
+
+
+// GET MOUNTHLY INCOME
+
+router.get("/income" , verifyTokenAndAdmin , async (req,res)=>{
+    const date = new Date();
+    const lastmonth = new Date(date.setMonth(date.getMonth()-1))
+    const previousmonth = new Date(new Date().setMonth(lastmonth.getMonth()-1))
+     
+    try {
+        const income = await Order.aggregate([
+            {$match: {createdAt : {$gte: previousmonth}}},
+            {
+                $project:{
+                    month : { $month: "$createdAt"},
+                    sales : "$amount"
+                },
+            },
+                {
+                    $group:{
+                        _id:"$month",
+                        total:{$sum: "$sales"}
+                    },
+                },
+            
+        ]);
+        res.status(200).json(income);
+    } catch (err) {
+        res.status(500).json(err)
+    }
+})
+
+//total orders status
+router.get("/orders/status-count", verifyTokenAndAdmin, async (req, res) => {
+  try {
+    const getOrderStatusCountQuery = `
+      SELECT 
+        progress, COUNT(*) AS totalOrders 
+      FROM 
+        \`ORDER\`
+      GROUP BY 
+        progress;
+    `;
+
+    connection.query(getOrderStatusCountQuery, (err, results) => {
+      if (err) {
+        console.error("Error fetching order status counts:", err);
+        res.status(500).json({ error: "Failed to fetch order status counts." });
+        return;
+      }
+
+      // Create an object to store the counts
+      const statusCounts = {
+        'On Way': 0,
+        'Arrived': 0,
+        'Failure': 0
+      };
+
+      // Populate the object with the results
+      results.forEach(row => {
+        statusCounts[row.progress] = row.totalOrders;
+      });
+
+      res.status(200).json(statusCounts);
+    });
+  } catch (err) {
+    console.error("Internal server error:", err);
+    res.status(500).json({ error: "Internal server error." });
+  }
+});
+//get the shipping details 
+router.get('/order/:orderId/shipping-details', verifyToken, async (req, res) => {
+  const orderId = req.params.orderId;
+
+  try {
+    const getShippingDetailsQuery = `
+      SELECT 
+        o.idORDER,
+        o.id_User,
+        o.id_Adrress,
+        o.qte,
+        o.estimtedtime,
+        o.createdAt,
+        o.discount,
+        o.progress,
+        s.shippingname,
+        s.shippingimg,
+        s.shippingprice,
+        s.availability
+      FROM 
+        \ORDER\ o
+      JOIN 
+        SHIPPING s ON o.id_Shipping = s.idSHIPPING
+      WHERE 
+        o.idORDER = ?;
+    `;
+
+    connection.query(getShippingDetailsQuery, [orderId], (err, results) => {
+      if (err) {
+        console.error("Error fetching shipping details:", err);
+        res.status(500).json({ error: "Failed to fetch shipping details." });
+        return;
+      }
+
+      if (results.length > 0) {
+        res.status(200).json(results[0]);
+      } else {
+        res.status(404).json({ error: "Order not found" });
+      }
+    });
+  } catch (err) {
+    console.error("Internal server error:", err);
+    res.status(500).json({ error: "Internal server error." });
+  }
+});
+
+
+
+router.get('/order/shipping-details', verifyToken, async (req, res) => {
+  try {
+    const getShippingDetailsQuery = `
+    SELECT * FROM shipping
+    `;
+
+    connection.query(getShippingDetailsQuery, (err, results) => {
+      if (err) {
+        console.error("Error fetching shipping details:", err);
+        res.status(500).json({ error: "Failed to fetch shipping details." });
+        return;
+      }
+
+      if (results.length > 0) {
+        res.status(200).json(results);  // Return all results
+      } else {
+        res.status(404).json({ error: "No shipping details found" });
+      }
+    });
+  } catch (err) {
+    console.error("Internal server error:", err);
+    res.status(500).json({ error: "Internal server error." });
+  }
+});
+
+
+// GET My ORDERS 
+router.get('/client/orders/:id', verifyTokenAndAuthorizationA_S, async (req, res) => {
+  const id = req.params.id;
+  const { status } = req.query;
+  const validStatuses = ['Waiting', 'On Way', 'Arrived'];
+  const statusArray = status ? status.split(',') : [];
+
+  const allStatusesValid = statusArray.every(s => validStatuses.includes(s));
+  if (statusArray.length > 0 && !allStatusesValid) {
+    return res.status(400).json({ error: 'Invalid order status' });
+  }
+
+  const statusCondition = statusArray.length > 0
+    ? `AND o.progress IN (${statusArray.map(s => `'${s}'`).join(',')})`
+    : '';
+
+  try {
+    const getOrderStatsQuery = `
+      SELECT 
+        o.idORDER,
+        o.id_User,
+        a.state,
+        o.phone,
+        a.city,
+        a.postal_code,
+        o.progress,
+        o.currentplace,
+        o.type,
+        DATE_FORMAT(o.createdAt, '%Y-%m-%d') AS dateOrder,
+        DATE_FORMAT(DATE_ADD(o.estimtedtime, INTERVAL 2 DAY), '%Y-%m-%d') AS estimatedTime,
+        COUNT(oi.idORDERITEM) AS totalProducts,
+        SUM(p.productprice * oi.qte) AS totalPrice,
+        (
+          SELECT JSON_ARRAYAGG(
+            JSON_OBJECT(
+              'size', oi.size, 
+              'color', oi.color, 
+              'quantity', oi.qte, 
+              'name', p.productname, 
+              'image', p.productimage, 
+              'price', p.productprice
+            )
+          )
+          FROM 
+            ecommerce.orderitem oi
+          JOIN 
+            ecommerce.product p ON oi.id_Product = p.idPRODUCT
+          WHERE 
+            oi.id_Order = o.idORDER
+        ) AS products
+      FROM 
+        ecommerce.order o
+      JOIN 
+        ecommerce.orderitem oi ON o.idORDER = oi.id_Order
+      JOIN 
+        ecommerce.product p ON oi.id_Product = p.idPRODUCT
+      JOIN 
+        ecommerce.stock s ON s.id_Product = p.idPRODUCT
+      JOIN 
+        ecommerce.shop sh ON sh.idSHOP = s.id_Shop
+      JOIN 
+        ecommerce.address a ON o.id_Adrress = a.idADDRESS
+      JOIN 
+        ecommerce.user u ON u.idUSER = ?
+      WHERE 
+        sh.id_Owner = ? 
+        ${statusCondition}  -- Ensure shop is owned by the current user
+      GROUP BY 
+        o.idORDER,
+        o.id_User,
+        a.state,
+        o.phone,
+        a.city,
+        a.postal_code,
+        o.progress,
+        o.currentplace,
+        o.createdAt,
+        o.type,
+        o.estimtedtime;
+    `;
+
+    connection.query(getOrderStatsQuery, [id, id], (err, results) => {
+      if (err) {
+        console.error('Error fetching order stats:', err);
+        return res.status(500).json({ error: 'Failed to fetch order stats.' });
+      }
+
+      if (results.length > 0) {
+        const orders = results.map(row => ({
+          orderId: row.idORDER,
+          user:row.id_User,
+          status: row.progress,
+          dateOrder: row.dateOrder,
+          estimatedTime: row.estimatedTime,
+          currentPlace: row.currentplace,
+          state: row.state,
+          phonenumber: row.phone,
+          city: row.city,
+          type: row.type,
+          totalProducts: row.totalProducts,
+          totalPrice: row.totalPrice,
+          products: row.products
+        }));
+
+        res.status(200).json(orders);
+      } else {
+        res.status(200).json([]);
+      }
+    });
+  } catch (err) {
+    console.error('Internal server error:', err);
+    res.status(500).json({ error: 'Internal server error.' });
+  }
+});
+
+
+
+
+module.exports = router ;
