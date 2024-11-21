@@ -248,12 +248,14 @@ const AddProduct = () => {
     }
   };
 
-  
-
+  const handleAtt = (e) => {
+    e.preventDefault();
+    setAtt((prev) => ({ ...prev, [e.target.name]: e.target.value }))
+  }
   const handlNameChange = (e ) => {
     e.preventDefault();
     setProduct((prev) => ({ ...prev, [e.target.name]: e.target.value }));
- setAtt({ size : Object.values(checkedList).join(',') , color :Object.values(tags).join(',')})
+ setAtt({ ... att , size : Object.values(checkedList).join(',') , color :Object.values(tags).join(',')})
     console.log(att)
     const productDetails = {
       ...product,
@@ -344,10 +346,12 @@ const AddProduct = () => {
         setSub(value);
         setSubName(subs.find(sub => sub.id === value).name)
     console.log(subname)
+    
+
         break;
       case 'type':
         setType(value);
-        setTypesName(name);
+        setTypesName(types.find(type => type.id === value).name);
         break;
       default:
         console.warn(`Unhandled field: ${field}`);
@@ -540,7 +544,7 @@ const AddProduct = () => {
     <InputText
       name="camera"
       type="number"
-      onChange={handlNameChange}
+      onChange={(e) => {handlNameChange(e), handleAtt(e)}}
       placeholder="48 , 108"
     />
   </InputContainer>
@@ -551,7 +555,7 @@ const AddProduct = () => {
         <InputText
           name="RAM"
           type="number"
-          onChange={handlNameChange}
+          onChange={(e) => {handlNameChange(e), handleAtt(e)}}
           placeholder="RAM (GB)"
         />
       </InputContainer>
@@ -562,7 +566,7 @@ const AddProduct = () => {
         <InputText
           name="CPU"
           type="text"
-          onChange={handlNameChange}
+          onChange={(e) => {handlNameChange(e), handleAtt(e)}}
           placeholder="ex: Intel Core i7"
         />
       </InputContainer>
@@ -573,7 +577,7 @@ const AddProduct = () => {
         <InputText
           name="GPU"
           type="text"
-          onChange={handlNameChange}
+          onChange={(e) => {handlNameChange(e), handleAtt(e)}}
           placeholder="ex: RTX 4090 Ti "
         />
       </InputContainer>
@@ -582,9 +586,9 @@ const AddProduct = () => {
           Battery Capacity <Span style={{ color: 'red' }}>*</Span>
         </Label>
         <InputText
-          name="Battery"
+          name="battery"
           type="number"
-          onChange={handlNameChange}
+          onChange={(e) => {handlNameChange(e), handleAtt(e)}}
           placeholder="in MW"
         />
       </InputContainer>
@@ -593,9 +597,9 @@ const AddProduct = () => {
           Storage <Span style={{ color: 'red' }}>*</Span>
         </Label>
         <InputText
-          name="Storage"
+          name="storage"
           type="number"
-          onChange={handlNameChange}
+          onChange={(e) => {handlNameChange(e), handleAtt(e)}}
           placeholder="in GB"
         />
       </InputContainer>
@@ -606,13 +610,249 @@ const AddProduct = () => {
         <InputText
           name="screen"
           type="number"
-          onChange={handlNameChange}
+          onChange={(e) => {handlNameChange(e), handleAtt(e)}}
           placeholder="15, 14"
         />
       </InputContainer>
     </>
-  ) : null
-) : (
+  ) :  (subname == 'Tools'  ?
+     <>
+      <InputContainer>
+      <Label>
+          Craft Material <Span style={{ color: 'red' }}>*</Span>
+        </Label>
+        <InputText
+          name="material"
+          type="text"
+          onChange={(e) => {handlNameChange(e), handleAtt(e)}}
+          placeholder="Steel , Plastique , Carbon"
+          />
+      </InputContainer>
+     
+      <InputContainer>
+      <Label>
+          Weight <Span style={{ color: 'red' }}>*</Span>
+        </Label>
+        <InputText
+          name="weight"
+          type="number"
+          onChange={(e) => {handlNameChange(e), handleAtt(e)}}
+          placeholder="KG"
+          />
+           <FormHelperText>if your product have different weight add " , " beetween them</FormHelperText>
+      </InputContainer>
+      
+      <InputContainer>
+      <Label>
+          Height <Span style={{ color: 'red' }}>*</Span>
+        </Label>
+        <InputText
+          name="height"
+          type="number"
+          onChange={(e) => {handlNameChange(e), handleAtt(e)}}
+          placeholder="cm"
+          />
+      </InputContainer>
+          </>   
+          
+      :
+      catname === 'Food' ? 
+      <>
+      <InputContainer>
+      <Label>
+          Expiration Date <Span style={{ color: 'red' }}>*</Span>
+        </Label>
+        <InputText
+          name="expiration"
+          type="date"
+          onChange={(e) => {handlNameChange(e), handleAtt(e)}}
+          />
+      </InputContainer>
+      <InputContainer>
+      <Label>
+          Calories (100g) <Span style={{ color: 'red' }}>*</Span>
+        </Label>
+        <InputText
+          name="Cal"
+          type="number"
+          onChange={(e) => {handlNameChange(e), handleAtt(e)}}
+          />
+      </InputContainer>
+      <InputContainer>
+      <Label>
+          Protein (100g) <Span style={{ color: 'red' }}>*</Span>
+        </Label>
+        <InputText
+          name="protein"
+          type="number"
+          onChange={(e) => {handlNameChange(e), handleAtt(e)}}
+          />
+      </InputContainer>
+      <InputContainer>
+      <Label>
+      Carbohydrates (100g) <Span style={{ color: 'red' }}>*</Span>
+        </Label>
+        <InputText
+          name="carbs"
+          type="number"
+          onChange={(e) => {handlNameChange(e), handleAtt(e)}}
+          />
+      </InputContainer>
+      <InputContainer>
+      <Label>
+      Sugar (100g) <Span style={{ color: 'red' }}>*</Span>
+        </Label>
+        <InputText
+          name="sugar"
+          type="number"
+          onChange={(e) => {handlNameChange(e), handleAtt(e)}}
+          />
+      </InputContainer>
+      </>
+      :
+      (catname === 'Dicors' ?  
+        <> 
+        <InputContainer>
+      <Label>
+          Craft Material <Span style={{ color: 'red' }}>*</Span>
+        </Label>
+        <InputText
+          name="material"
+          type="text"
+          onChange={(e) => {handlNameChange(e), handleAtt(e)}}
+          placeholder="Steel , Plastique , Carbon"
+          />
+      </InputContainer>
+      <InputContainer>
+        <Label>
+        Dimensions  <Span style={{ color: 'red' }}>*</Span>
+          </Label>
+          <InputText
+            name="dimension"
+            type="text"
+            onChange={(e) => {handlNameChange(e), handleAtt(e)}}
+            placeholder='Height, width, depth (e.g., 200 cm x 100 cm x 80 cm)'
+            />
+        </InputContainer>
+        <InputContainer>
+        <Label>
+        Weight (Kg) <Span style={{ color: 'red' }}>*</Span>
+          </Label>
+          <InputText
+            name="weight"
+            type="number"
+            onChange={(e) => {handlNameChange(e), handleAtt(e)}}
+            />
+        </InputContainer>
+        <InputContainer>
+        <Label>
+        Color  <Span style={{ color: 'red' }}>*</Span>
+          </Label>
+          <InputText
+            name="colors"
+            type="text"
+            onChange={(e) => {handlNameChange(e), handleAtt(e)}}
+            placeholder='red , black , blue'
+
+            />
+           <FormHelperText>if your product have different colors add " , " beetween them</FormHelperText>
+
+        </InputContainer>
+{subname == 'Furniture\n' ? 
+<>
+        <InputContainer>
+        <Label>
+        Shape  <Span style={{ color: 'red' }}>*</Span>
+          </Label>
+          <InputText
+            name="shape"
+            type="text"
+            onChange={(e) => {handlNameChange(e), handleAtt(e)}}
+            placeholder='Round, Rectangular, L-shaped, etc.'
+            />
+        </InputContainer>
+        <InputContainer>
+        <Label>
+        Finish  <Span style={{ color: 'red' }}>*</Span>
+          </Label>
+          <InputText
+            name="finish"
+            type="text"
+            onChange={(e) => {handlNameChange(e), handleAtt(e)}}
+            placeholder='Matte, Glossy, Polished, Stained, Painted.'
+            />
+        </InputContainer>
+            </>
+            : 
+            
+            subname == 'Home Appliances' ? 
+            <>
+ <InputContainer>
+        <Label>
+        Power Rating (V) <Span style={{ color: 'red' }}>*</Span>
+          </Label>
+          <InputText
+            name="power"
+            type="number"
+            onChange={(e) => {handlNameChange(e), handleAtt(e)}}
+            placeholder='voltage required (e.g., 220V)'
+            />
+        </InputContainer>
+        <InputContainer>
+        <Label>
+        Primary Funtion  <Span style={{ color: 'red' }}>*</Span>
+          </Label>
+          <InputText
+            name="function"
+            type="text"
+            onChange={(e) => {handlNameChange(e), handleAtt(e)}}
+            placeholder='E.g., Cooling, Heating, Washing, Cooking.'
+            />
+        </InputContainer>
+        <InputContainer>
+        <Label>
+        Smart Features  <Span style={{ color: 'red' }}>*</Span>
+          </Label>
+          <InputText
+            name="smart"
+            type="text"
+            onChange={(e) => {handlNameChange(e), handleAtt(e)}}
+            placeholder='Wi-Fi connectivity, Voice control, App integration.'
+            />
+        </InputContainer>
+        {typename == 'Laundry'
+         ?
+         <InputContainer>
+        <Label>
+        Capacity (Kg) <Span style={{ color: 'red' }}>*</Span>
+          </Label>
+          <InputText
+            name="capacity"
+            type="number"
+            onChange={(e) => {handlNameChange(e), handleAtt(e)}}
+            placeholder='Cloths Weight'
+            />
+        </InputContainer>
+         : 
+         <InputContainer>
+         <Label>
+         Temperature Range (°C) <Span style={{ color: 'red' }}>*</Span>
+           </Label>
+           <InputText
+             name="temperature"
+             type="number"
+             onChange={(e) => {handlNameChange(e), handleAtt(e)}}
+             placeholder='E.g., Fridge: 1-8°C, Freezer: -15°C to -25°C.'
+             />
+         </InputContainer>
+        }
+            </>
+            : '' 
+             }
+            </>
+      : '')
+    )
+  ) : (
   <>
     <InputContainer>
       <Label>Color</Label>
@@ -725,13 +965,13 @@ const AddProduct = () => {
         onChange={onChange}
       />
     </InputContainer>
+  </>
+)}
+
     <InputContainer>
       <Label>Description</Label>
       <Area type="textarea" name="productdesc" onChange={handlNameChange} />
     </InputContainer>
-  </>
-)}
-
           <InputContainer>
             <Label>
               Price <Span style={{ color: 'red' }}>*</Span>
@@ -766,7 +1006,7 @@ const AddProduct = () => {
           ) )}
           
         </Select>
-        <FormHelperText>With label + helper text</FormHelperText>
+        <FormHelperText>Select Your Shop</FormHelperText>
       </FormControl>
           </InputContainer>
           <InputContainer>

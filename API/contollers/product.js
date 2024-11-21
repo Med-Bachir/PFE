@@ -85,6 +85,7 @@ router.get("/all-products", verifyTokenAndAdmin, async (req, res) => {
             p.productprice,
             p.id_Category,
             p.productimage,
+            p.attributes
             s.shopimage AS shopName,
             c.categoryname AS categoryName,
             s.idSHOP AS isshop,
@@ -187,20 +188,7 @@ router.get("/seller-products/:sellerId", verifyTokenAndAuthorizationA_S, async (
 });
 
 
-//UPDATE
 
-router.put("/:id", verifyTokenAndAdmin , async (req,res)=>{
-    
-  try {
-    const updatedProduct = await Product.findByIdAndUpdate(
-        req.params.id,{
-        $set:req.body
-    },{new:true})
-    res.status(200).json(updatedProduct);
-  } catch (err) {
-    res.status(500).json(err)
-  }
-})
 
 //DELETE PRODUCT
 
@@ -239,14 +227,12 @@ router.delete("/delete-product/:productId", verifyTokenAndSeller, async (req, re
   }
 });
 
-//GET PRODUCT
-
 router.get("/product/:productId", async (req, res) => {
   try {
       const productId = req.params.productId;
 
       // Query to fetch the product by its ID
-      const getProductQuery = "SELECT * FROM PRODUCT WHERE idPRODUCT = ?";
+      const getProductQuery = "SELECT p.* , c.categoryname , s.name as subname, t.name as typename FROM PRODUCT p , categories c , subcategories s , types t WHERE idPRODUCT = ? and p.id_Category = c.idCATEGORIES and s.id = p.id_SubCategory and t.id = p.id_Type";
       const getProductValues = [productId];
 
       connection.query(getProductQuery, getProductValues, (err, product) => {
@@ -259,6 +245,18 @@ router.get("/product/:productId", async (req, res) => {
           if (product.length === 0) {
               res.status(404).json({ error: "Product not found." });
               return;
+          }
+          
+
+          // Parse the attributes field if it exists
+          let productData = product[0];
+          if (productData.attributes) {
+              try {
+                  productData.attributes = JSON.parse(productData.attributes);
+              } catch (parseError) {
+                  console.error("Error parsing attributes:", parseError);
+                  productData.attributes = 0; // Set to null if parsing fails
+              }
           }
 
           // Query to fetch the average rating for the product
@@ -274,9 +272,9 @@ router.get("/product/:productId", async (req, res) => {
                   return;
               }
 
-              const averageRate = ratingResult[0].averageRate;
+              const averageRate = ratingResult[0]?.averageRate;
               const productWithRating = {
-                  ...product[0],
+                  ...productData,
                   averageRate: averageRate !== null ? averageRate : "No ratings yet"
               };
 
@@ -289,6 +287,7 @@ router.get("/product/:productId", async (req, res) => {
       res.status(500).json({ error: "Internal server error." });
   }
 });
+
 
 //GET PRODUCTS BY CATORY NAME 
 

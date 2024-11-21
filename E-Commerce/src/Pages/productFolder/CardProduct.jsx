@@ -230,6 +230,28 @@ const Text = styled.span`
   font-size: 14px;
   color: #5c5c5c;
 `;
+const AttributeContainer = styled.div`
+display: flex;
+flex-direction: column;
+padding: 20px 0;
+gap: 8px;
+`;
+const Attribute = styled.div`
+display: flex;
+gap: 8px;
+align-items: center;
+
+
+
+`;
+const AttributeName = styled.span`
+  font-size: 18px;
+  color: #4e4e4e;
+`;
+const AttributeValue = styled.span`
+  font-size: 16px;
+  color: #959595;
+`;
 
 const CardProduct = () => {
   const user = useSelector((state) => state.user?.currentUser);
@@ -269,8 +291,8 @@ const CardProduct = () => {
     getProduct();
   }, [Location]);
 
-  const c = product.productcolor ? product.productcolor.split(",") : [];
-  const s = product.productsize ? product.productsize.split(",") : [];
+  const c = product?.attributes?.color.split(",") ;
+  const s = product?.attributes?.size.split(",");
 
   ////reactredux
   const quantity = useSelector((state) => state.cartProduct?.quantity);
@@ -430,16 +452,18 @@ const handlAction = () => {
             <Title>{product.productname}</Title>
 
             <Desc>{product.productdesc}</Desc>
-            <Price> $ {product.productprice}</Price>
+            <Price>{product?.discount == 0 ? '': <Price  style={{fontSize:24 , textDecoration: 'line-through' , color:'#b9b9b9' , marginRight:20}}>$ {product.productprice} </Price>}  $ {product.productprice - ((product.productprice * product.discount) / 100)} </Price>
+            {product.categoryname == 'Cloths' ?
+      <>
             <ColorContainer>
               <ColorT>Color</ColorT>
               {c &&
                 c.length > 0 &&
                 c?.map((color, index) => (
                   <ColorDot
-                    key={index}
-                    isSelected={color === selectedColor}
-                    onClick={() => handleColorClick(color)}
+                  key={index}
+                  isSelected={color === selectedColor}
+                  onClick={() => handleColorClick(color)}
                   >
                     <Color color={color} isSelected={color === selectedColor}></Color>
                   </ColorDot>
@@ -452,15 +476,62 @@ const handlAction = () => {
                 s.length > 0 &&
                 s?.map((size, index) => (
                   <Size
-                    key={index}
-                    isSelected={size === selectedSize}
-                    onClick={() => handleSizeClick(size)}
+                  key={index}
+                  isSelected={size === selectedSize}
+                  onClick={() => handleSizeClick(size)}
                   >
                     {size}
                   </Size>
                 ))}
             </SizeContainer>
+</>
+: product?.categoryname == 'Food' ? 
+<AttributeContainer>
+  <Attribute>
 
+  <AttributeName>Calories : </AttributeName>
+<AttributeValue>
+
+{product?.attributes.Cal} Cal
+</AttributeValue>
+  </Attribute>
+  <Attribute>
+  </Attribute>
+  <Attribute>
+
+<AttributeName>Carbohydrates : </AttributeName>
+<AttributeValue>
+
+{product?.attributes.carbs} g
+</AttributeValue>
+  </Attribute>
+    <Attribute>
+
+<AttributeName>Sugar : </AttributeName>
+<AttributeValue>
+
+{product?.attributes.sugar} g
+</AttributeValue>
+    </Attribute>
+    <Attribute>
+
+<AttributeName>Protein : </AttributeName>
+<AttributeValue>
+
+{product?.attributes.protein} g
+</AttributeValue>
+    </Attribute>
+    <Attribute>
+
+<AttributeName>Expiration Date : </AttributeName>
+<AttributeValue>
+
+{product?.attributes.expiration} 
+</AttributeValue>
+    </Attribute>
+</AttributeContainer>
+: ''
+}
             {qte == 0 ? (
               <AddToCardContainer onClick={() => handleQte("add")}>
                 ADD TO CARD

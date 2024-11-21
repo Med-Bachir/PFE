@@ -116,7 +116,7 @@ router.delete("/delete/:id", verifyTokenAndAdmin, async (req, res) => {
 
         connection.query(query, values, (err, result) => {
             if (err) {
-                res.status(500).json({ error: "Failed to delete user." });
+                res.status(400).json({ error: "Failed to delete user." });
                 return;
             }
 

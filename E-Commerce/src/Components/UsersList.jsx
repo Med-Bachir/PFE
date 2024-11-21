@@ -5,6 +5,7 @@ import DeleteIcon from "@mui/icons-material/Delete";
 import { Container } from "./Shipping";
 import { StaticContainer, StaticTitle } from "../Pages/Profiles/admin/AdminPf";
 import newRequest from "../utils/newRequest";
+import AlertMessage from "./Alert";
 
 
 
@@ -85,6 +86,9 @@ flex: 1;
 `;
 const UsersList = () => {
   const [users, setUsers] = useState([]);
+  const [message, setMessage] = useState("");
+  const [type, setType] = useState("");
+  const [open, setOpen] = useState(false);
 
   useEffect(() => {
     const getUsers = async () => {
@@ -102,13 +106,21 @@ const UsersList = () => {
     try {
       const response = await newRequest.delete(`/users/delete/${userId}`);
       console.log(response.data.message);
+      setMessage("User Deleted Successfully");
+          setType("success");
+          setOpen(true);
       setUsers((prevUsers) => prevUsers.filter((user) => user.idUSER !== userId));
     } catch (error) {
+      setMessage("Somthing is wrong!! Please try again later");
+          setType("error");
+          setOpen(true);
       console.error("Error deleting user:", error.response?.data?.error || error.message);
     }
   };
   return (
     <Container>
+      <AlertMessage open={open} setOpen={setOpen} message={message} type={type} />
+
     <StaticContainer style={{padding:0}}>
   <StaticTitle>All Users</StaticTitle>
     </StaticContainer>

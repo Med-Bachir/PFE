@@ -14,6 +14,7 @@ import { StaticContainer, StaticTitle } from "../Pages/Profiles/admin/AdminPf";
 import newRequest from "../utils/newRequest";
 import DoneIcon from '@mui/icons-material/Done';
 import { useNavigate } from "react-router-dom";
+import AlertMessage from "./Alert";
 
 
 const Container = styled.div`
@@ -103,20 +104,24 @@ justify-content: center;
 `;
 
 const ShopeList = () => {
+  const [message, setMessage] = useState("");
+  const [type, setType] = useState("");
+  const [open, setOpen] = useState(false);
   const ColumnsTag = ['ID' , 'Shop Name' , 'Products' , 'Order' ,'Owner Name' ,'Status'];
 
 const navigate = useNavigate();
   const [shops, setShops] = useState([]);
 
+  const getShops = async () => {
+    try {
+      const res = await newRequest.get("/shop/shops-admin");
+      setShops(res.data);
+    } catch (err) {
+      console.error("Error fetching users:", err);
+    }
+  };
   useEffect(() => {
-    const getShops = async () => {
-      try {
-        const res = await newRequest.get("/shop/shops-admin");
-        setShops(res.data);
-      } catch (err) {
-        console.error("Error fetching users:", err);
-      }
-    };
+   
     getShops();
   }, []);
 
@@ -129,12 +134,18 @@ navigate(`/Shops/${id}`);
       try {
         const response = await newRequest.put(`/shop/approve-seller/${id}`);
         if (response.status === 200) {
-            alert('Shop accepted successfully.');
+          setMessage("Shop Accepted");
+          setType("success");
+          setOpen(true);
             // Optionally, you can add logic to refresh the list of shops or update the UI accordingly
         }
+    getShops();
+
     } catch (error) {
         console.error('Failed to accept shop:', error);
-        alert('Failed to accept shop. Please try again later.');
+        setMessage("Something is wrong!! Please try again later ");
+        setType("error");
+        setOpen(true);
     }
     }
 
@@ -146,13 +157,21 @@ navigate(`/Shops/${id}`);
         if(status == 'Open'){
           const response = await newRequest.delete(`/shop/delete/${id}`);
           if (response.status === 200) {
-              alert('Shop Deleted successfully.');
+            setMessage("Shop Deleted Successfully");
+            setType("success");
+            setOpen(true);
+    getShops();
+
               // Optionally, you can add logic to refresh the list of shops or update the UI accordingly
           }
         }else{
           const response = await newRequest.delete(`/shop/refuse-shop/${id}`);
         if (response.status === 200) {
-            alert('Shop refused successfully.');
+          setMessage("Shop Refused");
+          setType("error");
+          setOpen(true);
+    getShops();
+
             // Optionally, you can add logic to refresh the list of shops or update the UI accordingly
         }
         }
@@ -160,7 +179,9 @@ navigate(`/Shops/${id}`);
         
     } catch (error) {
         console.error('Failed to refuse shop:', error);
-        alert('Failed to refuse shop. Please try again later.');
+        setMessage("Something is wrong!! Please try again later");
+        setType("error");
+        setOpen(true);
     }
     
 
@@ -168,6 +189,8 @@ navigate(`/Shops/${id}`);
 
   return (
     <Container>
+      <AlertMessage open={open} setOpen={setOpen} message={message} type={type} />
+
       <StaticContainer style={{padding:'0 32px 0 0', display:'flex',alignItems:'center' , flexDirection:'row' , justifyContent:'space-between'}}>
         <StaticTitle>Active Shops </StaticTitle>
         <Search><IconButton sx={{width:"10%"}}><PersonSearchIcon style={{color:"white"}} /></IconButton><Input placeholder="Enter Shop Name" /></Search>
