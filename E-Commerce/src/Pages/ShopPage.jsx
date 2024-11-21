@@ -6,6 +6,8 @@ import { Avatar, Divider } from '@mui/material'
 import InstagramIcon from '@mui/icons-material/Instagram';
 import newRequest from '../utils/newRequest'
 
+import me from "./../Animation - 1716145973359.json";
+import Lottie from 'lottie-react'
 
 
 
@@ -250,7 +252,15 @@ color: #a3a3a3;
 `
 
 
-
+const LottieContainer = styled.div`
+display: flex;
+align-items: center;
+justify-content: center;
+flex-direction: column;
+background-color: white;
+border-radius: 8px;
+width: 100%;
+`;
 
 
 const ShopPage = () => {
@@ -357,8 +367,9 @@ const ShopPage = () => {
 <Cover style={{backgroundImage:`url(${shop.ShopCover})`}}>
 
 </Cover>
+{products != '' ?
 <ShopProducts>
-{products.map((item) => (
+ {products.map((item) => (
     
     <Link to={`/cardproduct/${item.idPRODUCT}`}>
     <Product>
@@ -372,9 +383,15 @@ const ShopPage = () => {
 </Product>
     </Link>
 ))}
-
-
 </ShopProducts>
+:
+<LottieContainer>
+          <Lottie animationData={me} style={{ width: '40%' }} />
+          <span>No Product in Shop</span>
+        </LottieContainer>
+
+
+}
 
 </ProductContainer>    
       </ShopProfile>  

@@ -117,23 +117,16 @@ const PopularContainer = styled.div`
   border-radius: 12px;
   padding: 40px 0 24px;
   height: min-content;
-  
-  
 `;
-
-
-
-
 
 const PopularInfo = styled.div`
   display: flex;
   contain: paint;
-  
+
   width: 100%;
-  
 `;
 const Product = styled.div`
-min-width: 100%;
+  min-width: 100%;
   transform: ${(props) => `translateX(${props.index * -100}%)`};
   transition: 500ms;
 `;
@@ -195,19 +188,14 @@ const PopularProductList = styled.div`
   height: auto;
   max-height: 640px;
   &::-webkit-scrollbar {
-    width: 2px; 
+    width: 2px;
   }
   &::-webkit-scrollbar-track {
     background: transparent;
   }
   &::-webkit-scrollbar-thumb {
-    background-color: rgba(
-      147,
-      147,
-      147,
-      0.543
-    ); 
-    border-radius: 20px; 
+    background-color: rgba(147, 147, 147, 0.543);
+    border-radius: 20px;
   }
 `;
 const ListItemConatiner = styled.div`
@@ -239,12 +227,11 @@ const ItemPrice = styled.span`
 `;
 
 const LottieContainer = styled.div`
-display: flex;
-align-items: center;
-justify-content: center;
-flex-direction: column;
-
-`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+`;
 
 const OwnerPf = () => {
   const open = useSelector((state) => state.cart.open);
@@ -276,15 +263,19 @@ const OwnerPf = () => {
       },
     ],
   });
-  
+
   useEffect(() => {
     const fetchStats = async () => {
       try {
-        const res = await newRequest.get(`/seller/seller/${user?.idUSER}/monthly-revenue`);
+        const res = await newRequest.get(
+          `/seller/seller/${user?.idUSER}/monthly-revenue`
+        );
         const stats = res.data;
-        
+
         const labels = stats.map((stat) => `${stat.month}`);
-        const data = stats.map((stat) => stat.monthlyRevenue == 0 ? 0 : stat.monthlyRevenue);
+        const data = stats.map((stat) =>
+          stat.monthlyRevenue == 0 ? 0 : stat.monthlyRevenue
+        );
         console.log(data);
         setUserData({
           labels,
@@ -297,21 +288,21 @@ const OwnerPf = () => {
           ],
         });
       } catch (err) {
-        
         console.error("Failed to fetch statistics", err);
       }
     };
-  
+
     fetchStats();
   }, [user?.idUSER]);
 
-  
   const [prod, setProd] = useState([]);
 
   useEffect(() => {
     const getProd = async () => {
       try {
-        const res = await newRequest.get(`/stats/top-rated-products/${user?.idUSER}`);
+        const res = await newRequest.get(
+          `/stats/top-rated-products/${user?.idUSER}`
+        );
         setProd(res.data);
       } catch (err) {
         console.error("Error fetching users:", err);
@@ -319,13 +310,15 @@ const OwnerPf = () => {
     };
     getProd();
   }, []);
- 
+
   const [prodS, setProdS] = useState([]);
 
   useEffect(() => {
     const getProdS = async () => {
       try {
-        const res = await newRequest.get(`/stats/top-sold-products/${user?.idUSER}`);
+        const res = await newRequest.get(
+          `/stats/top-sold-products/${user?.idUSER}`
+        );
         setProdS(res.data);
       } catch (err) {
         console.error("Error fetching users:", err);
@@ -333,7 +326,6 @@ const OwnerPf = () => {
     };
     getProdS();
   }, []);
-
 
   const handleClick = (buttonName) => {
     setActiveButton(buttonName);
@@ -361,7 +353,12 @@ const OwnerPf = () => {
             <ItemIcon src="https://img.icons8.com/color/48/man-holding-bags-with-money-skin-type-3.png" />
             <ItemInfo>
               <ItemTitle>Income</ItemTitle>
-              <ItemStatic>$ {stats.TotalArrivedOrderValue == null ? 0 : stats.TotalArrivedOrderValue}</ItemStatic>
+              <ItemStatic>
+                ${" "}
+                {stats.TotalArrivedOrderValue == null
+                  ? 0
+                  : stats.TotalArrivedOrderValue}
+              </ItemStatic>
             </ItemInfo>
           </Item>
           <Item color={`teal`}>
@@ -453,8 +450,6 @@ const OwnerPf = () => {
         </Statics>
       </StaticContainer>
 
-    
-
       <StaticContainer>
         <StaticTitle>INCOM HISTORY</StaticTitle>
         <LineChart chartData={userData} />
@@ -470,50 +465,54 @@ const OwnerPf = () => {
         <PopularContainer>
           <StaticTitle className="bg-red-700">TOP 10 RATED PRODUCT</StaticTitle>
           <PopularInfo>
-          {prod != null ? prod.map((item) => (
-              <Product open={open} index={index}>
-                <ProductImage open={open}>
-                  <img
-                    style={{ width: "100%" }}
-                    src={item.productimage}
-                    alt=""
-                  />
-                  <ProductInfo>
-                    <Title>
-                      <ProductName>{item.productname}</ProductName>
-                      <Rating
-                        name="read-only"
-                        value={item.avgrate}
-                        readOnly
-                        size="medium"
-                      />
-                    </Title>
-                    <ProductShops>Bingo Shop | Niggas Shop</ProductShops>
-                    <ProductPrice>${item.productprice}</ProductPrice>
-                  </ProductInfo>
-                </ProductImage>
-              </Product>
-            )) : 
-            <LottieContainer>
-            <Lottie  animationData={me} style={{ width:"40%"}} /> 
-            No Product Found
-            </LottieContainer>
-            }
+            {prod != "" ? (
+              prod.map((item) => (
+                <Product open={open} index={index}>
+                  <ProductImage open={open}>
+                    <img
+                      style={{ width: "100%" }}
+                      src={item.productimage}
+                      alt=""
+                    />
+                    <ProductInfo>
+                      <Title>
+                        <ProductName>{item.productname}</ProductName>
+                        <Rating
+                          name="read-only"
+                          value={item.avgrate}
+                          readOnly
+                          size="medium"
+                        />
+                      </Title>
+                      <ProductShops>Bingo Shop | Niggas Shop</ProductShops>
+                      <ProductPrice>${item.productprice}</ProductPrice>
+                    </ProductInfo>
+                  </ProductImage>
+                </Product>
+              ))
+            ) : (
+              <LottieContainer>
+                <Lottie animationData={me} style={{ width: "40%" }} />
+                No Product Found
+              </LottieContainer>
+            )}
           </PopularInfo>
           <SliderSpan>
-          {prod.map((item, idx) => (
-    <Span
-        key={item.idPRODUCT}
-        style={{
-            width: `${idx === index ? "20px" : "0px"}`,
-            backgroundColor: `${idx === index ? "#5AB8A8" : ""}`,
-        }}
-        onClick={() => {
-            const newIndex = prod.findIndex(product => product.idPRODUCT === item.idPRODUCT);
-            setIndex(newIndex !== -1 ? newIndex : 0);
-        }}
-    />
-))}
+            {prod.map((item, idx) => (
+              <Span
+                key={item.idPRODUCT}
+                style={{
+                  width: `${idx === index ? "20px" : "0px"}`,
+                  backgroundColor: `${idx === index ? "#5AB8A8" : ""}`,
+                }}
+                onClick={() => {
+                  const newIndex = prod.findIndex(
+                    (product) => product.idPRODUCT === item.idPRODUCT
+                  );
+                  setIndex(newIndex !== -1 ? newIndex : 0);
+                }}
+              />
+            ))}
           </SliderSpan>
         </PopularContainer>
 
@@ -522,25 +521,26 @@ const OwnerPf = () => {
             TOP 10 SELLED PRODUCT
           </StaticTitle>
           <PopularProductList open={open}>
-            {prodS != null ? prodS.map((item) => (
-              <ListItemConatiner key={item.idPRODUCT}>
-                <ItemImage src={item.productimage} />
-                <ItemDesc>
-                  <ItemName>{item.productname}</ItemName>
-                  <ItemType>Solds : {item.totalSold}</ItemType>
-                </ItemDesc>
-                <ItemPrice>$ {item.productprice}</ItemPrice>
-              </ListItemConatiner>
-            )) : 
-            <LottieContainer>
-            <Lottie  animationData={me} style={{ width:"40%"}} /> 
-            No Product Found
-            </LottieContainer>}
+            {prodS != "" ? (
+              prodS.map((item) => (
+                <ListItemConatiner key={item.idPRODUCT}>
+                  <ItemImage src={item.productimage} />
+                  <ItemDesc>
+                    <ItemName>{item.productname}</ItemName>
+                    <ItemType>Solds : {item.totalSold}</ItemType>
+                  </ItemDesc>
+                  <ItemPrice>$ {item.productprice}</ItemPrice>
+                </ListItemConatiner>
+              ))
+            ) : (
+              <LottieContainer>
+                <Lottie animationData={me} style={{ width: "40%" }} />
+                No Product Found
+              </LottieContainer>
+            )}
           </PopularProductList>
         </PopularContainer>
       </StaticContainer>
-
-      
     </Container>
   );
 };
