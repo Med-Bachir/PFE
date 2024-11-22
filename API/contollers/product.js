@@ -112,8 +112,8 @@ router.get("/all-products", verifyTokenAndAdmin, async (req, res) => {
             p.productprice,
             p.id_Category,
             p.productimage,
-            p.attributes
-            s.shopimage AS shopName,
+            p.discount,
+            s.shopimage ,
             c.categoryname AS categoryName,
             s.idSHOP AS isshop,
             AVG(r.rate) AS avgRate
@@ -128,7 +128,7 @@ router.get("/all-products", verifyTokenAndAdmin, async (req, res) => {
         LEFT JOIN 
             REVIEWS r ON p.idPRODUCT = r.id_Product
         GROUP BY 
-            p.idPRODUCT, p.productname, p.productprice, p.id_Category, s.shopimage, c.categoryname ,p.productimage , s.idSHOP;
+            p.idPRODUCT, p.productname, p.productprice, p.id_Category, s.shopimage, c.categoryname ,p.productimage , s.idSHOP , p.discount ;
       `;
 
     connection.query(getAllProductsQuery, (err, products) => {
@@ -189,11 +189,15 @@ router.get(
           SELECT p.*,
                  s.qte AS quantity,
                  c.categoryname AS categoryName,
-                 sh.shopname AS shopName
+                 sh.shopname AS shopName,
+                 su.name as subname ,
+                 t.name as typename
           FROM PRODUCT p
           JOIN STOCK s ON p.idPRODUCT = s.id_Product
           JOIN shop sh ON sh.idSHOP = s.id_Shop
           JOIN CATEGORIES c ON p.id_Category = c.idCATEGORIES
+          JOIN types t ON p.id_Type = t.id
+          JOIN SUBCATEGORIES su ON p.id_SubCategory = su.id
           WHERE sh.id_Owner = ?;
       `;
       const getProductsValues = [sellerId];

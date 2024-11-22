@@ -5,7 +5,7 @@ import { LoadingOutlined } from '@ant-design/icons';
 import { message, Upload } from 'antd';
 import { useState } from 'react';
 import CloudUploadTwoTone from '@mui/icons-material/CloudUploadTwoTone';
-import { Tooltip } from '@mui/material';
+import { CircularProgress, Tooltip } from '@mui/material';
 import { useSelector } from 'react-redux';
 import newRequest from '../utils/newRequest';
 
@@ -102,9 +102,9 @@ const getBase64 = (img, callback) => {
 };
 
 const beforeUpload = (file) => {
-  const isJpgOrPng = file.type === 'image/jpeg' || file.type === 'image/png';
+  const isJpgOrPng = file.type === 'image/jpeg' || file.type === 'image/png' || file.type === 'image/webp';
   if (!isJpgOrPng) {
-    message.error('You can only upload JPG/PNG file!');
+    message.error('You can only upload JPG/PNG/WEBP file!');
   }
   const isLt2M = file.size / 1024 / 1024 < 2;
   if (!isLt2M) {
@@ -119,6 +119,7 @@ const CreateShop = () => {
   const [logoImageUrl, setLogoImageUrl] = useState(null);
 const [coverImageUrl, setCoverImageUrl] = useState(null);
 const [loading, setLoading] = useState(false);
+const [isLoading, setIsLoading] = useState(false);
  
   const [name, setName] = useState('');
 
@@ -160,6 +161,7 @@ const [loading, setLoading] = useState(false);
   };
 
   const handleCreate = async () => {
+    setIsLoading(true)
     try {
       const response = await newRequest.post(`shop/create-shop/${user?.idUSER}`, {
         shopname: shop.shopname,
@@ -172,15 +174,21 @@ const [loading, setLoading] = useState(false);
         city: shop.city,
         street: shop.street,
       });
-console.log(response.status)
+
       if (response.status === 200) {
         message.success('Shop creation request submitted successfully. Please wait for admin approval.');
+    setIsLoading(false)
+
       } else {
         message.error('Failed to submit shop creation request.');
+    setIsLoading(false)
+
       }
     } catch (error) {
       console.error('Error creating shop:', error);
       message.error('Failed to submit shop creation request.');
+    setIsLoading(false)
+
     }
   };
 
@@ -328,8 +336,18 @@ console.log(response.status)
         </FormContainer>
       ))}
       <Tooltip title="Send Request">
-        <Fab color="success" style={{ position: 'absolute', bottom: 96, right: 32 }} aria-label="add" onClick={handleCreate}>
-          <AddBusinessTwoToneIcon />
+        <Fab
+          color="success"
+          style={{ position: "absolute", bottom: 96, right: 32 }}
+          aria-label="add"
+          onClick={handleCreate}
+          disabled={isLoading ? true : false}
+        >
+          {isLoading ? (
+            <CircularProgress size="30px" color="inherit" />
+          ) : (
+            <AddBusinessTwoToneIcon />
+          )}
         </Fab>
       </Tooltip>
     </Container>

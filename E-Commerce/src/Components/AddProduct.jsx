@@ -121,7 +121,7 @@ const getBase64 = (img, callback) => {
 };
 
 const beforeUpload = (file) => {
-  const isJpgOrPng = file.type === "image/jpeg" || file.type === "image/png";
+  const isJpgOrPng = file.type === "image/jpeg" || file.type === "image/png" || file.type === 'image/webp';
   if (!isJpgOrPng) {
     message.error("You can only upload JPG/PNG file!");
   }
@@ -668,7 +668,7 @@ const AddProduct = () => {
                   </Label>
                   <InputText
                     name="weight"
-                    type="number"
+                    type="text"
                     onChange={(e) => {
                       handlNameChange(e), handleAtt(e);
                     }}

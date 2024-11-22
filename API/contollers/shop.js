@@ -4,6 +4,7 @@ const { query } = require("../utils/promiseQuery.js");
 const router = require("express").Router();
 
 const { v2: cloudinary } = require('cloudinary');
+const { v4: uuidv4 } = require("uuid");
 
 
 // Cloudinary Configuration
@@ -22,12 +23,13 @@ router.post("/create-shop/:id_Owner", verifyTokenAndAuthorizationA_S, async (req
         // Check if the owner has already submitted a shop creation request
         const checkExistingRequestQuery = "SELECT * FROM SHOP WHERE id_Owner = ? AND status = 'close'";
         const checkExistingRequestValues = [id_Owner];
-
+        const uniquePublicId = `logo_${uuidv4()}`;
         const uploadResultImage = await cloudinary.uploader.upload(shopimage, {
-            public_id: 'ShopImage',
+            public_id: uniquePublicId,
         });
+        const uniquePublicIdCover = `cover_${uuidv4()}`;
         const uploadResultCover = await cloudinary.uploader.upload(shopcover, {
-            public_id: 'Cover',
+            public_id: uniquePublicIdCover,
         });
 
         console.log(uploadResultCover)
