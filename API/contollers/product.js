@@ -186,19 +186,33 @@ router.get(
 
       // Query to fetch all products associated with the specified seller
       const getProductsQuery = `
-          SELECT p.*,
+          SELECT
+          p.idPRODUCT,
+           p.productname ,
+          p.productimage ,
+          p.productprice ,
+          p.discount,
+          p.attributes,
                  s.qte AS quantity,
                  c.categoryname AS categoryName,
                  sh.shopname AS shopName,
                  su.name as subname ,
-                 t.name as typename
+                 t.name as typename ,
+                 AVG(r.rate) AS avgRate
           FROM PRODUCT p
           JOIN STOCK s ON p.idPRODUCT = s.id_Product
           JOIN shop sh ON sh.idSHOP = s.id_Shop
           JOIN CATEGORIES c ON p.id_Category = c.idCATEGORIES
           JOIN types t ON p.id_Type = t.id
           JOIN SUBCATEGORIES su ON p.id_SubCategory = su.id
-          WHERE sh.id_Owner = ?;
+           LEFT JOIN 
+            REVIEWS r ON p.idPRODUCT = r.id_Product
+          WHERE sh.id_Owner = ? 
+          GROUP BY p.idPRODUCT,
+           p.productname ,
+          p.productimage ,
+          p.productprice ,
+          p.discount , c.categoryname , sh.shopname , su.name , t.name ,r.rate , s.qte ,p.attributes ;
       `;
       const getProductsValues = [sellerId];
 
@@ -223,7 +237,7 @@ router.get(
 
 router.delete(
   "/delete-product/:productId",
-  verifyTokenAndSeller,
+  verifyTokenAndAuthorizationA_S,
   async (req, res) => {
     try {
       const { productId } = req.params;
@@ -276,7 +290,7 @@ router.get("/product/:productId", async (req, res) => {
 
     // Query to fetch the product by its ID
     const getProductQuery =
-      "SELECT p.* , c.categoryname , s.name as subname, t.name as typename FROM PRODUCT p , categories c , subcategories s , types t WHERE idPRODUCT = ? and p.id_Category = c.idCATEGORIES and s.id = p.id_SubCategory and t.id = p.id_Type";
+      "SELECT p.* ,sh.idSHOP, sh.shopname ,c.categoryname , s.name as subname, t.name as typename FROM PRODUCT p ,shop sh  ,stock st, categories c , subcategories s , types t WHERE idPRODUCT = ? and p.id_Category = c.idCATEGORIES and s.id = p.id_SubCategory and t.id = p.id_Type and st.id_Product = p.idPRODUCT and st.id_Shop = sh.idSHOP ";
     const getProductValues = [productId];
 
     connection.query(getProductQuery, getProductValues, (err, product) => {

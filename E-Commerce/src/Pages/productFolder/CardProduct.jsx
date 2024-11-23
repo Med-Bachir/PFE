@@ -12,7 +12,7 @@ import { Rating } from "@mui/material";
 import { Avatar } from "antd";
 import AlertMessage from "../../Components/Alert";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-
+import FavoriteRoundedIcon from '@mui/icons-material/FavoriteRounded';
 
 const Container = styled.div``;
 const Wrapper = styled.div`
@@ -30,7 +30,7 @@ const Wrapper = styled.div`
     background-color: rgba(147, 147, 147, 0.543);
   }
 `;
-const HartContainer = styled.div`
+const HeartContainer = styled.div`
   border: 2px solid #009f7f;
   border-radius: 50%;
   width: 30px;
@@ -73,26 +73,23 @@ const Price = styled.span`
   font-size: 35px;
 `;
 const ColorContainer = styled.div`
-  margin-bottom: 20px;
   display: flex;
   height: 50px;
   align-items: center;
-
-  margin-top: 20px;
+  gap: 8px;
 `;
 const ColorT = styled.span`
   font-weight: 500;
   margin-right: 20px;
 `;
 const ColorDot = styled.span`
-  padding: 2px;
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
   border: ${({ isSelected }) => (isSelected ? "1px solid #009f7f" : "none")};
   transition: border 200ms ease-in-out;
-
+  box-shadow: rgba(0, 0, 0, 0.05) 0px 6px 24px 0px, rgba(0, 0, 0, 0.08) 0px 0px 0px 1px;
 
 `;
 const Color = styled.div`
@@ -109,8 +106,8 @@ const Color = styled.div`
   transition: 200ms ease-in-out;
 `;
 const SizeContainer = styled.div`
-  margin-bottom: 20px;
-  width: 18%;
+  
+  width: fit-content;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -143,7 +140,7 @@ const AmountContainer = styled.div`
 `;
 const AddToCardContainer = styled.div`
   display: flex;
-
+  margin-top: 20px;
   width: 30%;
   border-radius: 10px;
   padding: 10px;
@@ -168,17 +165,21 @@ const CategorieContainer = styled.div`
   margin-bottom: 20px;
   align-items: center;
 `;
-const CategorieT = styled.span`
+const Categorie = styled.span`
   margin-right: 50px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 18px;
 `;
 
 const SellerContainer = styled.div`
   display: flex;
 `;
-const SellerT = styled.div`
+const Seller = styled.div`
   margin-right: 50px;
 `;
-const Seller = styled.div`
+const Shope = styled.div`
   color: #009f7f;
   text-decoration: underline;
   cursor: pointer;
@@ -240,7 +241,7 @@ const Attribute = styled.div`
 display: flex;
 gap: 8px;
 align-items: center;
-
+margin: 10px 0;
 
 
 `;
@@ -258,6 +259,7 @@ const CardProduct = () => {
   const [message, setMessage] = useState("");
   const [type, setType] = useState("");
   const [open, setOpen] = useState(false);
+  const [isWish, setIsWish] = useState(false);
   const Location = useLocation().pathname.split("/")[2];
 
   const [selectedColor, setSelectedColor] = useState(null);
@@ -278,6 +280,16 @@ const CardProduct = () => {
     setSelectedSize((prevSize) => (prevSize === size ? null : size));
   };
 
+
+  const Wish = async () => {
+    try {
+      const res = await newRequest.get(`/wish/${Location}/${user?.idUSER}`);
+      setIsWish(res.data);
+    } catch (error) {
+      console.log("error", error);
+    }
+  };
+
   useEffect(() => {
     const getProduct = async () => {
       try {
@@ -291,8 +303,13 @@ const CardProduct = () => {
     getProduct();
   }, [Location]);
 
-  const c = product?.attributes?.color.split(",") ;
-  const s = product?.attributes?.size.split(",");
+  useEffect(() => {
+    
+
+    Wish();
+  }, [Location]);
+
+  
 
   ////reactredux
   const quantity = useSelector((state) => state.cartProduct?.quantity);
@@ -366,15 +383,42 @@ const handlAction = () => {
       const response = await newRequest.post(
         `wish/${user?.idUSER}/add/${Location}`
       );
-
+      
       if (response.status === 200) {
-        message.success("Product added successfully.");
+        setMessage("Product add to wish list");
+        setType("success");
+        setOpen(true);
       } else {
-        message.error("Failed to add product.");
+        setMessage("Please login first !!");
+        setType("error");
+        setOpen(true);
       }
     } catch (error) {
       console.error("Error adding product:", error);
-      message.error("Failed to add product.");
+      setMessage("Something is wrong try again later !!");
+      setType("error");
+      setOpen(true);
+    }
+    Wish();
+  };
+  const removeWish = async () => {
+    try {
+      const response = await newRequest.delete(
+        `wish/${user?.idUSER}/delete/${Location}`
+      );
+      
+      if (response.status === 200) {
+        setMessage("Product removed successfully");
+        setType("success");
+        setOpen(true);
+        Wish()
+      } else {
+        setMessage("Failed to remove product!! Contact Us");
+        setType("error");
+        setOpen(true);
+      }
+    } catch (error) {
+      console.error("Error adding product:", error);
     }
   };
 
@@ -384,22 +428,34 @@ const handlAction = () => {
     setText((prev) => ({ ...prev, [e.target.name]: e.target.value }));
   };
 
+  const getReviews = async () => {
+    try {
+      const res = await newRequest.get(`review/product-reviews/${Location}`);
+      setReviews(res.data);
+    } catch (error) {
+      console.log("error", error);
+    }
+  };
+
   
   const handleSubmit = async () => {
+   
     const reviewDetails = {
       rate: value,
       text: text.text,
     };
+    if(user){
 
-    try {
-      const response = await newRequest.post(
-        `review/submit-review/${user?.idUSER}/${Location}`,
-        reviewDetails
-      );
+      try {
+        const response = await newRequest.post(
+          `review/submit-review/${user?.idUSER}/${Location}`,
+          reviewDetails
+        );
       
-
+      
       if (response.status === 200) {
         message.success("Review added successfully.");
+        getReviews()
       } else {
         message.error("Review to add product.");
       }
@@ -407,19 +463,18 @@ const handlAction = () => {
       console.error("Error adding product:", error);
       message.error("Failed to add Review.");
     }
+  } else {
+    setMessage("Please Login First!!");
+        setType("error");
+        setOpen(true);
+  }
+    
   };
-
+  
   const [reviews, setReviews] = useState([]);
 
   useEffect(() => {
-    const getReviews = async () => {
-      try {
-        const res = await newRequest.get(`review/product-reviews/${Location}`);
-        setReviews(res.data);
-      } catch (error) {
-        console.log("error", error);
-      }
-    };
+   
 
     getReviews();
   }, []);
@@ -439,6 +494,56 @@ const handlAction = () => {
     getTotal();
   }, []);
 
+
+
+  const categoryAttributesConfig = {
+    Cloths: {
+      fields: [
+        { key: "color", label: "Color", type: "color", split: true },
+        { key: "size", label: "Size", type: "size", split: true },
+      ],
+    },
+    Food: {
+      fields: [
+        { key: "calories", label: "Calories", suffix: " Cal" },
+        { key: "carbs", label: "Carbohydrates", suffix: " g" },
+        { key: "sugar", label: "Sugar", suffix: " g" },
+        { key: "protein", label: "Protein", suffix: " g" },
+        { key: "expiration", label: "Expiration Date" },
+      ],
+    },
+    Electronics: {
+      fields: [
+        { key: "RAM", label: "RAM", suffix: " GB" },
+        { key: "CPU", label: "CPU" },
+        { key: "GPU", label: "GPU" },
+        { key: "battery", label: "Battery Capacity", suffix: " MAH" },
+        { key: "storage", label: "Storage", suffix: " GB" },
+        { key: "camera", label: "Camera", suffix: " PX", condition: (p) => ["Tablet", "Mobile"].includes(p.subname) },
+      ],
+    },
+    Fitness: {
+      fields: [
+        { key: "height", label: "Height", suffix: " cm" },
+        { key: "weight", label: "Weight", type: "size", split: true, suffix: " KG" },
+        { key: "material", label: "Craft Material" },
+      ],
+    },
+    Dicors: {
+      fields: [
+        { key: "dimension", label: "Dimension" },
+        { key: "colors", label: "Colors", type: "color", split: true },
+        { key: "weight", label: "Weight", suffix: " KG" },
+        { key: "material", label: "Craft Material" },
+        { key: "finish", label: "Finish" },
+        { key: "shape", label: "Shape" },
+      ],
+    },
+  };
+  
+  const categoryConfig = categoryAttributesConfig[product.categoryname];
+  if (!categoryConfig) return null;
+
   return (
     <Container>
         <AlertMessage open={open} setOpen={setOpen} message={message} type={type} />
@@ -453,85 +558,58 @@ const handlAction = () => {
 
             <Desc>{product.productdesc}</Desc>
             <Price>{product?.discount == 0 ? '': <Price  style={{fontSize:24 , textDecoration: 'line-through' , color:'#b9b9b9' , marginRight:20}}>$ {product.productprice} </Price>}  $ {product.productprice - ((product.productprice * product.discount) / 100)} </Price>
-            {product.categoryname == 'Cloths' ?
-      <>
-            <ColorContainer>
-              <ColorT>Color</ColorT>
-              {c &&
-                c.length > 0 &&
-                c?.map((color, index) => (
-                  <ColorDot
+            <AttributeContainer>
+      {categoryConfig.fields.map((field) => {
+        const value = product?.attributes?.[field.key];
+        if (!value || (field.condition && !field.condition(product))) return null;
+
+        if (field.type === "color") {
+          const colors = field.split ? value.split(",") : [value];
+          return (
+            <ColorContainer key={field.key}>
+              <ColorT>{field.label}</ColorT>
+              {colors.map((color, index) => (
+                <ColorDot
                   key={index}
                   isSelected={color === selectedColor}
                   onClick={() => handleColorClick(color)}
-                  >
-                    <Color color={color} isSelected={color === selectedColor}></Color>
-                  </ColorDot>
-                ))}
+                >
+                  <Color color={color} isSelected={color === selectedColor} />
+                </ColorDot>
+              ))}
             </ColorContainer>
-            <hr style={{ marginBottom: 30 }}></hr>
-            <SizeContainer>
-              <SizeT>Size</SizeT>
-              {s &&
-                s.length > 0 &&
-                s?.map((size, index) => (
-                  <Size
+          );
+        }
+
+        if (field.type === "size") {
+          const sizes = field.split ? value.split(",") : [value];
+          return (
+            <SizeContainer key={field.key}>
+              <SizeT>{field.label}</SizeT>
+              {sizes.map((size, index) => (
+                <Size
                   key={index}
                   isSelected={size === selectedSize}
                   onClick={() => handleSizeClick(size)}
-                  >
-                    {size}
-                  </Size>
-                ))}
+                >
+                  {size} {field.suffix || ""}
+                </Size>
+              ))}
             </SizeContainer>
-</>
-: product?.categoryname == 'Food' ? 
-<AttributeContainer>
-  <Attribute>
+          );
+        }
 
-  <AttributeName>Calories : </AttributeName>
-<AttributeValue>
-
-{product?.attributes.Cal} Cal
-</AttributeValue>
-  </Attribute>
-  <Attribute>
-  </Attribute>
-  <Attribute>
-
-<AttributeName>Carbohydrates : </AttributeName>
-<AttributeValue>
-
-{product?.attributes.carbs} g
-</AttributeValue>
-  </Attribute>
-    <Attribute>
-
-<AttributeName>Sugar : </AttributeName>
-<AttributeValue>
-
-{product?.attributes.sugar} g
-</AttributeValue>
-    </Attribute>
-    <Attribute>
-
-<AttributeName>Protein : </AttributeName>
-<AttributeValue>
-
-{product?.attributes.protein} g
-</AttributeValue>
-    </Attribute>
-    <Attribute>
-
-<AttributeName>Expiration Date : </AttributeName>
-<AttributeValue>
-
-{product?.attributes.expiration} 
-</AttributeValue>
-    </Attribute>
-</AttributeContainer>
-: ''
-}
+        return (
+          <Attribute key={field.key}>
+            <AttributeName>{field.label}:</AttributeName>
+            <AttributeValue>
+              {value} {field.suffix || ""}
+            </AttributeValue>
+          </Attribute>
+        );
+      })}
+    </AttributeContainer>
+           
             {qte == 0 ? (
               <AddToCardContainer onClick={() => handleQte("add")}>
                 ADD TO CARD
@@ -565,16 +643,24 @@ const handlAction = () => {
 
             <hr style={{ marginBottom: 60 }}></hr>
             <CategorieContainer>
-              <CategorieT>Categories</CategorieT>
+              <Categorie>Categories : <p style={{fontSize:16 , color:'teal'}}>{product?.categoryname}</p> </Categorie>
+              <Categorie>Sub category : <p style={{fontSize:16 , color:'teal'}}>{product?.subname}</p> </Categorie>
+              <Categorie>Type : <p style={{fontSize:16 , color:'teal'}}>{product?.typename}</p> </Categorie>
             </CategorieContainer>
             <SellerContainer>
-              <SellerT>Owner</SellerT>
-              <Seller>Clothing Shop</Seller>
+              <Seller>Owner</Seller>
+              <Link to={`/Shops/${product?.idSHOP}`}>
+              <Shope>{product?.shopname}</Shope>
+              </Link>
             </SellerContainer>
           </InfoContainer>
-          <HartContainer onClick={handleWish}>
-            <FavoriteBorderIcon sx={{ color: "#009f7f", cursor: "pointer" }} />
-          </HartContainer>
+          <HeartContainer onClick={ !isWish ? handleWish : removeWish}>
+            {isWish ? 
+            <FavoriteRoundedIcon sx={{ color: "#009f7f" , cursor: "pointer" }}  />
+            :
+            <FavoriteBorderIcon sx={{ color: "#009f7f" , cursor: "pointer" }} />
+            }
+          </HeartContainer>
         </ProductConatainer>
       </Wrapper>
 

@@ -19,8 +19,7 @@ import AlertMessage from "./Alert";
 
 const Container = styled.div`
 padding: 0 32px;
-overflow-y: scroll;
-height: 500px;
+overflow-y: auto;
 `
 
 const Search = styled.div`

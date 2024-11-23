@@ -50,7 +50,7 @@ const Shops = styled.img`
 const Image = styled.img`
   width: 45px;
   border: 1px solid #eee;
-  padding: 6px;
+  padding: 4px;
   border-radius: 4px;
 `;
 const Name = styled.span``;
@@ -197,6 +197,11 @@ const tableTagsAdmin = [
 
   {
     title: "Price",
+    flex: 1,
+    position: "center",
+  },
+  {
+    title: "Discount",
     flex: 1,
     position: "center",
   },
@@ -390,7 +395,11 @@ const ProductList = ({ productData }) => {
               <Detail>{parsedAttributes?.material}</Detail>
                 <Detail>{parsedAttributes?.dimension}</Detail>
                 <Detail>{parsedAttributes?.weight} KG</Detail>
-                <Detail>{parsedAttributes?.colors}</Detail>
+                <Detail><Detail>
+                  {parsedAttributes?.colors?.split(",").map((color, index) => (
+                    <div key={index} style={{ backgroundColor: color, width: 34, height: 12, borderRadius: "8px" , border:'1px solid' }} />
+                  ))}
+                </Detail></Detail>
                 <Detail>{parsedAttributes?.shape}</Detail>
                 <Detail>{parsedAttributes?.finish}</Detail>
                 

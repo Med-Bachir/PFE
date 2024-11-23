@@ -5,6 +5,8 @@ import DeleteIcon from "@mui/icons-material/Delete";
 import VisibilityTwoToneIcon from "@mui/icons-material/VisibilityTwoTone";
 import DoneTwoToneIcon from "@mui/icons-material/DoneTwoTone";
 import CloseTwoToneIcon from "@mui/icons-material/CloseTwoTone";
+import me from "./../Animation - 1716145973359.json";
+import Lottie from "lottie-react";
 
 
 const Table = styled.table`
@@ -62,11 +64,21 @@ const ColumnInfo = styled.th`
       : "#FF7F00"};
 `;
 
+const LottieContainer = styled.div`
+display: flex;
+align-items: center;
+justify-content: center;
+flex-direction: column;
+background-color: white;
+border-radius: 8px;
+margin-bottom: 20px;
+`;
+
 const ShopeRequest = ({shop}) => {
   
  
   return (
-    <Table>
+    <Table >
       <Row type={"tag"}>
         <ColumnTag>Brand name</ColumnTag>
         <ColumnTag>Store Owner</ColumnTag>
@@ -74,7 +86,7 @@ const ShopeRequest = ({shop}) => {
 
         <ColumnTag style={{ border: "none", flex: 1 }}>Action</ColumnTag>
       </Row>
-      {shop?.map((item) => (
+      {shop != ''  ? shop?.map((item) => (
         <>
           <Row key={item.ShopID} type={"normal"}>
             <Column>
@@ -128,9 +140,15 @@ const ShopeRequest = ({shop}) => {
               </ColumnInfo>
             </Column>
           </Row>
-          <Divider />
+          
         </>
-      ))}
+      ))
+    :
+    <LottieContainer>
+            <Lottie  animationData={me} style={{ width:"20%"}} /> 
+            No Shop Request Found
+            </LottieContainer> 
+            }
     </Table>
   );
 };

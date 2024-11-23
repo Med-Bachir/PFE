@@ -8,6 +8,7 @@ import newRequest from '../utils/newRequest'
 
 import me from "./../Animation - 1716145973359.json";
 import Lottie from 'lottie-react'
+import { useSelector } from 'react-redux'
 
 
 
@@ -100,9 +101,10 @@ const ShopProducts = styled.div`
 display: grid;
 grid-template-columns: repeat(3, 1fr);
 gap: 20px;
-
-
+cursor: ${props => props.role == 'admin' ? 'not-allowed' : ""};
+filter: brightness(70%);
 `
+
 
 const Product = styled.div`
 
@@ -118,8 +120,8 @@ height: 450px;
 
 `
 const ProductImage = styled.img`
+height: 350px;
 width: 100%;
-
 
 `
 const Name = styled.span`
@@ -264,13 +266,17 @@ width: 100%;
 
 
 const ShopPage = () => {
+  const user = useSelector((state) => state.user?.currentUser);
 
     const Location = useLocation().pathname.split('/')[2]
-    console.log(Location)
     const [open ,setOpen] = useState(false);
     const handleOpen = () => {
         setOpen(!open)
     }
+    const notAllowed = {
+      cursor : 'not-allowed',
+      
+      }
 
     const [shop ,setShop] = useState([]);
 
@@ -368,10 +374,16 @@ const ShopPage = () => {
 
 </Cover>
 {products != '' ?
-<ShopProducts>
+<ShopProducts >
  {products.map((item) => (
     
-    <Link to={`/cardproduct/${item.idPRODUCT}`}>
+<Link 
+  style={user?.userRole === 'admin' || user?.userRole === 'seller' ? notAllowed : {}} 
+  to={user?.userRole === 'client' ? `/cardproduct/${item.idPRODUCT}` : undefined}
+>
+ 
+
+
     <Product>
         {item.discount == 0 ? '' : <Discount>{item.discount}%</Discount>}
     <ProductImage src={item.productimage} />

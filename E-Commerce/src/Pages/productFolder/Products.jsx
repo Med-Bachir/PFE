@@ -11,9 +11,12 @@ const Container = styled.div`
   width: 100%;
   height: auto;
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(3, 31.5%);
   gap: 20px;
   padding: 32px;
+  & > * {
+    width: 100%; /* Ensure grid items fill the column */
+  }
 `;
 const LottieContainer = styled.div`
 display: flex;

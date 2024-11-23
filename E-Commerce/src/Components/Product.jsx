@@ -22,12 +22,13 @@ const Container = styled.div`
 const ImageContainer = styled.div`
   flex: 1;
   display: flex;
-  align-items: center;
   justify-content: center;
   position: relative;
+  contain: paint;
 `
 const Image = styled.img`
-  width: 100%;
+  object-fit: cover;
+  height: 300px;
 `;
 
 const InfoContainer = styled.div`

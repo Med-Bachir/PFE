@@ -79,6 +79,40 @@ router.post('/:userId/add/:productId', async (req, res) => {
       res.status(500).json({ error: 'Failed to retrieve wishlist.' });
     }
   });
+
+
+  // Product in Wish List
+router.get('/:product/:user', (req, res) => {
+  const { product , user } = req.params;
+
+  const isWish = `
+      SELECT 
+          w.id_Product
+      FROM 
+          wishlist w 
+      JOIN 
+          Product p ON w.id_Product = p.idPRODUCT
+      JOIN 
+          user u ON u.idUSER = w.id_User
+      WHERE 
+          w.id_Product = ? and w.id_User = ?
+      
+  `;
+
+  connection.query(isWish, [product , user], (err, result) => {
+      if (err) {
+          console.error("Error fetching product reviews:", err);
+          return res.status(500).json({ error: "Failed to fetch reviews."  });
+          
+      }
+
+      // Map results to include full name and user image
+      
+
+      res.status(200).json(result != '');
+  });
+});
+
   
   // DELETE PRODUCT FROM WISHLIST
   router.delete('/:userId/delete/:productId', async (req, res) => {
