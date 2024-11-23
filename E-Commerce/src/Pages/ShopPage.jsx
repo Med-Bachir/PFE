@@ -101,8 +101,8 @@ const ShopProducts = styled.div`
 display: grid;
 grid-template-columns: repeat(3, 1fr);
 gap: 20px;
-cursor: ${props => props.role == 'admin' ? 'not-allowed' : ""};
-filter: brightness(70%);
+cursor: ${props => props.role === 'admin' || 'seller' ? 'not-allowed' : ""};
+filter: ${props => props.role === 'admin' || 'seller' ? "brightness(70%)" : ""} ;
 `
 
 
@@ -374,7 +374,7 @@ const ShopPage = () => {
 
 </Cover>
 {products != '' ?
-<ShopProducts >
+<ShopProducts role={user?.userRole} >
  {products.map((item) => (
     
 <Link 

@@ -166,6 +166,7 @@ const Products = styled.div`
   margin-bottom: 10px;
 
   align-items: center;
+ 
 `;
 const Update = styled.div`
   display: flex;
@@ -183,10 +184,10 @@ const Image = styled.img`
 const Information = styled.div`
   display: flex;
   flex-direction: column;
-  margin-right: 180px;
-
-  height: 80px;
+  height: auto;
+  width: fit-content;
   justify-content: space-between;
+  gap: 12px;
 `;
 const Name = styled.span`
   font-weight: bold;
@@ -194,7 +195,28 @@ const Name = styled.span`
 `;
 const Price = styled.div`
   color: #009f7f;
+  display: flex;
+  align-items: center;
+  gap: 12px;
   
+`;
+const Attributes = styled.div`
+  color: black;
+  display: flex;
+  align-items: center;
+  gap: 20px;
+`;
+const Attribute = styled.span`
+display: flex;
+align-items: center;
+gap: 8px;
+`;
+const Color = styled.div`
+padding: 4px 12px;
+max-width: 25px;
+border-radius: 8px;
+background-color: ${props => props.color};
+opacity: 0.8;
 `;
 const Quantity = styled.div`
   color: #3c3c3c75;
@@ -340,10 +362,20 @@ const Cart = () => {
               <Image src={item.image} />
               <Information>
                 <Name>{item.name}</Name>
-                <Price>$ {item.price}</Price>
+                <Price> {item.discount == 0 ? '' : <p style={{fontSize:14 , color:'#a5a5a5' , textDecoration: 'line-through'}} >${item.price} </p>}  ${item.price - item.price * (item.discount / 100 ) }
+                
+                <Attributes>
+                  {item.attributes?.color ? 
+                  <Attribute>color : <Color color={item.attributes?.color} />  </Attribute>
+                  : ''}
+                  {item.attributes?.size ? 
+                  <Attribute>size : {item.attributes?.size}</Attribute>
+                  : ''}
+                </Attributes>
+                </Price>
                 <Quantity>1 * {item.quantity}pc</Quantity>
               </Information>
-              <Total>$ {item.price * item.quantity}</Total>
+              <Total>$ {(item.price - item.price * (item.discount / 100 )) * item.quantity}</Total>
             </Products>
           ))}
           <Divider />

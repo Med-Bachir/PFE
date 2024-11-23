@@ -149,14 +149,14 @@ router.get('/seller/:sellerId/monthly-revenue', verifyTokenAndAuthorizationA_S, 
       SELECT 
         EXTRACT(YEAR FROM CURDATE()) AS year,
         m.month AS monthNumber,
-        COALESCE(SUM(oi.qte * p.productprice), 0) AS monthlyRevenue
+        COALESCE(SUM(oi.qte * (p.productprice - p.productprice * p.discount / 100 )), 0) AS monthlyRevenue
       FROM months m
       LEFT JOIN \`ORDER\` o ON YEAR(o.createdAt) = EXTRACT(YEAR FROM CURDATE()) AND MONTH(o.createdAt) = m.month
       LEFT JOIN ORDERITEM oi ON o.idORDER = oi.id_Order 
       LEFT JOIN PRODUCT p ON oi.id_Product = p.idPRODUCT
       LEFT JOIN STOCK s ON p.idPRODUCT = s.id_Product
       LEFT JOIN SHOP sh ON s.id_Shop = sh.idSHOP
-      WHERE sh.id_Owner = ? OR sh.id_Owner IS NULL
+      WHERE sh.id_Owner = ? AND o.progress = 'Arrived' OR sh.id_Owner IS NULL
       GROUP BY m.month
       ORDER BY m.month;
       `;

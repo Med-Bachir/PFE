@@ -7,29 +7,46 @@ const Fuse = require('fuse.js');
 
 
 // Add product to the cart
-router.post('/cart/:userId/add/:productId',verifyToken , async (req, res) => {
-  try {
+router.post("/cart/:userId/add/:productId", verifyToken, async (req, res) => {
+    try {
       const userId = req.params.userId; // Extracting userId from params
       const productId = req.params.productId; // Extracting productId from params
-      const { color, size , quantity } = req.body; // Extracting color and size from request body
-
-      // Check if the product is already in the user's cart
-      const cartExistsQuery = 'SELECT * FROM CART WHERE id_Client = ? AND id_Product = ? AND color = ? AND size = ?';
-      const cart = await query(cartExistsQuery, [userId, productId, color, size ]);
-
-      if (cart.length === 0) {
-          // Add the product to the cart
-          const addToCartQuery = 'INSERT INTO CART (id_Client, id_Product, color, size, quantity) VALUES (?, ?, ?, ?,?)';
-          await query(addToCartQuery, [userId, productId, color, size , quantity]);
-          res.status(200).json({ message: 'Product added to cart successfully.' });
-      } else {
-          res.status(200).json({ message: 'Product is already in the cart.' });
+      const { attributes, quantity } = req.body; // Extracting attributes (JSON) and quantity from request body
+  
+      if (!attributes && !quantity) {
+        return res.status(400).json({ error: "Attributes and quantity are required." });
       }
-  } catch (error) {
-      console.error('Error adding product to cart:', error);
-      res.status(500).json({ error: 'Failed to add product to cart.' });
-  }
-});
+  
+      // Convert attributes JSON to a string for comparison
+      const attributesString = JSON.stringify(attributes);
+  
+      // Check if the product with the same attributes is already in the user's cart
+      const cartExistsQuery = `
+        SELECT * 
+        FROM CART 
+        WHERE id_Client = ? 
+          AND id_Product = ? 
+          AND JSON_CONTAINS(attributes, ?) 
+      `;
+      const cart = await query(cartExistsQuery, [userId, productId, attributesString]);
+  
+      if (cart.length === 0) {
+        // Add the product to the cart
+        const addToCartQuery = `
+          INSERT INTO CART (id_Client, id_Product, attributes, quantity) 
+          VALUES (?, ?, ?, ?)
+        `;
+        await query(addToCartQuery, [userId, productId, attributesString, quantity]);
+  
+        return res.status(200).json({ message: "Product added to cart successfully." });
+      } else {
+        return res.status(200).json({ message: "Product is already in the cart." });
+      }
+    } catch (error) {
+      console.error("Error adding product to cart:", error);
+      res.status(500).json({ error: "Failed to add product to cart." });
+    }
+  });
 
 // GET USER CART
 router.get('/cart/:userId', async (req, res) => {
@@ -44,11 +61,11 @@ router.get('/cart/:userId', async (req, res) => {
                JOIN PRODUCT p ON c.id_Product = p.idPRODUCT
                WHERE c.id_Client = ?) AS total_product_count,
                
-              (SELECT SUM(p.productprice * c.quantity)         
+              (SELECT SUM((p.productprice - p.productprice * (p.discount / 100)) * c.quantity)         
                FROM CART c 
                JOIN PRODUCT p ON c.id_Product = p.idPRODUCT
                WHERE c.id_Client = ?) AS total_price,
-
+c.idCART,
               p.idPRODUCT, 
               p.productname, 
               p.productdesc, 
@@ -56,8 +73,8 @@ router.get('/cart/:userId', async (req, res) => {
               p.productimage, 
               p.discount, 
               c.quantity,
-              c.color,
-              c.size
+              c.attributes
+              
           FROM 
               CART c
           JOIN 
@@ -65,7 +82,7 @@ router.get('/cart/:userId', async (req, res) => {
           WHERE 
               c.id_Client = ?
           GROUP BY 
-              p.idPRODUCT, p.productname, p.productdesc, p.productprice, p.productimage, p.discount, c.quantity , c.color , c.size;
+              c.idCART,p.idPRODUCT, p.productname, p.productdesc, p.productprice, p.productimage, p.discount, c.quantity , c.attributes ;
       `;
 
       const cartItems = await query(getCartQuery, [userId, userId, userId]);
@@ -79,6 +96,7 @@ router.get('/cart/:userId', async (req, res) => {
 
           // Map the products from the query result
           const products = cartItems.map(item => ({
+            cart:item.idCART,
               id: item.idPRODUCT,
               name: item.productname,
               description: item.productdesc,
@@ -86,8 +104,8 @@ router.get('/cart/:userId', async (req, res) => {
               image: item.productimage,
               discount: item.discount,
               quantity: item.quantity,
-              color : item.color,
-              size : item.size
+              attributes : JSON.parse(item.attributes),
+              
           }));
 
           // Construct the response JSON
@@ -131,7 +149,29 @@ router.put("/update/:userId/:productId",verifyToken , async(req,res)=>{
     }
   })
 
- 
+ // DELETE ITEM FROM CART
+ router.delete("/delete/:item",verifyToken , async(req,res)=>{
+    
+    const id = req.params.item;
+    
+    
+    try {
+     
+      // Query to get the user's cart items
+      const UpdateCartQuery = `
+         DELETE FROM CART 
+            WHERE idCART = ? ;
+      `;
+
+      connection.query(UpdateCartQuery, [id]);
+      
+      res.status(200).json("Product DELETED !")
+
+    } catch (err) {
+      res.status(500).json("Cart dont exist !")
+    }
+  })
+
 
 
 

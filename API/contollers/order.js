@@ -24,7 +24,7 @@ router.post('/checkout/:userId', async (req, res) => {
   }
 */
   const cartQuery = `
-    SELECT c.id_Product, c.color, c.size, c.quantity, p.productprice
+    SELECT c.id_Product, c.attributes, c.quantity, p.productprice
     FROM CART c , product p
     WHERE id_Client = ? AND c.id_Product = p.idPRODUCT
   `;
@@ -101,14 +101,14 @@ router.post('/checkout/:userId', async (req, res) => {
 
         // Insert order items into ORDERITEM table
         const orderItemsQuery = `
-          INSERT INTO ORDERITEM (id_Order, id_Product, qte, color, size)
-          VALUES (?, ?, ?, ?, ?)
+          INSERT INTO ORDERITEM (id_Order, id_Product, qte, attributes)
+          VALUES (?, ?, ?, ?)
         `;
         for (const product of cartProducts) {
-          const { id_Product, color, size, quantity } = product;
+          const { id_Product, attributes, quantity } = product;
           console.log(quantity)
           await new Promise((resolve, reject) => {
-            connection.query(orderItemsQuery, [orderId, id_Product, quantity, color, size], (err, results) => {
+            connection.query(orderItemsQuery, [orderId, id_Product, quantity, attributes], (err, results) => {
               if (err) reject(err);
               else resolve(results);
             });
@@ -205,12 +205,12 @@ router.get('/client/:clientId/order-stats', verifyToken, async (req, res) => {
     DATE_FORMAT(DATE_ADD(o.estimtedtime, INTERVAL 2 DAY), '%Y-%m-%d') AS estimatedTime,
     o.qte AS amount,
     o.currentplace AS place,
-    (oi.qte * p.productprice) AS totalPrice,
+    (oi.qte * (p.productprice - p.productprice * p.discount / 100) ) AS totalPrice,
     s.shippingname AS typeShipping,
     a.state, a.postal_code, a.city,
     s.shippingprice AS priceShipping,
     p.idPRODUCT, p.productname, p.productdesc, p.productprice, p.productimage, 
-    oi.qte,oi.color,oi.size
+    oi.qte,oi.attributes , p.discount,o.type
 FROM 
     \`ORDER\` o
 JOIN 
@@ -251,19 +251,21 @@ WHERE
               priceShipping: row.priceShipping,
               place:row.place,
               city:row.city,
+              type:row.type,
               products: []
             };
           }
           orders[orderId].products.push({
             id: row.idPRODUCT,
-            
+            discount:row.discount/100,
             name: row.productname,
             description: row.productdesc,
             price: row.productprice,
             image: row.productimage,
             color: row.color,
             size: row.size,
-            quantity:row.qte
+            quantity:row.qte,
+            attributes : JSON.parse(row.attributes)
           });
         });
 
@@ -428,13 +430,14 @@ router.get('/order/shipping-details', verifyToken, async (req, res) => {
 });
 
 
-// GET My ORDERS 
+// GET My ORDERS
 router.get('/client/orders/:id', verifyTokenAndAuthorizationA_S, async (req, res) => {
-  const id = req.params.id;
+  const sellerId = req.params.id; // Seller's user ID
   const { status } = req.query;
+
+  // Validate and process status filter
   const validStatuses = ['Waiting', 'On Way', 'Arrived'];
   const statusArray = status ? status.split(',') : [];
-
   const allStatusesValid = statusArray.every(s => validStatuses.includes(s));
   if (statusArray.length > 0 && !allStatusesValid) {
     return res.status(400).json({ error: 'Invalid order status' });
@@ -448,35 +451,27 @@ router.get('/client/orders/:id', verifyTokenAndAuthorizationA_S, async (req, res
     const getOrderStatsQuery = `
       SELECT 
         o.idORDER,
-        o.id_User,
+        o.id_User AS clientId,
+        o.progress AS status,
+        o.currentplace AS currentPlace,
         a.state,
-        o.phone,
         a.city,
         a.postal_code,
-        o.progress,
-        o.currentplace,
+        o.phone,
         o.type,
         DATE_FORMAT(o.createdAt, '%Y-%m-%d') AS dateOrder,
         DATE_FORMAT(DATE_ADD(o.estimtedtime, INTERVAL 2 DAY), '%Y-%m-%d') AS estimatedTime,
         COUNT(oi.idORDERITEM) AS totalProducts,
-        SUM(p.productprice * oi.qte) AS totalPrice,
-        (
-          SELECT JSON_ARRAYAGG(
-            JSON_OBJECT(
-              'size', oi.size, 
-              'color', oi.color, 
-              'quantity', oi.qte, 
-              'name', p.productname, 
-              'image', p.productimage, 
-              'price', p.productprice
-            )
+        SUM((p.productprice - p.productprice * p.discount / 100) * oi.qte) AS totalPrice,
+        JSON_ARRAYAGG(
+          JSON_OBJECT(
+            'productId', p.idPRODUCT,
+            'name', p.productname,
+            'image', p.productimage,
+            'price', p.productprice,
+            'quantity', oi.qte,
+            'attributes', oi.attributes
           )
-          FROM 
-            ecommerce.orderitem oi
-          JOIN 
-            ecommerce.product p ON oi.id_Product = p.idPRODUCT
-          WHERE 
-            oi.id_Order = o.idORDER
         ) AS products
       FROM 
         ecommerce.order o
@@ -485,31 +480,29 @@ router.get('/client/orders/:id', verifyTokenAndAuthorizationA_S, async (req, res
       JOIN 
         ecommerce.product p ON oi.id_Product = p.idPRODUCT
       JOIN 
-        ecommerce.stock s ON s.id_Product = p.idPRODUCT
-      JOIN 
-        ecommerce.shop sh ON sh.idSHOP = s.id_Shop
+        ecommerce.stock s ON s.id_Product = p.idPRODUCT AND s.id_Shop IN (
+          SELECT idSHOP FROM ecommerce.shop WHERE id_Owner = ?
+        )
       JOIN 
         ecommerce.address a ON o.id_Adrress = a.idADDRESS
-      JOIN 
-        ecommerce.user u ON u.idUSER = ?
       WHERE 
-        sh.id_Owner = ? 
-        ${statusCondition}  -- Ensure shop is owned by the current user
+        s.id_Shop IN (SELECT idSHOP FROM ecommerce.shop WHERE id_Owner = ?) 
+        ${statusCondition}
       GROUP BY 
         o.idORDER,
         o.id_User,
-        a.state,
-        o.phone,
-        a.city,
-        a.postal_code,
         o.progress,
         o.currentplace,
-        o.createdAt,
+        a.state,
+        a.city,
+        a.postal_code,
+        o.phone,
         o.type,
+        o.createdAt,
         o.estimtedtime;
     `;
 
-    connection.query(getOrderStatsQuery, [id, id], (err, results) => {
+    connection.query(getOrderStatsQuery, [sellerId, sellerId], (err, results) => {
       if (err) {
         console.error('Error fetching order stats:', err);
         return res.status(500).json({ error: 'Failed to fetch order stats.' });
@@ -518,18 +511,19 @@ router.get('/client/orders/:id', verifyTokenAndAuthorizationA_S, async (req, res
       if (results.length > 0) {
         const orders = results.map(row => ({
           orderId: row.idORDER,
-          user:row.id_User,
-          status: row.progress,
+          clientId: row.clientId,
+          status: row.status,
+          currentPlace: row.currentPlace,
+          state: row.state,
+          city: row.city,
+          postalCode: row.postal_code,
+          phone: row.phone,
+          type: row.type,
           dateOrder: row.dateOrder,
           estimatedTime: row.estimatedTime,
-          currentPlace: row.currentplace,
-          state: row.state,
-          phonenumber: row.phone,
-          city: row.city,
-          type: row.type,
           totalProducts: row.totalProducts,
           totalPrice: row.totalPrice,
-          products: row.products
+          products: JSON.parse(row.products)
         }));
 
         res.status(200).json(orders);
@@ -542,6 +536,7 @@ router.get('/client/orders/:id', verifyTokenAndAuthorizationA_S, async (req, res
     res.status(500).json({ error: 'Internal server error.' });
   }
 });
+
 
 
 

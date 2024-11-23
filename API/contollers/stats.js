@@ -127,8 +127,7 @@ router.get("/top-rated-products", async (req, res) => {
     MAX(p.productdesc) AS productdesc,
     MAX(p.productprice) AS productprice,
     MAX(p.productimage) AS productimage,
-    MAX(p.productcolor) AS productcolor,
-    MAX(p.productsize) AS productsize,
+    
     AVG(r.rate) AS avg_rating
 FROM 
     PRODUCT p
@@ -206,10 +205,10 @@ router.get(
     try {
       // Query to get the top 10 sold products from the ORDERITEM table
       const topSoldProductsQuery = `
-          SELECT p.idPRODUCT, p.productname, p.productdesc, p.productprice, p.productimage, p.productcolor, p.productsize, SUM(oi.qte) as totalSold
+          SELECT p.idPRODUCT, p.productname, p.productdesc, p.productprice, p.productimage,  SUM(oi.qte) as totalSold
           FROM ORDERITEM oi
           JOIN PRODUCT p ON oi.id_Product = p.idPRODUCT
-          GROUP BY p.idPRODUCT, p.productname, p.productdesc, p.productprice, p.productimage, p.productcolor, p.productsize
+          GROUP BY p.idPRODUCT, p.productname, p.productdesc, p.productprice, p.productimage
           ORDER BY totalSold DESC
           LIMIT 10;
       `;
@@ -318,7 +317,7 @@ router.get(
     try {
       const query = `
         WITH OwnerProducts AS (
-            SELECT DISTINCT p.idPRODUCT, p.productprice
+            SELECT DISTINCT p.idPRODUCT, p.productprice , p.discount
             FROM ecommerce.orderitem oi
             JOIN ecommerce.product p ON oi.id_Product = p.idPRODUCT
             JOIN ecommerce.stock st ON p.idPRODUCT = st.id_Product
@@ -362,7 +361,7 @@ router.get(
              WHERE oi.id_Product IN (SELECT idPRODUCT FROM OwnerProducts) 
                AND o.progress = 'Arrived') AS ArrivedOrders,
 
-            (SELECT SUM(op.productprice * oi.qte) 
+            (SELECT SUM((op.productprice - op.productprice * op.discount / 100) * oi.qte) 
              FROM ecommerce.orderitem oi 
              JOIN ecommerce.order o ON oi.id_Order = o.idORDER
              JOIN OwnerProducts op ON oi.id_Product = op.idPRODUCT

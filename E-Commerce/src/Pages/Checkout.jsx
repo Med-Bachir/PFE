@@ -186,10 +186,26 @@ const CheckOut = () => {
   const [typeOrder, setTypeOrder] = useState("");
 
   // Handle Functions
-  const handleDelete = async ({ index }) => {
-    setMessage("Pale Deleted Successfully From Cart");
-    setType("success");
-    setOpen(true);
+  const handleDelete = async (id) => {
+
+    const res = newRequest.delete(`/cards/delete/${id}`)
+ 
+    try{
+
+      if((await res).request.status == 200){
+        setMessage("Product Deleted Successfully From Cart");
+        setType("success");
+        setOpen(true);
+        getCart();
+      }else{
+        setMessage("Faild to delete product from the cart");
+        setType("error");
+        setOpen(true);
+      }
+    }catch(err){
+console.log(err)
+    }
+    
   };
 
   const handleType = (e) => {
@@ -393,7 +409,7 @@ const CheckOut = () => {
             <Title>Color</Title>
             <Title>Size</Title>
             <Title>
-              Price <Type>(DA)</Type>
+              Price <Type>($)</Type>
             </Title>
             <Title>Quantity</Title>
             <Title type="Action">Action</Title>
@@ -415,14 +431,14 @@ const CheckOut = () => {
                   />
                   <Detail type="name">{item.name}</Detail>
                 </Item>
-                <Detail>{item.color}</Detail>
-                <Detail>{item.size}</Detail>
-                <Detail> $ {item.price} </Detail>
+                <Detail>{item.attributes?.color}</Detail>
+                <Detail>{item.attributes?.size} </Detail>
+                <Detail> $ {item.price - item.price * item.discount / 100} </Detail>
                 <Detail>{item.quantity}</Detail>
                 <IconButton
                   color="error"
                   sx={{ outline: "none", m: 2 }}
-                  onClick={() => handleDelete({ index })}
+                  onClick={() => handleDelete(item.cart)}
                 >
                   <DeleteOutlineTwoToneIcon />
                 </IconButton>

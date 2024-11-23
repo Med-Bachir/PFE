@@ -172,18 +172,18 @@ const rowTagProduct = ["Product", "Color", "Size", "Quantity", "Price"];
 const Orders = () => {
   const user = useSelector((state) => state.user?.currentUser);
 
-  const [message, setMessage] = useState('');
-  const [type, setType] = useState('');
+  const [message, setMessage] = useState("");
+  const [type, setType] = useState("");
   const [open, setOpen] = useState(false);
 
   const [orders, setOrders] = useState([]);
   const [selectedOrderId, setSelectedOrderId] = useState(null);
   const [edited, setEdited] = useState(null);
-  const [status, setStatus] = React.useState('');
-  const [place, setPlace] = React.useState('');
+  const [status, setStatus] = useState("");
+  const [place, setPlace] = useState("");
   const [state, setState] = useState({
     Waiting: false,
-    'On Way': false,
+    "On Way": false,
     Arrived: false,
   });
 
@@ -191,11 +191,10 @@ const Orders = () => {
     const getOrders = async () => {
       try {
         let endpoint = `/orders/client/orders/${user?.idUSER}`;
-        const activeStates = Object.keys(state).filter(status => state[status]);
+        const activeStates = Object.keys(state).filter((key) => state[key]);
         if (activeStates.length > 0) {
           endpoint += `?progress=${activeStates.join(",")}`;
         }
-
         const res = await newRequest.get(endpoint);
         setOrders(res.data);
       } catch (err) {
@@ -206,8 +205,11 @@ const Orders = () => {
   }, [state]);
 
   const parseProducts = (productsJson) => {
-    const productsArray = JSON.parse(productsJson);
-    return productsArray;
+    try {
+      return JSON.parse(productsJson);
+    } catch {
+      return [];
+    }
   };
 
   const handleToggleOrderDetails = (orderId) => {
@@ -215,116 +217,63 @@ const Orders = () => {
   };
 
   const handleChange = (event) => {
-    setState({ ...state, [event.target.name]: event.target.checked });
-    setPlace({ ...state, [event.target.name]: event.target.checked });
+    setState((prev) => ({ ...prev, [event.target.name]: event.target.checked }));
   };
 
-
-  const handleUpdate = (index , type , id , user) => {
-     if (type == 'submit'){
+  const handleUpdate = async (index, type, id, userId) => {
+    if (type === "submit") {
       try {
-        newRequest.put(`/orders/client/update-order-stats/${id}` , {status : status.status, currentplace : place.place , userId : user}).then((res) => {
-          setMessage("Order Updates Successfuly ");
-          setType("success");
-          setOpen(true);
-          setTimeout(() => {
-            window.location.reload();
-
-          }, [2000])
-
-        }).catch((err) => {
-          if (err?.response?.status === 409) {
-            
-            setMessage("Somting is wrong ,contact us about the problem");
-            setType("error");
-            setOpen(true);
-          }
-         
-          
-  
-        })
-  
+        await newRequest.put(`/orders/client/update-order-stats/${id}`, {
+          status,
+          currentplace: place,
+          userId,
+        });
+        setMessage("Order updated successfully");
+        setType("success");
+        setOpen(true);
+        setTimeout(() => window.location.reload(), 2000);
       } catch (err) {
-        console.log(err)
+        setMessage("Error updating order. Please try again.");
+        setType("error");
+        setOpen(true);
       }
     }
-    setEdited((prevIndex) => (prevIndex === index ? null : index));  
+    setEdited((prevIndex) => (prevIndex === index ? null : index));
   };
 
-
-  const handleDelete = (id) => {
-   
-     try {
-       newRequest.delete(`/order/client/delete-order/${id}`).then((res) => {
-         setMessage("Order Deleted Successfuly ");
-         setType("success");
-         setOpen(true);
-         setTimeout(() => {
-           window.location.reload();
-
-         }, [2000])
-
-       }).catch((err) => {
-         if (err?.response?.status === 409) {
-           
-           setMessage("Somting is wrong ,contact us about the problem");
-           setType("error");
-           setOpen(true);
-         }
-        
-         
- 
-       })
- 
-     } catch (err) {
-       console.log(err)
-     }
-   
-   setEdited((prevIndex) => (prevIndex === index ? null : index));  
- };
-
-  const handleStatus = (event) => {
-    setStatus({[event.target.name] : event.target.value});
-    console.log(status)
+  const handleDelete = async (id) => {
+    try {
+      await newRequest.delete(`/order/client/delete-order/${id}`);
+      setMessage("Order deleted successfully");
+      setType("success");
+      setOpen(true);
+      setTimeout(() => window.location.reload(), 2000);
+    } catch (err) {
+      setMessage("Error deleting order. Please try again.");
+      setType("error");
+      setOpen(true);
+    }
   };
-  const handlePlace = (event) => {
-    setPlace({[event.target.name] : event.target.value});
-    console.log(place)
-  };
- 
+
   return (
     <Container>
       <AlertMessage open={open} setOpen={setOpen} message={message} type={type} />
       <FilterContainer>
         <Title>Filter Orders</Title>
         <FilterList>
-          <FormControlLabel
-            value="Waiting"
-            control={<Switch color="success" />}
-            label="Waiting"
-            labelPlacement="start"
-            name="Waiting"
-            onChange={handleChange}
-          />
-          <FormControlLabel
-            value="On Way"
-            control={<Switch color="success" />}
-            label="On Way"
-            labelPlacement="start"
-            name="On Way"
-            onChange={handleChange}
-          />
-          <FormControlLabel
-            value="Arrived"
-            control={<Switch color="success" />}
-            label="Arrived"
-            labelPlacement="start"
-            name="Arrived"
-            onChange={handleChange}
-          />
+          {["Waiting", "On Way", "Arrived"].map((status) => (
+            <FormControlLabel
+              key={status}
+              value={status}
+              control={<Switch color="success" />}
+              label={status}
+              labelPlacement="start"
+              name={status}
+              onChange={handleChange}
+            />
+          ))}
         </FilterList>
       </FilterContainer>
-
       <ListContainer>
         <Tags>
           {rowTag.map((tag, index) => (
@@ -333,111 +282,117 @@ const Orders = () => {
             </Tag>
           ))}
         </Tags>
-        {orders != "" ? orders.map((order, index) => (
-          <div key={index}>
-            <Order>
-              <Informations type="ID">#{order?.orderId}</Informations>
-              <Informations>0{order?.phonenumber}</Informations>
-              <Informations>{edited === index ? 
-              <FormControl sx={{ minWidth: 80 , width:'80%' }} size="small">
-              <InputLabel id="demo-simple-select-autowidth-label">Places</InputLabel>
-              <Select
-              name="place"
-                labelId="demo-simple-select-autowidth-label"
-                id="demo-simple-select-autowidth"
-                value={place.place}
-                onChange={handlePlace}
-                autoWidth
-                label="Places"
-                >
-               
-                <MenuItem value={'Mall Storage'}>Mall Storage</MenuItem>
-                <MenuItem value={'Out For Delivery'}>Out For Delivery</MenuItem>
-                <MenuItem value={order?.state}>{order?.state}</MenuItem>
-                <MenuItem value={order?.city}>{order?.city}</MenuItem>
-              </Select>
-                </FormControl>
-              : order?.currentPlace}</Informations>
-              <Informations>
-              { edited === index ? <FormControl sx={{ minWidth: 80 , width:'80%' }} size="small">
-        <InputLabel id="demo-simple-select-autowidth-label">Status</InputLabel>
-        <Select
-        name="status"
-          labelId="demo-simple-select-autowidth-label"
-          id="demo-simple-select-autowidth"
-          value={status.status}
-          onChange={handleStatus}
-          autoWidth
-          label="Status"
-        >
-         
-          <MenuItem value={'Waiting'}>Waiting</MenuItem>
-          <MenuItem value={'On Way'}>On Way</MenuItem>
-          <MenuItem value={'Arrived'}>Arrived</MenuItem>
-        </Select>
-      </FormControl> : <Status status={order?.status}>{ order?.status }</Status> }
-              </Informations>
-              <Informations>{order?.state}</Informations>
-              <Informations>{order?.city}</Informations>
-              <Informations>{order?.type}</Informations>
-              <Informations>{order?.dateOrder}</Informations>
-              <Informations type="Action">
-              {edited === index ? <Tooltip title='edit' arrow>
-    <IconButton sx={{flex:1}} onClick={() => handleUpdate(index , 'submit' , order?.orderId , order?.user)}><SaveTwoToneIcon color='primary' /> </IconButton>
-    </Tooltip>:<Tooltip title='edit' arrow>
-    <IconButton sx={{flex:1}} onClick={() => handleUpdate(index , 'change' , order?.orderId , order?.user)}><EditTwoToneIcon color='primary' /> </IconButton>
-    </Tooltip>}
-                <IconButton onClick={() => handleDelete(order?.orderId)}>
-                  <DeleteTwoToneIcon color="error" />
-                </IconButton>
-                <IconButton
-                  onClick={() => handleToggleOrderDetails(order?.orderId)}
-                  sx={{
-                    rotate: selectedOrderId === order?.orderId ? "90deg" : "0",
-                    transition: "200ms",
-                  }}
-                >
-                  <MoreHorizTwoToneIcon color="secondary" />
-                </IconButton>
-              </Informations>
-            </Order>
-            <OrderDetails show={selectedOrderId === order?.orderId}>
-              <Tags>
-                {rowTagProduct.map((tag, index) => (
-                  <OrderTag key={index} tag={tag}>
-                    {tag}
-                  </OrderTag>
+        {orders.length > 0 ? (
+          orders.map((order, index) => (
+            <div key={index}>
+              <Order>
+                <Informations type="ID">#{order?.orderId}</Informations>
+                <Informations>0{order?.phonenumber}</Informations>
+                <Informations>
+                  {edited === index ? (
+                    <FormControl sx={{ minWidth: 80, width: "80%" }} size="small">
+                      <InputLabel>Places</InputLabel>
+                      <Select
+                        value={place}
+                        onChange={(e) => setPlace(e.target.value)}
+                      >
+                        <MenuItem value="Mall Storage">Mall Storage</MenuItem>
+                        <MenuItem value="Out For Delivery">Out For Delivery</MenuItem>
+                        <MenuItem value={order?.state}>{order?.state}</MenuItem>
+                        <MenuItem value={order?.city}>{order?.city}</MenuItem>
+                      </Select>
+                    </FormControl>
+                  ) : (
+                    order?.currentPlace
+                  )}
+                </Informations>
+                <Informations>
+                  {edited === index ? (
+                    <FormControl sx={{ minWidth: 80, width: "80%" }} size="small">
+                      <InputLabel>Status</InputLabel>
+                      <Select
+                        value={status}
+                        onChange={(e) => setStatus(e.target.value)}
+                      >
+                        <MenuItem value="Waiting">Waiting</MenuItem>
+                        <MenuItem value="On Way">On Way</MenuItem>
+                        <MenuItem value="Arrived">Arrived</MenuItem>
+                      </Select>
+                    </FormControl>
+                  ) : (
+                    <Status status={order?.status}>{order?.status}</Status>
+                  )}
+                </Informations>
+                <Informations>{order?.state}</Informations>
+                <Informations>{order?.city}</Informations>
+                <Informations>{order?.type}</Informations>
+                <Informations>{order?.dateOrder}</Informations>
+                <Informations type="Action">
+                  {edited === index ? (
+                    <Tooltip title="Save">
+                      <IconButton
+                        onClick={() => handleUpdate(index, "submit", order?.orderId, order?.clientId)}
+                      >
+                        <SaveTwoToneIcon color="primary" />
+                      </IconButton>
+                    </Tooltip>
+                  ) : (
+                    <Tooltip title="Edit">
+                      <IconButton
+                        onClick={() => setEdited(index)}
+                      >
+                        <EditTwoToneIcon color="primary" />
+                      </IconButton>
+                    </Tooltip>
+                  )}
+                  <IconButton onClick={() => handleDelete(order?.orderId)}>
+                    <DeleteTwoToneIcon color="error" />
+                  </IconButton>
+                  <IconButton
+                    onClick={() => handleToggleOrderDetails(order?.orderId)}
+                    sx={{ rotate: selectedOrderId === order?.orderId ? "90deg" : "0deg", transition: "200ms" }}
+                  >
+                    <MoreHorizTwoToneIcon color="secondary" />
+                  </IconButton>
+                </Informations>
+              </Order>
+              <OrderDetails show={selectedOrderId === order?.orderId}>
+                <Tags>
+                  {rowTagProduct.map((tag, index) => (
+                    <OrderTag key={index} tag={tag}>
+                      {tag}
+                    </OrderTag>
+                  ))}
+                </Tags>
+                {order?.products.map((product, idx) => (
+                  <Details key={idx}>
+                    <Detail type="Product">
+                      <Avatar
+                        src={product.image}
+                        sx={{ borderRadius: 2, width: 50, height: 50, mr: 4 }}
+                      />
+                      {product.name}
+                    </Detail>
+                    <Detail>
+                      {product.attributes?.color &&
+                        product.attributes.color.split(",").map((c, i) => (
+                          <Circle key={i} color={c} />
+                        ))}
+                    </Detail>
+                    <Detail>{product.attributes?.size || "N/A"}</Detail>
+                    <Detail>{product.quantity}</Detail>
+                    <Detail>${product.price}</Detail>
+                  </Details>
                 ))}
-              </Tags>
-              {parseProducts(order?.products).map((product, idx) => (
-                <Details key={idx}>
-                  <Detail type="Product">
-                    <Avatar
-                      src={product.image}
-                      sx={{ borderRadius: 2, width: 50, height: 50, mr: 4 }}
-                    />
-                    {product.name}
-                  </Detail>
-                  <Detail>
-                    {product.color.split(",").map(c => (
-
-                      <Circle color={c} />
-                    ))}
-                  </Detail>
-                  <Detail>{product.size}</Detail>
-                  <Detail>{product.quantity}</Detail>
-                  <Detail> $ {product.price}</Detail>
-                </Details>
-              ))}
-            </OrderDetails>
-          </div>
-        )) : 
-        <LottieContainer>
-        <Lottie  animationData={me} style={{ width:"40%"}} /> 
-        No Order Found
-        </LottieContainer> 
-        
-        }
+              </OrderDetails>
+            </div>
+          ))
+        ) : (
+          <LottieContainer>
+            <Lottie animationData={me} style={{ width: "40%" }} />
+            No Orders Found
+          </LottieContainer>
+        )}
       </ListContainer>
     </Container>
   );

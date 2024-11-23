@@ -313,6 +313,8 @@ const StepLabel = styled.label`
 font-size: 12px;
 text-align: center;
 max-width: 60px;
+display: flex;
+flex-direction: column;
 `
 const Span = styled.span`
 
@@ -381,12 +383,13 @@ background-color: white;
 const Product = styled.div`
 display: flex;
 align-items: center;
-justify-content:space-evenly;
+justify-content:start;
 gap: 20px;
-padding: 4px;
+margin: 8px -20px 8px 20px;
 `
 const ProductImage= styled.img`
-width: 60px;
+width: 40px;
+height: 40px;
 
 `
 const ProductName= styled.span``
@@ -396,6 +399,7 @@ const Price= styled.span``
 const Warning = styled.span`
 color: ${hovredText};
 font-size: 10px;
+
 `
 
 
@@ -425,7 +429,7 @@ const getProcessedSteps = (selectedOrder) => {
     },
     {
       stepIcon: <WhereToVoteTwoToneIcon />,
-      stepLabel: <>{selectedOrder?.city} <Warning>(Local Post)</Warning></>,
+      stepLabel: <>{selectedOrder?.city} <Warning>{selectedOrder?.type}</Warning></>,
       stepStatus: selectedOrder?.place === selectedOrder?.city ? 'complete' : 'waiting',
       last: true,
     },
@@ -479,8 +483,7 @@ console.log(Location)
 
     getOrders();
   }, [user?.idUSER]);
-  const total = 0
-console.log(selectedOrder?.currentplace)
+  
   return (
     <Container location ={Location[1]}>
        
@@ -509,7 +512,7 @@ console.log(selectedOrder?.currentplace)
             <Information><Info direction='left'>Order Sate </Info> : <Info>{order.dateOrder}</Info></Information>
             <Information><Info direction='left'>Delivery Time</Info> :<Info>{order.estimatedTime}</Info> </Information>
             <Information><Info direction='left'>Amount</Info> :<Info>{order.amount}</Info> </Information>
-            <Information><Info direction='left'>Total Price</Info> :<Info> ${order.products.reduce((total, item) => total + item.price, 0)  - (order?.products.reduce((total, item) => total + item.price, 0) * 0) + order.priceShipping }</Info></Information>
+            <Information><Info direction='left'>Total Price</Info> :<Info> ${order.products.reduce((total, item) => total + ((item.price - (item.price * item.discount)) * item.quantity), 0) + order.priceShipping }</Info></Information>
           </Order>
         ))}
         </Orders>
@@ -555,13 +558,13 @@ console.log(selectedOrder?.currentplace)
   <TotalType>
     <TotalName>Sub Total</TotalName>
     <TypePrice>
-      ${selectedOrder.products.reduce((total, item) => total + item.price, 0)}
+      ${selectedOrder.products.reduce((total, item) => total + ((item.price - (item.price * item.discount)) * item.quantity), 0)}
     </TypePrice>
   </TotalType>
 )}
               <TotalType><TotalName>Discount</TotalName><TypePrice>0%</TypePrice></TotalType>
               <TotalType><TotalName>Delivery Fee</TotalName><TypePrice>${selectedOrder.priceShipping}</TypePrice></TotalType>
-              {selectedOrder && ( <TotalType ><TotalName type="total">Total</TotalName><TypePrice>${selectedOrder.products.reduce((total, item) => total + item.price, 0)  - (selectedOrder?.products.reduce((total, item) => total + item.price, 0) * 0) + selectedOrder.priceShipping }</TypePrice></TotalType>
+              {selectedOrder && ( <TotalType ><TotalName type="total">Total</TotalName><TypePrice>${selectedOrder.products.reduce((total, item) => total + ((item.price - (item.price * item.discount)) * item.quantity), 0)  - (selectedOrder?.products.reduce((total, item) => total + item.price, 0) * 0) + selectedOrder.priceShipping }</TypePrice></TotalType>
            )} </OrderTotal>
           </Details>
         </OrderInfos>
@@ -591,7 +594,7 @@ console.log(selectedOrder?.currentplace)
           <TagRow>
             <Tag style={{flex:3}}>Item</Tag>
             <Tag style={{flex:2}}>Color</Tag>
-            <Tag style={{flex:2}}>Size</Tag>
+            <Tag style={{flex:2}}>Size / weight <Warning>(kg)</Warning></Tag>
             <Tag style={{flex:2}}>Quantity</Tag>
             <Tag style={{flex:2}}>Price</Tag>
           </TagRow>
@@ -606,10 +609,10 @@ console.log(selectedOrder?.currentplace)
             <ProductImage src={product.image} alt={product.name} />
             <ProductName>{product.name}</ProductName>
           </Product>
-          <Qte style={{flex:2}}>{product.color}</Qte>
-          <Qte style={{flex:2}}>{product.size}</Qte>
+          <Qte style={{flex:2}}>{!product.attributes?.color ? "/" : product.attributes?.color}</Qte>
+          <Qte style={{flex:2}}>{!product.attributes?.size ? "/" : product.attributes?.size}</Qte>
           <Qte style={{flex:2}}>{product.quantity}</Qte>
-          <Price style={{flex:2}}> $ {product.price}</Price>
+          <Price style={{flex:2}}> {product.discount != 0 ? <p style={{textDecoration : "line-through" , color:"#9e9e9e" , fontSize:12}}>${product.price}</p>  :'' }$ {product.price - product.price * product.discount }</Price>
         </Row>
       ))}
     

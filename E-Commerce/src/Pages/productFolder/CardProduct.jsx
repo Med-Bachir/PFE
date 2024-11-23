@@ -261,6 +261,7 @@ const CardProduct = () => {
   const [open, setOpen] = useState(false);
   const [isWish, setIsWish] = useState(false);
   const Location = useLocation().pathname.split("/")[2];
+  const [selectedAttributes, setSelectedAttributes] = useState(null);
 
   const [selectedColor, setSelectedColor] = useState(null);
   const [selectedSize, setSelectedSize] = useState(null);
@@ -271,7 +272,16 @@ const CardProduct = () => {
   const [product, setProduct] = useState({});
   const [value, setValue] = useState(2);
   ///////////////////////
-
+  const handleAttributes = (name, value) => {
+    setSelectedAttributes((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+  
+    console.log(selectedAttributes);
+  };
+  
+ 
   const handleColorClick = (color) => {
     setSelectedColor((prevColor) => (prevColor === color ? null : color));
   };
@@ -335,8 +345,7 @@ const handlAction = () => {
   const handleSubmitCart = async () => {
     const productDetails = {
       ...product,
-      size: selectedSize,
-      color: selectedColor,
+      attributes:selectedAttributes,
       quantity:qte
     };
 
@@ -569,13 +578,15 @@ const handlAction = () => {
             <ColorContainer key={field.key}>
               <ColorT>{field.label}</ColorT>
               {colors.map((color, index) => (
-                <ColorDot
-                  key={index}
-                  isSelected={color === selectedColor}
-                  onClick={() => handleColorClick(color)}
-                >
-                  <Color color={color} isSelected={color === selectedColor} />
-                </ColorDot>
+               <ColorDot
+               key={index}
+               
+               isSelected={color === selectedColor}
+               onClick={() => handleAttributes("color", color)}
+             >
+               <Color color={color} isSelected={color === selectedAttributes?.color} />
+             </ColorDot>
+             
               ))}
             </ColorContainer>
           );
@@ -589,8 +600,9 @@ const handlAction = () => {
               {sizes.map((size, index) => (
                 <Size
                   key={index}
-                  isSelected={size === selectedSize}
-                  onClick={() => handleSizeClick(size)}
+                  isSelected={size === selectedAttributes?.size}
+                  onClick={() => handleAttributes("size", size)}
+
                 >
                   {size} {field.suffix || ""}
                 </Size>
