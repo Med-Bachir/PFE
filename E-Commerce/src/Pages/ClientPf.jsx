@@ -166,7 +166,7 @@ const navigate = useNavigate()
             <Statics>
               <TotalOrder>
                 {" "}
-                {orders.Waiting} <Type>Wiating</Type>
+                {orders.Waiting == null ? 0 : orders.Waiting } <Type>Wiating</Type>
               </TotalOrder>
               <TotalOrder position="center">
                 {" "}
@@ -174,7 +174,7 @@ const navigate = useNavigate()
               </TotalOrder>
               <TotalOrder>
                 {" "}
-                {orders["On Way"]} <Type>On Way</Type>
+                {orders["On Way"] == null ? 0 : orders["On Way"]} <Type>On Way</Type>
               </TotalOrder>
             </Statics>
           </Total>

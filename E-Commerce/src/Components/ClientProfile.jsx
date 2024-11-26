@@ -13,7 +13,7 @@ import SaveAltTwoToneIcon from "@mui/icons-material/SaveAltTwoTone";
 const Container = styled.div`
   
   width: 100%;
-  
+ 
  
  position: relative;
   display: flex;
@@ -115,24 +115,36 @@ const UploadButton = styled.label`
 
 const ClientProfile = () => {
   const user = useSelector((state) => state.user?.currentUser);
-  const [newUser, setNewUser] = React.useState(user || {});
+  const [newUser, setNewUser] = React.useState(user || {
+    firstname:'',
+lastname:"",
+username:"",
+email:""
+  });
   const token = Cookies.get('accessToken');
   console.log(token)
   
   const [message, setMessage] = React.useState("");
   const [type, setType] = React.useState("");
   const [open, setOpen] = React.useState(false);
-  const [edit, setEdit] = React.useState(false);
+  const [edit, setEdit] = React.useState();
   const [profileImage, setProfileImage] = React.useState(null);
   console.log(newUser)
   
   const handleChange = (e) => {
+
+
+    e.preventDefault()
   const { name, value, files } = e.target;
+
+
+ 
+
   if (name === 'userimg' && files.length > 0) {
     setProfileImage(files[0]);
     const reader = new FileReader();
     reader.onload = (event) => {
-      setNewUser((prev) => ({ ...prev, [name]: event.target.result }));
+      setNewUser({...user  , userimg : files[0].name });
     };
     reader.readAsDataURL(files[0]); // Convert blob URL to data URL
   } else {
@@ -144,22 +156,22 @@ const ClientProfile = () => {
     {
       Label: "First Name",
       name:"firstname",
-      value: user?.firstname,
+      value: newUser?.firstname,
     },
     {
       Label: "Last Name",
       name:"lastname",
-      value: user?.lastname,
+      value: newUser?.lastname,
     },
     {
       Label: "Username",
       name:"username",
-      value: user?.username,
+      value: newUser?.username,
     },
     {
       Label: "Email",
       name:"email",
-      value: user?.email,
+      value: newUser?.email,
     },
     
   ];
@@ -187,7 +199,7 @@ const ClientProfile = () => {
     };
 
     newRequest
-      .put(`/seller/${user?.idUSER}`, newUser, { headers })
+      .put(`/users/${user?.idUSER}`, newUser, { headers })
       .then((res) => {
         if (res.status === 200) {
           setMessage("Update Saved");
@@ -205,7 +217,12 @@ const ClientProfile = () => {
           setType("error");
           setOpen(true);
         }
-      });
+      }).finally(() => {
+        setEdit(false)
+
+      })
+
+      
   };
 
   
@@ -220,7 +237,7 @@ const ClientProfile = () => {
         <IconButton onClick={() => setEdit(!edit)}><EditTwoTone/></IconButton>
        </Top>
         <ImageSetting>
-          <Avatar sx={{ width: 80, height: 80 ,bgcolor:'green' }}  src={user?.userimg == null ? 'e' : user?.userimg} alt={user?.username} />
+          <Avatar sx={{ width: 80, height: 80 ,bgcolor:'#eeeeee89' }}  src={user?.userimg == null ? 'e' : user?.userimg} alt={user?.username} />
           <Options>
             <ButtonGroup>
             <HiddenInput type="file" id="file-upload" name="userimg" onChange={handleChange} />
@@ -238,7 +255,7 @@ const ClientProfile = () => {
             <Information>
               <Label>{item.Label}</Label>
               
-              <Input  name={item.name} placeholder={edit ? '' : item.value} onChange={handleChange} disabled={edit ? false : true}  />
+              <Input  name={item.name} placeholder={edit ? '' : item.value} value={edit ? item.value : item.value} onChange={handleChange} disabled={edit ? false : true}  />
 
             </Information>
           ))}

@@ -384,7 +384,7 @@ router.get("/:categoryName", async (req, res) => {
   }
 });
 // Get products by category name and subcategory
-router.get("/:categoryName/:sub?", async (req, res) => {
+router.get("/:categoryName/:sub", async (req, res) => {
   try {
     const { categoryName, sub } = req.params;
 
@@ -393,7 +393,7 @@ router.get("/:categoryName/:sub?", async (req, res) => {
       FROM PRODUCT p
       JOIN CATEGORIES c ON p.id_Category = c.idCATEGORIES
       JOIN SUBCATEGORIES s ON p.id_SubCategory = s.id
-      WHERE c.categoryname = ? AND s.name = ?
+      WHERE c.categoryname = ? AND s.name = ? + '\n'
     `;
 
     connection.query(
@@ -416,7 +416,7 @@ router.get("/:categoryName/:sub?", async (req, res) => {
 });
 
 // Get products by category name, subcategory, and type
-router.get("/:categoryName/:sub?/:type?", async (req, res) => {
+router.get("/:categoryName/:sub/:type", async (req, res) => {
   try {
     const { categoryName, sub, type } = req.params;
 
@@ -426,7 +426,7 @@ router.get("/:categoryName/:sub?/:type?", async (req, res) => {
       JOIN CATEGORIES c ON p.id_Category = c.idCATEGORIES
       JOIN SUBCATEGORIES s ON p.id_SubCategory = s.id
       JOIN TYPES t ON p.id_Type = t.id
-      WHERE c.categoryname = ? AND s.name = ? AND t.name = ?
+      WHERE c.categoryname = ? AND s.name = ? + '\n' AND t.name = ?
     `;
 
     connection.query(

@@ -49,6 +49,8 @@ const Shops = styled.img`
 `;
 const Image = styled.img`
   width: 45px;
+  height: 45px;
+  object-fit: contain;
   border: 1px solid #eee;
   padding: 4px;
   border-radius: 4px;

@@ -12,10 +12,8 @@ import { Button, message, Upload } from 'antd';
 import Visibility from '@mui/icons-material/Visibility';
 import VisibilityOff from '@mui/icons-material/VisibilityOff';
 import Lottie from "lottie-react"
-import ism from "../login.json"
 import { Link, useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
-import { loginFailure, loginStart, loginSuccess } from "../redux/user";
 
 import me from "../Home.json"
 import AlertMessage from "../Components/Alert";

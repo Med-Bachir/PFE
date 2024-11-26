@@ -190,6 +190,93 @@ router.put("/client/update-order-stats/:id", verifyTokenAndAuthorizationA_S, asy
   }
 });
 
+router.put("/seller/update-orderitem-stats/:id", verifyTokenAndAuthorizationA_S, async (req, res) => {
+  const orderId = req.params.id; // ID of the order being updated
+  const { status, currentplace, userId , owner } = req.body; // Ensure userId is included in the request body
+
+  try {
+    // Step 1: Update the specific order item
+    const updateOrderItemQuery = `
+      UPDATE orderitem
+      SET status = ?, currentplace = ?
+      WHERE id_Order = ? AND id_Product IN (SELECT s.id_Product from stock s , shop sh WHERE sh.id_Owner = ? AND s.id_Shop = sh.idSHOP);
+    `;
+
+    connection.query(updateOrderItemQuery, [status, currentplace, orderId , owner], (err, results) => {
+      if (err) {
+        console.error("Error updating order item status:", err);
+        return res.status(500).json({ error: "Failed to update order item status." });
+      }
+
+      // Step 2: Retrieve all statuses for the order's order items
+      const getOrderItemsQuery = `
+        SELECT status FROM orderitem WHERE id_Order = ?;
+      `;
+
+      connection.query(getOrderItemsQuery, [orderId], (err, rows) => {
+        if (err) {
+          console.error("Error retrieving order item statuses:", err);
+          return res.status(500).json({ error: "Failed to retrieve order item statuses." });
+        }
+
+        // Extract all statuses
+        const statuses = rows.map(row => row.status);
+
+        // Step 3: Determine the new order status
+        let newOrderStatus;
+        if (statuses.every(s => s === "Waiting")) {
+          newOrderStatus = "Waiting";
+        } else if (statuses.every(s => s === "On Way")) {
+          newOrderStatus = "On Way";
+        } else if (statuses.every(s => s === "Arrived")) {
+          newOrderStatus = "Arrived";
+        } else {
+          // Mixed statuses: "waiting" and "on way"
+          newOrderStatus = "On Way";
+        }
+
+        // Step 4: Update the order's status
+        const updateOrderStatusQuery = `
+          UPDATE ecommerce.order
+          SET progress = ?
+          WHERE idORDER = ?;
+        `;
+
+        connection.query(updateOrderStatusQuery, [newOrderStatus, orderId], (err, results) => {
+          if (err) {
+            console.error("Error updating order status:", err);
+            return res.status(500).json({ error: "Failed to update order status." });
+          }
+
+          // Step 5: Insert a notification for the user
+          const insertNotificationQuery = `
+            INSERT INTO notification (text, type, reciver)
+            VALUES (?, ?, ?);
+          `;
+
+          const notificationText = `Your order #${orderId} status has been updated to "${newOrderStatus}".`;
+          const notificationType = "order_update";
+
+          connection.query(insertNotificationQuery, [notificationText, notificationType, userId], (err, results) => {
+            if (err) {
+              console.error("Error sending notification:", err);
+              return res.status(500).json({ error: "Failed to send notification." });
+            }
+
+            res.status(200).json({ 
+              message: "Order item status updated, order status updated, and notification sent successfully.",
+              orderStatus: newOrderStatus
+            });
+          });
+        });
+      });
+    });
+  } catch (err) {
+    console.error("Internal server error:", err);
+    res.status(500).json({ error: "Internal server error." });
+  }
+});
+
 
 // Route to get order stats for a client
 router.get('/client/:clientId/order-stats', verifyToken, async (req, res) => {
@@ -200,17 +287,16 @@ router.get('/client/:clientId/order-stats', verifyToken, async (req, res) => {
     SELECT 
     o.idORDER,
     o.id_User,
-    o.progress AS status,
+    o.progress AS orderStatus,
     DATE_FORMAT(o.createdAt, '%Y-%m-%d') AS dateOrder,
     DATE_FORMAT(DATE_ADD(o.estimtedtime, INTERVAL 2 DAY), '%Y-%m-%d') AS estimatedTime,
     o.qte AS amount,
     o.currentplace AS place,
-    (oi.qte * (p.productprice - p.productprice * p.discount / 100) ) AS totalPrice,
+    SUM((oi.qte * (p.productprice - p.productprice * p.discount / 100) )) AS totalPrice,
     s.shippingname AS typeShipping,
     a.state, a.postal_code, a.city,
-    s.shippingprice AS priceShipping,
-    p.idPRODUCT, p.productname, p.productdesc, p.productprice, p.productimage, 
-    oi.qte,oi.attributes , p.discount,o.type
+    s.shippingprice AS priceShipping
+   
 FROM 
     \`ORDER\` o
 JOIN 
@@ -222,7 +308,9 @@ JOIN
 JOIN 
     ADDRESS a ON o.id_Adrress = a.idADDRESS
 WHERE 
-    o.id_User = ?;
+    o.id_User = ?
+GROUP BY o.idORDER
+
     `;
 
     connection.query(getOrderStatsQuery, [clientId], (err, results) => {
@@ -240,7 +328,7 @@ WHERE
             orders[orderId] = {
               orderId: orderId,
               user:row.id_User,
-              status: row.status,
+              status: row.orderStatus,
               dateOrder: row.dateOrder,
               estimatedTime: row.estimatedTime,
               amount: row.amount,
@@ -255,18 +343,7 @@ WHERE
               products: []
             };
           }
-          orders[orderId].products.push({
-            id: row.idPRODUCT,
-            discount:row.discount/100,
-            name: row.productname,
-            description: row.productdesc,
-            price: row.productprice,
-            image: row.productimage,
-            color: row.color,
-            size: row.size,
-            quantity:row.qte,
-            attributes : JSON.parse(row.attributes)
-          });
+          
         });
 
         const formattedResults = Object.values(orders);
@@ -284,8 +361,42 @@ WHERE
 
 
 
+router.get('/client/:clientId/orderitem-stats', verifyToken, async (req, res) => {
+  const clientId = req.params.clientId;
+  const order = req.query.order; // Retrieve the `order` parameter from the query string
 
+  try {
+    const getOrderStatsQuery = `
+        SELECT DISTINCT
+   
+    
+    p.idPRODUCT, p.productname, p.productdesc, p.productprice, p.productimage, 
+    oi.qte,oi.attributes , p.discount , oi.status,
+    (oi.qte * (p.productprice - p.productprice * p.discount / 100) ) AS totalPrice
+FROM 
+    ecommerce.ORDER o
+JOIN 
+    ORDERITEM oi ON  oi.id_Order = ?
+JOIN 
+    PRODUCT p ON oi.id_Product = p.idPRODUCT
 
+WHERE 
+    o.id_User = ?;
+    `;
+
+    connection.query(getOrderStatsQuery, [order,clientId ], (err, results) => {
+      if (err) {
+        console.error("Error fetching order stats:", err);
+        return res.status(500).json({ error: "Failed to fetch order stats." });
+      }
+
+      res.status(200).json(results); // Return the results
+    });
+  } catch (err) {
+    console.error("Internal server error:", err);
+    res.status(500).json({ error: "Internal server error." });
+  }
+});
 
 
 // GET MOUNTHLY INCOME
@@ -470,7 +581,9 @@ router.get('/client/orders/:id', verifyTokenAndAuthorizationA_S, async (req, res
             'image', p.productimage,
             'price', p.productprice,
             'quantity', oi.qte,
-            'attributes', oi.attributes
+            'attributes', oi.attributes,
+            'status',oi.status,
+            'place',oi.currentplace
           )
         ) AS products
       FROM 

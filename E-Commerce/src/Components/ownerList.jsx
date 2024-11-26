@@ -7,22 +7,32 @@ import AlertMessage from "./Alert";
 
 
 const Container = styled.div`
-padding: 0 32px;
+padding: 32px;
 `
 const StaticContainer = styled.div`
 background-color: white;
-margin-top: 20px ;
+contain: paint;
+border-radius: 8px;
+padding: 20px 0;
+display: flex;
+flex-direction: column;
 `
-const StaticTitle = styled.div`
-padding: 20px;
+const StaticTitle = styled.span`
 font-size: 20px;
 border-left: 4px teal solid;
+padding: 0 20px;
+display: flex;
+align-items: center;
+justify-items: center;
 `
 
 const Table = styled.table`
   display: flex;
   flex-direction: column;
   justify-content: space-between;
+  border-radius: 8px;
+  margin-top: 20px;
+  background-color: white;
 `;
 const Row = styled.tr`
   display: flex;
@@ -123,10 +133,9 @@ const OwnersList = () => {
     <Container>
       <AlertMessage open={open} setOpen={setOpen} message={message} type={type} />
 
-    <StaticContainer style={{padding:0}}>
+    <StaticContainer >
   <StaticTitle>All Owners</StaticTitle>
     </StaticContainer>
-    <StaticContainer style={{padding:0}}>
   
   
   
@@ -191,7 +200,6 @@ const OwnersList = () => {
           </>
         ))}
       </Table>
-        </StaticContainer>
         </Container>
   )
 }

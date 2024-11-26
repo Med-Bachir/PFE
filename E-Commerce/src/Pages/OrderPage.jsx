@@ -460,16 +460,33 @@ const OrderPage = () => {
 
   const user = useSelector((state) => state.user?.currentUser);
   const Location = useLocation().pathname.split('/')
+  const [ordersItems, setOrdersItems] = useState([]);
     
   const [selectedOrderId, setSelectedOrderId] = useState();
   const [selectedOrder, setSelectedOrder] = useState();
   const [orders, setOrders] = useState([]);
 console.log(Location)
+
+
+const getOrdersItems = async (id) => {
+  try {
+    // Include the `order` parameter in the query string
+    const res = await newRequest.get(`orders/client/${user?.idUSER}/orderitem-stats?order=${id}`);
+    setOrdersItems(res.data);
+  } catch (err) {
+    console.error("Error fetching orders:", err);
+  }
+};
+
   const handleOrderClick = (orderId, orderDetails) => {
     setSelectedOrderId(orderId === selectedOrderId ? null : orderId);
     setSelectedOrder(orderId === selectedOrderId ? null : orderDetails);
+    getOrdersItems(orderId)
   };
   const steps = getProcessedSteps(selectedOrder);
+
+
+ 
 
   useEffect(() => {
     const getOrders = async () => {
@@ -480,9 +497,10 @@ console.log(Location)
         console.log("error", error);
       }
     };
-
     getOrders();
   }, [user?.idUSER]);
+
+  
   
   return (
     <Container location ={Location[1]}>
@@ -512,7 +530,7 @@ console.log(Location)
             <Information><Info direction='left'>Order Sate </Info> : <Info>{order.dateOrder}</Info></Information>
             <Information><Info direction='left'>Delivery Time</Info> :<Info>{order.estimatedTime}</Info> </Information>
             <Information><Info direction='left'>Amount</Info> :<Info>{order.amount}</Info> </Information>
-            <Information><Info direction='left'>Total Price</Info> :<Info> ${order.products.reduce((total, item) => total + ((item.price - (item.price * item.discount)) * item.quantity), 0) + order.priceShipping }</Info></Information>
+            <Information><Info direction='left'>Total Price</Info> :<Info> ${order.totalPrice.toFixed(2) }</Info></Information>
           </Order>
         ))}
         </Orders>
@@ -558,13 +576,13 @@ console.log(Location)
   <TotalType>
     <TotalName>Sub Total</TotalName>
     <TypePrice>
-      ${selectedOrder.products.reduce((total, item) => total + ((item.price - (item.price * item.discount)) * item.quantity), 0)}
+      ${selectedOrder.totalPrice.toFixed(2)}
     </TypePrice>
   </TotalType>
 )}
               <TotalType><TotalName>Discount</TotalName><TypePrice>0%</TypePrice></TotalType>
               <TotalType><TotalName>Delivery Fee</TotalName><TypePrice>${selectedOrder.priceShipping}</TypePrice></TotalType>
-              {selectedOrder && ( <TotalType ><TotalName type="total">Total</TotalName><TypePrice>${selectedOrder.products.reduce((total, item) => total + ((item.price - (item.price * item.discount)) * item.quantity), 0)  - (selectedOrder?.products.reduce((total, item) => total + item.price, 0) * 0) + selectedOrder.priceShipping }</TypePrice></TotalType>
+              {selectedOrder && ( <TotalType ><TotalName type="total">Total</TotalName><TypePrice>${(selectedOrder.totalPrice + selectedOrder.priceShipping).toFixed(2) }</TypePrice></TotalType>
            )} </OrderTotal>
           </Details>
         </OrderInfos>
@@ -596,6 +614,7 @@ console.log(Location)
             <Tag style={{flex:2}}>Color</Tag>
             <Tag style={{flex:2}}>Size / weight <Warning>(kg)</Warning></Tag>
             <Tag style={{flex:2}}>Quantity</Tag>
+            <Tag style={{flex:2}}>Progress</Tag>
             <Tag style={{flex:2}}>Price</Tag>
           </TagRow>
          
@@ -603,16 +622,17 @@ console.log(Location)
               
   
    
-      {selectedOrder?.products.map(product => (
+      {ordersItems.map(product => (
         <Row key={product.id}>
           <Product style={{flex:3}}>
-            <ProductImage src={product.image} alt={product.name} />
-            <ProductName>{product.name}</ProductName>
+            <ProductImage src={product.productimage} alt={product.productname} />
+            <ProductName>{product.productname}</ProductName>
           </Product>
-          <Qte style={{flex:2}}>{!product.attributes?.color ? "/" : product.attributes?.color}</Qte>
-          <Qte style={{flex:2}}>{!product.attributes?.size ? "/" : product.attributes?.size}</Qte>
-          <Qte style={{flex:2}}>{product.quantity}</Qte>
-          <Price style={{flex:2}}> {product.discount != 0 ? <p style={{textDecoration : "line-through" , color:"#9e9e9e" , fontSize:12}}>${product.price}</p>  :'' }$ {product.price - product.price * product.discount }</Price>
+          <Qte style={{flex:2}}>{!JSON.parse(product.attributes)?.color ? "/" : JSON.parse(product.attributes)?.color}</Qte>
+          <Qte style={{flex:2}}>{!JSON.parse(product.attributes)?.size ? "/" : JSON.parse(product.attributes)?.size}</Qte>
+          <Qte style={{flex:2}}>{product.qte}</Qte>
+          <Progress status={product.status} style={{flex:2}}>{product.status}</Progress>
+          <Price style={{flex:2}}> {product.discount != 0 ? <p style={{textDecoration : "line-through" , color:"#9e9e9e" , fontSize:12}}>${product.productprice}</p>  :'' }$ {(product.productprice - product.productprice * product.discount / 100).toFixed(2) }</Price>
         </Row>
       ))}
     

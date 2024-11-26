@@ -135,12 +135,15 @@ min-width: 100%;
 
 const ProductImage = styled.div`
   transition: 500ms;
-  width: ${(props) => (props.open == true ? "100%" : "100%")};
+  width: 100%;
   padding: 12px 64px;
+
+
   & img {
     width: 100%;
     border: 1px #eee solid;
     border-radius: 8px;
+    object-fit: contain;
   }
 `;
 const ProductInfo = styled.div`
@@ -214,6 +217,8 @@ const ItemImage = styled.img`
   border: 1px solid #eee;
   padding: 8px;
   width: 48px;
+  height: 48px;
+  object-fit: contain;
   border-radius: 8px;
 `;
 const ItemDesc = styled.div`
@@ -656,7 +661,7 @@ const AdminPf = () => {
               <Product open={open} index={index}>
                 <ProductImage open={open}>
                   <img
-                    style={{ width: "100%" }}
+                    style={{ height:400 }}
                     src={item.productimage}
                     alt=""
                   />

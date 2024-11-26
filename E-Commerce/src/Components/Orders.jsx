@@ -111,6 +111,7 @@ const OrderDetails = styled.div`
   flex-direction: column;
   width: auto;
 min-width: 600px;
+
 `;
 
 const Details = styled.div`
@@ -167,7 +168,7 @@ const rowTag = [
   "Action",
 ];
 
-const rowTagProduct = ["Product", "Color", "Size", "Quantity", "Price"];
+const rowTagProduct = ["Product", "Color", "Size","Status","Current Place" ,"Quantity", "Price" , "Actions"];
 
 const Orders = () => {
   const user = useSelector((state) => state.user?.currentUser);
@@ -187,30 +188,26 @@ const Orders = () => {
     Arrived: false,
   });
 
-  useEffect(() => {
-    const getOrders = async () => {
-      try {
-        let endpoint = `/orders/client/orders/${user?.idUSER}`;
-        const activeStates = Object.keys(state).filter((key) => state[key]);
-        if (activeStates.length > 0) {
-          endpoint += `?progress=${activeStates.join(",")}`;
-        }
-        const res = await newRequest.get(endpoint);
-        setOrders(res.data);
-      } catch (err) {
-        console.error("Error fetching orders:", err);
+  const getOrders = async () => {
+    try {
+      let endpoint = `/orders/client/orders/${user?.idUSER}`;
+      const activeStates = Object.keys(state).filter((key) => state[key]);
+      if (activeStates.length > 0) {
+        endpoint += `?progress=${activeStates.join(",")}`;
       }
-    };
+      const res = await newRequest.get(endpoint);
+      setOrders(res.data);
+    } catch (err) {
+      console.error("Error fetching orders:", err);
+    }
+  };
+  
+  useEffect(() => {
+ 
     getOrders();
   }, [state]);
 
-  const parseProducts = (productsJson) => {
-    try {
-      return JSON.parse(productsJson);
-    } catch {
-      return [];
-    }
-  };
+  
 
   const handleToggleOrderDetails = (orderId) => {
     setSelectedOrderId(selectedOrderId === orderId ? null : orderId);
@@ -220,18 +217,19 @@ const Orders = () => {
     setState((prev) => ({ ...prev, [event.target.name]: event.target.checked }));
   };
 
-  const handleUpdate = async (index, type, id, userId) => {
+  const handleUpdate = async (index, type, id, userId , owner) => {
     if (type === "submit") {
       try {
-        await newRequest.put(`/orders/client/update-order-stats/${id}`, {
+        await newRequest.put(`/orders/seller/update-orderitem-stats/${id}`, {
           status,
           currentplace: place,
           userId,
+          owner
         });
         setMessage("Order updated successfully");
         setType("success");
         setOpen(true);
-        setTimeout(() => window.location.reload(), 2000);
+        setTimeout(() => getOrders(), 2000);
       } catch (err) {
         setMessage("Error updating order. Please try again.");
         setType("error");
@@ -247,7 +245,7 @@ const Orders = () => {
       setMessage("Order deleted successfully");
       setType("success");
       setOpen(true);
-      setTimeout(() => window.location.reload(), 2000);
+      setTimeout(() => getOrders(), 2000);
     } catch (err) {
       setMessage("Error deleting order. Please try again.");
       setType("error");
@@ -287,9 +285,9 @@ const Orders = () => {
             <div key={index}>
               <Order>
                 <Informations type="ID">#{order?.orderId}</Informations>
-                <Informations>0{order?.phonenumber}</Informations>
+                <Informations>0{order?.phone}</Informations>
                 <Informations>
-                  {edited === index ? (
+                {edited === index ? (
                     <FormControl sx={{ minWidth: 80, width: "80%" }} size="small">
                       <InputLabel>Places</InputLabel>
                       <Select
@@ -302,13 +300,16 @@ const Orders = () => {
                         <MenuItem value={order?.city}>{order?.city}</MenuItem>
                       </Select>
                     </FormControl>
-                  ) : (
-                    order?.currentPlace
-                  )}
+                  ) :(
+                    <>
+                    {order?.currentPlace}
+                    </>
+                  )
+                  }
                 </Informations>
                 <Informations>
-                  {edited === index ? (
-                    <FormControl sx={{ minWidth: 80, width: "80%" }} size="small">
+                {edited === index ? (
+                      <FormControl sx={{ minWidth: 80, width: "80%" }} size="small">
                       <InputLabel>Status</InputLabel>
                       <Select
                         value={status}
@@ -319,19 +320,21 @@ const Orders = () => {
                         <MenuItem value="Arrived">Arrived</MenuItem>
                       </Select>
                     </FormControl>
-                  ) : (
+                  ) :(
+                  
                     <Status status={order?.status}>{order?.status}</Status>
-                  )}
+          )}
                 </Informations>
                 <Informations>{order?.state}</Informations>
                 <Informations>{order?.city}</Informations>
                 <Informations>{order?.type}</Informations>
                 <Informations>{order?.dateOrder}</Informations>
                 <Informations type="Action">
-                  {edited === index ? (
+                  
+                {edited === index ? (
                     <Tooltip title="Save">
                       <IconButton
-                        onClick={() => handleUpdate(index, "submit", order?.orderId, order?.clientId)}
+                        onClick={() => handleUpdate(index, "submit", order?.orderId, order?.clientId , user?.idUSER)}
                       >
                         <SaveTwoToneIcon color="primary" />
                       </IconButton>
@@ -345,15 +348,13 @@ const Orders = () => {
                       </IconButton>
                     </Tooltip>
                   )}
-                  <IconButton onClick={() => handleDelete(order?.orderId)}>
-                    <DeleteTwoToneIcon color="error" />
-                  </IconButton>
                   <IconButton
                     onClick={() => handleToggleOrderDetails(order?.orderId)}
                     sx={{ rotate: selectedOrderId === order?.orderId ? "90deg" : "0deg", transition: "200ms" }}
                   >
                     <MoreHorizTwoToneIcon color="secondary" />
                   </IconButton>
+                  
                 </Informations>
               </Order>
               <OrderDetails show={selectedOrderId === order?.orderId}>
@@ -364,8 +365,8 @@ const Orders = () => {
                     </OrderTag>
                   ))}
                 </Tags>
-                {order?.products.map((product, idx) => (
-                  <Details key={idx}>
+                {order?.products.map((product, index) => (
+                  <Details key={index}>
                     <Detail type="Product">
                       <Avatar
                         src={product.image}
@@ -374,14 +375,35 @@ const Orders = () => {
                       {product.name}
                     </Detail>
                     <Detail>
-                      {product.attributes?.color &&
+                      {product.attributes?.color ? product.attributes?.color &&
                         product.attributes.color.split(",").map((c, i) => (
                           <Circle key={i} color={c} />
-                        ))}
+                        ))
+                      
+                      :
+                       "/"} 
                     </Detail>
                     <Detail>{product.attributes?.size || "N/A"}</Detail>
+                    <Detail>
+
+                     
+                    <Status status={product?.status}>{product?.status}</Status>
+                  
+                  </Detail>
+                  <Detail>
+                   
+                    {product?.place}
+                  
+                  </Detail>
                     <Detail>{product.quantity}</Detail>
-                    <Detail>${product.price}</Detail>
+                    <Detail>${product.price.toFixed(2)}</Detail>
+                    <Detail type="Action">
+                  
+                  <IconButton onClick={() => handleDelete(order?.orderId)}>
+                    <DeleteTwoToneIcon color="error" />
+                  </IconButton>
+                  
+                </Detail>
                   </Details>
                 ))}
               </OrderDetails>

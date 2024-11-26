@@ -27,8 +27,10 @@ const ImageContainer = styled.div`
   contain: paint;
 `
 const Image = styled.img`
-  object-fit: cover;
-  height: 300px;
+height: 300px;
+width: 100%;
+  object-fit: contain;
+
 `;
 
 const InfoContainer = styled.div`
@@ -173,7 +175,7 @@ const Product = ({ id, productname, productprice, productimage, discount }) => {
             <Title>{productname}</Title>
 
             <PriceContainer>
-              <Price discount={discount}>$ {productprice}</Price>
+              <Price discount={discount}>$ {productprice.toFixed(2)}</Price>
               {discount > 0 && (
                 <NewPrice discount={discount}>
                   {discountedPrice.toFixed(2)}$

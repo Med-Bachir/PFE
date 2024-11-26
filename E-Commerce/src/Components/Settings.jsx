@@ -250,7 +250,7 @@ const Settings = () => {
             <Information>
               <Label>{item.Label}</Label>
               
-              <Input  name={item.name} placeholder={edit ? '' : item.value} onChange={handleChange} disabled={edit ? false : true}  />
+              <Input  name={item.name} placeholder={edit ? '' : item.value} value={edit ? item.value : item.value} onChange={handleChange} disabled={edit ? false : true}  />
 
             </Information>
           ))}

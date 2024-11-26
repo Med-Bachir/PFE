@@ -27,7 +27,6 @@ import Cart from "./Cart";
 const PagesContainer = styled.div``;
 const HeaderContainer = styled.header`
   position: sticky;
-
   height: 80px;
   width: 100%;
   display: flex;
@@ -38,18 +37,31 @@ const HeaderContainer = styled.header`
   background-color: white;
   z-index: 99;
   overflow: hidden;
+
+  @media (max-width: 768px) {
+    flex-direction: column;
+    height: auto;
+    padding: 10px;
+  }
 `;
 
 export const Center = styled.div`
   flex: 2;
   display: flex;
   justify-content: center;
-
   gap: 8px;
+
+  @media (max-width: 768px) {
+    display: none; /* Hide on small screens */
+  }
 `;
 
 const Logo = styled.img`
-  width: 400px;
+  width: 200px;
+
+  @media (max-width: 768px) {
+    width: 150px; /* Adjust logo size */
+  }
 `;
 const LogoText = styled.h1`
   font-size: 20px;
@@ -62,14 +74,23 @@ export const Left = styled.div`
   align-items: center;
   display: flex;
   justify-content: flex-start;
-`;
 
+  @media (max-width: 768px) {
+    justify-content: center;
+  }
+`;
 export const Right = styled.div`
   flex: ${(props) =>
     props.user == null ? 3 : props.user?.userRole == "client" ? 3 : 2};
   display: flex;
   justify-content: space-between;
   align-items: center;
+
+  @media (max-width: 768px) {
+    flex-direction: column;
+    gap: 10px;
+    margin-top: 10px;
+  }
 `;
 const Notifications = styled.div`
   box-shadow: rgba(0, 0, 0, 0.1) 0px 4px 6px -1px,
@@ -112,6 +133,10 @@ const Title = styled.span`
   font-size: 14px;
   padding: 5px 16px;
   border-bottom: 1px solid #eee;
+
+  @media (max-width: 768px) {
+    font-size: 12px;
+  }
 `;
 
 

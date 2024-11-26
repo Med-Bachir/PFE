@@ -1,9 +1,16 @@
 const {verifyTokenAndAuthorizationA_C, verifyTokenAndAdminandSeller, verifyToken,verifyTokenAndAuthorization, verifyTokenAndAdmin } = require("./verifytoken");
 const connection = require('../db');
-const { query } = require("../utils/promiseQuery.js");
 const router = require("express").Router();
+const { v2: cloudinary } = require("cloudinary");
+const { v4: uuidv4 } = require("uuid");
 
 
+
+cloudinary.config({
+  cloud_name: "dr95wrssj",
+  api_key: "419664968851868",
+  api_secret: "61D8e5oyWfCQLWBohKa-9t7HxZg",
+});
 //GET ALL CLIENTS
 router.get("/", verifyTokenAndAdminandSeller, async (req, res, next) => {
     
@@ -51,30 +58,42 @@ router.get("/", verifyTokenAndAdminandSeller, async (req, res, next) => {
 // UPDATE CLIENT 
 
 router.put("/:id", verifyTokenAndAuthorizationA_C, async (req, res) => {
-    try {
-        const userId = req.params.id;
-        const { username, email, userimg } = req.body;
+  try {
+      const userId = req.params.id;
+      const { firstname, lastname, username, email, userimg } = req.body;
 
-        const query = "UPDATE USER SET   username=?, email=?, userimg=? WHERE idUSER=?";
-        const values = [ username, email, userimg, userId];
+      // Upload the image to Cloudinary
+      const uniquePublicId = `Profile_${uuidv4()}`;
+      console.log("User image:", userimg); // Add this to debug
+      const uploadResult = await cloudinary.uploader.upload(userimg, {
+        public_id: uniquePublicId,
+      });
 
-        connection.query(query, values, (err, result) => {
-            if (err) {
-                res.status(500).json({ error: "Failed to update user." });
-                return;
-            }
+      // Extract the URL of the uploaded image
+      const imageUrl = uploadResult.secure_url;
 
-            // Check if any rows were affected
-            if (result.affectedRows === 0) {
-                res.status(404).json({ error: "User not found." });
-                return;
-            }
+      // Update query
+      const query = "UPDATE USER SET firstname=?, lastname=?, username=?, email=?, userimg=? WHERE idUSER=?";
+      const values = [firstname, lastname, username, email, imageUrl, userId];
 
-            res.status(200).json({ message: "User updated successfully." });
-        });
-    } catch (err) {
-        res.status(500).json({ error: "Internal server error." });
-    }
+      // Execute query
+      connection.query(query, values, (err, result) => {
+          if (err) {
+              res.status(500).json({ error: "Failed to update user." + err });
+              return;
+          }
+
+          // Check if any rows were affected
+          if (result.affectedRows === 0) {
+              res.status(404).json({ error: "User not found." });
+              return;
+          }
+
+          res.status(200).json({ message: "User updated successfully." });
+      });
+  } catch (err) {
+      res.status(500).json({ error: "Internal server error." });
+  }
 });
 
 // DELETE CLIENT 

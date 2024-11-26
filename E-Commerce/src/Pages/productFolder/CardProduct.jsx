@@ -49,12 +49,16 @@ const ImageContainer = styled.div`
   flex: 1;
   display: flex;
   justify-content: center;
+ 
 `;
 const InfoContainer = styled.div`
   flex: 1;
 `;
 const Image = styled.img`
-  width: 80%;
+height: 100%;
+height: calc(100vh - 144px);
+width: 100%;
+object-fit: contain;
 `;
 const Title = styled.h2`
   margin-bottom: 20px;
@@ -282,13 +286,7 @@ const CardProduct = () => {
   };
   
  
-  const handleColorClick = (color) => {
-    setSelectedColor((prevColor) => (prevColor === color ? null : color));
-  };
 
-  const handleSizeClick = (size) => {
-    setSelectedSize((prevSize) => (prevSize === size ? null : size));
-  };
 
 
   const Wish = async () => {
@@ -389,6 +387,13 @@ const handlAction = () => {
   })
   const handleWish = async () => {
     try {
+if(!user){
+  setMessage("Please login first !!");
+        setType("error");
+        setOpen(true);
+        return;
+}
+
       const response = await newRequest.post(
         `wish/${user?.idUSER}/add/${Location}`
       );
@@ -396,10 +401,6 @@ const handlAction = () => {
       if (response.status === 200) {
         setMessage("Product add to wish list");
         setType("success");
-        setOpen(true);
-      } else {
-        setMessage("Please login first !!");
-        setType("error");
         setOpen(true);
       }
     } catch (error) {
@@ -464,13 +465,15 @@ const handlAction = () => {
       
       if (response.status === 200) {
         message.success("Review added successfully.");
-        getReviews()
       } else {
         message.error("Review to add product.");
       }
     } catch (error) {
       console.error("Error adding product:", error);
       message.error("Failed to add Review.");
+    } finally {
+      getReviews();
+
     }
   } else {
     setMessage("Please Login First!!");
@@ -566,7 +569,7 @@ const handlAction = () => {
             <Title>{product.productname}</Title>
 
             <Desc>{product.productdesc}</Desc>
-            <Price>{product?.discount == 0 ? '': <Price  style={{fontSize:24 , textDecoration: 'line-through' , color:'#b9b9b9' , marginRight:20}}>$ {product.productprice} </Price>}  $ {product.productprice - ((product.productprice * product.discount) / 100)} </Price>
+            <Price>{product?.discount == 0 ? '': <Price  style={{fontSize:24 , textDecoration: 'line-through' , color:'#b9b9b9' , marginRight:20}}>$ {product.productprice.toFixed(2)} </Price>}  $ {(product.productprice - ((product.productprice * product.discount) / 100)).toFixed(2)} </Price>
             <AttributeContainer>
       {categoryConfig.fields.map((field) => {
         const value = product?.attributes?.[field.key];

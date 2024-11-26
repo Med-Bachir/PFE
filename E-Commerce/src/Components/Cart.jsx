@@ -309,7 +309,7 @@ const Cart = () => {
           <CubeItem>{cart?.totalProductCount == null ? 0 : cart?.totalProductCount} Item</CubeItem>
         </CubeItemContainer>
         <CubeAmount>
-          <CubeItemNumber>$ {cart?.totalPrice == null ? 0 : cart?.totalPrice }</CubeItemNumber>
+          <CubeItemNumber>$ {cart?.totalPrice == null ? 0 : cart?.totalPrice.toFixed(2) }</CubeItemNumber>
         </CubeAmount>
       </Cube>
 
@@ -362,7 +362,7 @@ const Cart = () => {
               <Image src={item.image} />
               <Information>
                 <Name>{item.name}</Name>
-                <Price> {item.discount == 0 ? '' : <p style={{fontSize:14 , color:'#a5a5a5' , textDecoration: 'line-through'}} >${item.price} </p>}  ${item.price - item.price * (item.discount / 100 ) }
+                <Price> {item.discount == 0 ? '' : <p style={{fontSize:14 , color:'#a5a5a5' , textDecoration: 'line-through'}} >${item.price} </p>}  ${(item.price - item.price * (item.discount / 100 )).toFixed(2) }
                 
                 <Attributes>
                   {item.attributes?.color ? 
@@ -375,7 +375,7 @@ const Cart = () => {
                 </Price>
                 <Quantity>1 * {item.quantity}pc</Quantity>
               </Information>
-              <Total>$ {(item.price - item.price * (item.discount / 100 )) * item.quantity}</Total>
+              <Total>$ {((item.price - item.price * (item.discount / 100 )) * item.quantity).toFixed(2)}</Total>
             </Products>
           ))}
           <Divider />
@@ -385,7 +385,7 @@ const Cart = () => {
           <Link style={{ width: '100%' }} to={`/checkout/${user?.idUSER}`}>
             <Checkout>
               <Button>Checkout</Button>
-              <TotalPrice>$ {cart?.totalPrice == null ? 0 : cart?.totalPrice }</TotalPrice>
+              <TotalPrice>$ {cart?.totalPrice == null ? 0 : cart?.totalPrice.toFixed(2) }</TotalPrice>
             </Checkout>
           </Link>
         </Bottom>

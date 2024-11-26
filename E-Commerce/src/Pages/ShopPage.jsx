@@ -101,8 +101,8 @@ const ShopProducts = styled.div`
 display: grid;
 grid-template-columns: repeat(3, 1fr);
 gap: 20px;
-cursor: ${props => props.role === 'admin' || 'seller' ? 'not-allowed' : ""};
-filter: ${props => props.role === 'admin' || 'seller' ? "brightness(70%)" : ""} ;
+cursor: ${props => props.role === 'admin' || props.role == 'seller' ? 'not-allowed' : ""};
+filter: ${props => props.role === 'admin' || props.role == 'seller' ? "brightness(70%)" : ""} ;
 `
 
 
@@ -116,12 +116,13 @@ align-items: center;
 border-radius:4px;
 padding: 16px;
 contain: paint;
-height: 450px;
+min-height: 400px;
 
 `
 const ProductImage = styled.img`
 height: 350px;
 width: 100%;
+object-fit: contain;
 
 `
 const Name = styled.span`
@@ -378,7 +379,7 @@ const ShopPage = () => {
  {products.map((item) => (
     
 <Link 
-  style={user?.userRole === 'admin' || user?.userRole === 'seller' ? notAllowed : {}} 
+  style={user?.userRole === 'admin' || user?.userRole === 'seller' ? notAllowed : {cursor:''}} 
   to={user?.userRole === 'client' ? `/cardproduct/${item.idPRODUCT}` : undefined}
 >
  
@@ -389,8 +390,9 @@ const ShopPage = () => {
     <ProductImage src={item.productimage} />
     <Name>{item.productname}</Name>
     <Price> <CurrentPrice> ${item.productprice - item.productprice * item.discount / 100} </CurrentPrice>{item.discount == 0 ? '' : <OldPrice>${item.productprice}</OldPrice>} </Price>
-
+<Link to={`/cardproduct/${item.idPRODUCT}`}>
     <Button style={{padding:'8px 16px' , marginTop:8 , backgroundColor:'#009f7f' ,color:'white' , fontWeight:500 , position:'absolute' , bottom:16, right:20}}>+</Button>
+</Link>
 
 </Product>
     </Link>
