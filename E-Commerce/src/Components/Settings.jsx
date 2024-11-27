@@ -30,6 +30,7 @@ const data = [
 const Container = styled.div`
   height: calc(100vh - 80px);
   width: 100%;
+  border: solid;
   padding: 32px;
   overflow:auto;
   display: flex;

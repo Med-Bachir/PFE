@@ -30,6 +30,11 @@ const OrderContainer = styled.div`
   gap: 32px;
   contain: paint;
   overflow-y: auto;
+  @media (max-width: 768px) {
+    display: flex;
+    flex-direction: column;
+
+  }
 `;
 
 const Left = styled.div`
@@ -38,7 +43,11 @@ const Left = styled.div`
   display: flex;
   flex-direction: column;
   gap: 20px;
-  
+  @media (max-width: 768px) {
+    width: 100%;
+   
+
+  }
   
 `;
 
@@ -123,7 +132,11 @@ const Right = styled.div`
   display: flex;
   flex-direction: column;
   height: calc(100vh - 80px);
- 
+  @media (max-width: 768px) {
+    width: 100%;
+   
+
+  }
  
 `;
 
@@ -195,9 +208,9 @@ const navigate = useNavigate()
           <Options>
             <ProfileContainer>
               <Avatar
-                src="e"
+                src={user?.userimg == null ? "e" : user?.userimg }
                 alt={user?.username}
-                sx={{ width: 80, height: 80, bgcolor: "green" }}
+                sx={{ width: 70, height: 70, bgcolor: "green" }}
               />
               <ProfileInfoContainer>
                 <Name>{user?.username}</Name>

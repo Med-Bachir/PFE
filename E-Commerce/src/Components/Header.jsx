@@ -41,7 +41,8 @@ const HeaderContainer = styled.header`
   @media (max-width: 768px) {
     flex-direction: column;
     height: auto;
-    padding: 10px;
+    padding: 0;
+    padding-bottom: 20px;
   }
 `;
 
@@ -57,18 +58,14 @@ export const Center = styled.div`
 `;
 
 const Logo = styled.img`
-  width: 200px;
+  width: 300px;
 
   @media (max-width: 768px) {
-    width: 150px; /* Adjust logo size */
+    width: 300px; /* Adjust logo size */
+    margin-bottom: -20px;
   }
 `;
-const LogoText = styled.h1`
-  font-size: 20px;
-  font-weight: 500;
-  color: black;
-  font-style: italic;
-`;
+
 export const Left = styled.div`
   flex: 1;
   align-items: center;
@@ -79,6 +76,12 @@ export const Left = styled.div`
     justify-content: center;
   }
 `;
+const Pages = styled.div`
+display: flex;
+align-items: center;
+margin-bottom: 12px;
+gap: 16px;
+`
 export const Right = styled.div`
   flex: ${(props) =>
     props.user == null ? 3 : props.user?.userRole == "client" ? 3 : 2};
@@ -108,6 +111,12 @@ const Notifications = styled.div`
   top: 80px;
 
   transition: 200ms;
+  @media (max-width: 768px) {
+    top: 185px;
+    width: 100%;
+  right: ${(props) => (props.open ? "0" : "-100%")};
+
+  }
 `;
 const Text = styled.div`
   display: flex;
@@ -118,6 +127,7 @@ const Text = styled.div`
   &:hover {
     background-color: #c7efff28;
   }
+  
 `;
 const NotificationText = styled.div`
   font-size: 12px;
@@ -138,6 +148,26 @@ const Title = styled.span`
     font-size: 12px;
   }
 `;
+
+const Responsive = styled.div`
+display: none;
+align-items: center;
+
+@media (max-width: 768px) {
+  display: block;
+}
+
+` 
+const ResponsivePC = styled.div`
+display: flex;
+align-items: center;
+justify-content: flex-end;
+
+@media (max-width: 768px) {
+  display: none;
+}
+
+` 
 
 
 
@@ -206,6 +236,9 @@ const Header = () => {
     }
   };
 
+
+
+
   return (
     <>
       <HeaderContainer>
@@ -214,11 +247,57 @@ const Header = () => {
           <Link to={"/"}>
             <Left>
               <Logo src={logo} />
-              
+              {user !== null ? (
+              <Responsive>
+                <Badge 
+                  badgeContent={
+                    user?.userRole === "client" ? (
+                      <PersonIcon sx={{ fontSize: 14 }} />
+                    ) : (
+                      <StoreIcon sx={{ fontSize: 14 }} />
+                    )
+                  }
+                  color="success"
+                >
+                  {user?.userRole !== "client" ? (
+                    <Link to="/profile">
+                      <Avatar
+                        alt={user?.username}
+                        sx={{
+                          width: "35px",
+                          height: "35px",
+                          bgcolor: "#009f7f",
+                        }}
+                        src={user?.userimg || "e"}
+                      />
+                    </Link>
+                  ) : (
+                    <Link to="/Client">
+                      <Avatar
+                        alt={user?.username}
+                        sx={{
+                          width: "35px",
+                          height: "35px",
+                          bgcolor: "#eee",
+                        }}
+                        src={user?.userimg || "e"}
+                      />
+                    </Link>
+                  )}
+                </Badge>
+               
+              </Responsive>
+            ) : (
+              <>
+               
+              </>
+            )}
             </Left>
           </Link>
           <Center></Center>
           <Right user={user}>
+            <Pages>
+
             <Link style={{ color: "black", fontWeight: 400 }} to="/Shops">
               Shops
             </Link>
@@ -235,7 +314,7 @@ const Header = () => {
               aria-expanded={open ? "true" : undefined}
               onClick={handleClick}
               sx={{ color: "black" }}
-            >
+              >
               Pages <KeyboardArrowDownIcon />
             </Button>
             <Menu
@@ -246,11 +325,11 @@ const Header = () => {
               MenuListProps={{
                 "aria-labelledby": "basic-button",
               }}
-            >
+              >
               <Link
                 to="/Orders"
                 style={{ textDecoration: "none", color: "inherit" }}
-              >
+                >
                 <MenuItem onClick={handleClose}>My Orders</MenuItem>
               </Link>
               <MenuItem onClick={handleClose}>About Us</MenuItem>
@@ -260,9 +339,10 @@ const Header = () => {
                 <NotificationsActiveOutlinedIcon />
               </IconButton>
             </Badge>
+                </Pages>
             
             {user !== null ? (
-              <div style={{ display: "flex", alignItems: "center" }}>
+              <ResponsivePC>
                 <Badge
                   badgeContent={
                     user?.userRole === "client" ? (
@@ -314,7 +394,7 @@ const Header = () => {
                     Become a Seller
                   </Button>
                 )}
-              </div>
+              </ResponsivePC>
             ) : (
               <>
                 <Link to="/register">

@@ -3,6 +3,10 @@ import React, { useEffect, useState } from 'react'
 import { useSelector } from 'react-redux'
 import styled from 'styled-components'
 import newRequest from '../utils/newRequest'
+import me from "../Animation - 1716145973359.json"
+import Lottie from 'lottie-react'
+import { Link } from 'react-router-dom'
+import AlertMessage from './Alert'
 
 
 
@@ -82,36 +86,69 @@ padding: 0 0 0 16px;
 font-size: 14px;
 border-radius: 0;
 `
+const LottieContainer = styled.div`
+display: flex;
+align-items: center;
+justify-content: center;
+flex-direction: column;
+`;
 
 
 const WishList = () => {
   const user = useSelector((state) => state.user?.currentUser);
+  const [message, setMessage] = useState("");
+  const [type, setType] = useState("");
+  const [open, setOpen] = useState(false);
 
 
 
   const [wishes ,setWishes] = useState([]);
 
-
+  const getWishes = async () => {
+    try {
+      
+        const res = await newRequest.get(`/wish/${user?.idUSER}`);
+        setWishes(res.data);
+     
+    } catch (err) {
+      console.error("Error fetching users:", err);
+    }
+  };
 
     useEffect(() => {
-        const getWishes = async () => {
-          try {
-            
-              const res = await newRequest.get(`/wish/${user?.idUSER}`);
-              setWishes(res.data);
-           
-          } catch (err) {
-            console.error("Error fetching users:", err);
-          }
-        };
+      
         getWishes();
-      }, [user?.idUSER]);
-      console.log(wishes)
+      }, []);
+
+      const removeWish = async (id) => {
+        try {
+          const response = await newRequest.delete(
+            `wish/${user?.idUSER}/delete/${id}`
+          );
+          
+          if (response.status === 200) {
+            setMessage("Product removed successfully");
+            setType("success");
+            setOpen(true);
+            
+          } else {
+            setMessage("Failed to remove product!! Contact Us");
+            setType("error");
+            setOpen(true);
+          }
+        } catch (error) {
+          console.error("Error adding product:", error);
+        }  finally {
+          getWishes()
+        }
+      };
   return (
     <Container>
+      <AlertMessage open={open} setOpen={setOpen} message={message} type={type} />
+
         <Title>My WishList</Title>
         <List>
-          {wishes.map((item) => (
+          {wishes != '' ? wishes.map((item) => (
 
 <>
             <Product>
@@ -124,14 +161,24 @@ const WishList = () => {
                 <Info style={{marginLeft:'auto' , alignItems:'end'}}>
                     <Price><Current>${item.productprice - item.productprice * item.discount / 100},00 </Current><Old>${item.productprice},00</Old></Price>
                     <ButtonGroup>
+                      <Link to={`/cardproduct/${item.idPRODUCT}`}>
                         <Button style={{paddingRight:16 }} work='add'>Add to cart</Button>
-                        <Button style={{borderLeft:'1px dashed #a3a3a3' }} work='remove'>Remove</Button>
+                      </Link>
+                        <Button onClick={() => removeWish(item.idPRODUCT)} style={{borderLeft:'1px dashed #a3a3a3' }} work='remove'>Remove</Button>
                     </ButtonGroup>
                 </Info>
             </Product>
             <Divider />
 </>
-        ))}
+        ))
+      
+      :
+      <LottieContainer>
+          <Lottie  animationData={me} style={{ width:"40%"}} /> 
+          no product found
+          </LottieContainer>
+           
+      }
             
         </List>
       

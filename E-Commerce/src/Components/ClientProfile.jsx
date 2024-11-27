@@ -18,17 +18,24 @@ const Container = styled.div`
  position: relative;
   display: flex;
   flex-direction: column;
+
   
 `;
 const SettingContainer = styled.div`
  display: flex;
 gap: 32px;
+@media (max-width: 768px ){
+  flex-direction: column;
+  
+  gap: 0px;
+  }
 
 
 `;
 const Top = styled.div`
  display: flex;
 justify-content:space-between;
+
 
 `;
 const SettingGroup = styled.div`
@@ -44,6 +51,7 @@ const SettingGroup = styled.div`
 const SettingTitle = styled.span`
   font-size: 20px;
   font-weight: 500;
+  
 
 `;
 const ImageSetting = styled.div`
@@ -51,28 +59,48 @@ const ImageSetting = styled.div`
   display: flex;
   align-items: center;
   gap: 28px;
+
+  @media (max-width: 768px) {
+   flex-direction: column;
+  }
+
 `;
 const Options = styled.div`
   display: flex;
   flex-direction: column;
   gap: 12px;
+  
 `;
 
 const ButtonGroup = styled.div`
   display: flex;
   gap: 12px;
+  @media (max-width: 768px ){
+  flex-direction: column;
+  }
 `;
 const MyButton = styled.button`
   background-color: ${(props) => (props.type == "delete" ? "transparent" : "")};
   border: ${(props) => (props.type == "delete" ? "1.5px solid" : "")};
   color: green;
   font-size: 14px;
+  
 `;
 
 const Required = styled.span`
   font-size: 12px;
   color: #9f9f9f;
   font-weight: 300;
+  display: -webkit-box;
+  -webkit-line-clamp: 2; /* Limit to two lines */
+  -webkit-box-orient: vertical; /* Required for line clamping */
+  overflow: hidden; /* Hide overflow */
+  text-overflow: ellipsis; /* Add ellipsis at the end of the second line */
+  
+  @media (max-width: 768px) {
+    /* Add media query for mobile */
+    -webkit-line-clamp: 2; 
+  }
 `;
 const ProfileInfo = styled.div`
   display: flex;
