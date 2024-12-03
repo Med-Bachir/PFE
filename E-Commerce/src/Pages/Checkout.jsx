@@ -16,7 +16,7 @@ import DeleteOutlineTwoToneIcon from "@mui/icons-material/DeleteOutlineTwoTone";
 import { useDispatch, useSelector } from "react-redux";
 import newRequest from "../utils/newRequest";
 import AlertMessage from "../Components/Alert";
-import EmptyData from "../Components/EmptyData";
+import EmptyData from "../Components/Pending/EmptyData";
 import { useNavigate } from "react-router-dom";
 
 const Container = styled.div`

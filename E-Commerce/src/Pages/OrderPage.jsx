@@ -12,7 +12,7 @@ import WhereToVoteTwoToneIcon from "@mui/icons-material/WhereToVoteTwoTone";
 import LockTwoToneIcon from "@mui/icons-material/LockTwoTone";
 import { useSelector } from "react-redux";
 import newRequest from "../utils/newRequest";
-import EmptyData from "../Components/EmptyData";
+import EmptyData from "../Components/Pending/EmptyData";
 import { hovredText } from "../Colors";
 
 const Container = styled.div`

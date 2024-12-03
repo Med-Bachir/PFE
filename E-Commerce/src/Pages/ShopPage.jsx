@@ -6,7 +6,7 @@ import { Avatar, Divider } from '@mui/material'
 import InstagramIcon from '@mui/icons-material/Instagram';
 import newRequest from '../utils/newRequest'
 
-import me from "./../Animation - 1716145973359.json";
+import me from "./../assets/Lotties/Animation - 1716145973359.json";
 import Lottie from 'lottie-react'
 import { useSelector } from 'react-redux'
 

@@ -48,7 +48,7 @@ router.get("/all-stats", verifyTokenAndAdmin, async (req, res) => {
   try {
     const query = `
 WITH OwnerProducts AS (
-    SELECT p.idPRODUCT, p.productprice
+    SELECT p.idPRODUCT, p.productprice , (p.discount) /100 AS discount
     FROM ecommerce.orderitem oi
     JOIN ecommerce.product p ON oi.id_Product = p.idPRODUCT
     JOIN ecommerce.stock st ON p.idPRODUCT = st.id_Product
@@ -93,11 +93,11 @@ SELECT
      WHERE oi.id_Product IN (SELECT idPRODUCT FROM OwnerProducts) 
      AND o.progress = 'Arrived') AS ArrivedOrders,
 
-    (SELECT SUM(op.productprice) 
+    (SELECT SUM((op.productprice - op.productprice * op.discount)  * oi.qte) 
      FROM ecommerce.orderitem oi 
      JOIN ecommerce.order o ON oi.id_Order = o.idORDER
      JOIN OwnerProducts op ON oi.id_Product = op.idPRODUCT
-     WHERE o.progress = 'Arrived') AS TotalArrivedOrderValue
+     WHERE oi.status = 'Arrived') AS TotalArrivedOrderValue
 ;
 
 
@@ -106,7 +106,7 @@ SELECT
 
     connection.query(query, (err, results) => {
       if (err) {
-        res.status(500).json({ error: "Failed to fetch statistics." });
+        res.status(500).json({ error: "Failed to fetch statistics." + err });
         return;
       }
 

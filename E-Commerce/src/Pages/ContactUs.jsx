@@ -1,5 +1,4 @@
 //Import
-import Footer from "../Components/Footer";
 import { styled } from "styled-components";
 import Lottie from "react-lottie";
 import * as animationData from "../CtLottie.json";

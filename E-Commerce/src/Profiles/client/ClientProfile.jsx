@@ -5,8 +5,8 @@ import { Avatar, Button, Fab, IconButton, TextField, Tooltip } from "@mui/materi
 import { useSelector } from "react-redux";
 import SaveAsTwoToneIcon from '@mui/icons-material/SaveAsTwoTone';
 import { EditTwoTone } from "@ant-design/icons";
-import AlertMessage from "../Components/Alert";
-import newRequest from "../utils/newRequest";
+import AlertMessage from "../../Components/Alert";
+import newRequest from "../../utils/newRequest";
 import Cookies from 'js-cookie'; 
 import SaveAltTwoToneIcon from "@mui/icons-material/SaveAltTwoTone";
 
@@ -14,13 +14,12 @@ const Container = styled.div`
   
   width: 100%;
  
- padding: 32px;
+ 
  position: relative;
   display: flex;
   flex-direction: column;
 
-  overflow-y: auto;
-  height: calc(100vh - 60px);
+  
 `;
 const SettingContainer = styled.div`
  display: flex;
@@ -142,7 +141,7 @@ const UploadButton = styled.label`
   transition: 200ms;
 `;
 
-const Settings = () => {
+const ClientProfile = () => {
   const user = useSelector((state) => state.user?.currentUser);
   const [newUser, setNewUser] = React.useState(user || {
     firstname:'',
@@ -227,7 +226,8 @@ email:""
       Authorization: `Bearer ${token}`
     };
 
-    newRequest.put(`/users/${user?.idUSER}`, newUser, { headers })
+    newRequest
+      .put(`/users/${user?.idUSER}`, newUser, { headers })
       .then((res) => {
         if (res.status === 200) {
           setMessage("Update Saved");
@@ -318,4 +318,4 @@ email:""
   );
 };
 
-export default Settings;
+export default ClientProfile;

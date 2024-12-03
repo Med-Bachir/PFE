@@ -156,7 +156,7 @@ router.get('/seller/:sellerId/monthly-revenue', verifyTokenAndAuthorizationA_S, 
       LEFT JOIN PRODUCT p ON oi.id_Product = p.idPRODUCT
       LEFT JOIN STOCK s ON p.idPRODUCT = s.id_Product
       LEFT JOIN SHOP sh ON s.id_Shop = sh.idSHOP
-      WHERE sh.id_Owner = ? AND o.progress = 'Arrived' OR sh.id_Owner IS NULL
+      WHERE sh.id_Owner = ? AND oi.status = 'Arrived' OR sh.id_Owner IS NULL
       GROUP BY m.month
       ORDER BY m.month;
       `;

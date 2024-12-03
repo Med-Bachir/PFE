@@ -1,4 +1,4 @@
-const {verifyTokenAndAuthorizationA_C, verifyTokenAndAdminandSeller, verifyToken,verifyTokenAndAuthorization, verifyTokenAndAdmin } = require("./verifytoken");
+const {verifyTokenAndAuthorizationA_C, verifyTokenAndAdminandSeller, verifyToken,verifyTokenAndAuthorization, verifyTokenAndAdmin, verifyTokenAndAuthorizationA_S } = require("./verifytoken");
 const connection = require('../db');
 const router = require("express").Router();
 const { v2: cloudinary } = require("cloudinary");
@@ -57,7 +57,7 @@ router.get("/", verifyTokenAndAdminandSeller, async (req, res, next) => {
 
 // UPDATE CLIENT 
 
-router.put("/:id", verifyTokenAndAuthorizationA_C, async (req, res) => {
+router.put("/:id", verifyTokenAndAuthorizationA_S, async (req, res) => {
   try {
       const userId = req.params.id;
       const { firstname, lastname, username, email, userimg } = req.body;
@@ -65,9 +65,16 @@ router.put("/:id", verifyTokenAndAuthorizationA_C, async (req, res) => {
       // Upload the image to Cloudinary
       const uniquePublicId = `Profile_${uuidv4()}`;
       console.log("User image:", userimg); // Add this to debug
-      const uploadResult = await cloudinary.uploader.upload(userimg, {
-        public_id: uniquePublicId,
-      });
+      try {
+        const uploadResult = await cloudinary.uploader.upload(userimg, {
+            public_id: uniquePublicId,
+        });
+        console.log("Upload successful:", uploadResult);
+    } catch (uploadError) {
+        console.error("Cloudinary upload error:", uploadError);
+        return res.status(500).json({ error: "Failed to upload image to Cloudinary." });
+    }
+    
 
       // Extract the URL of the uploaded image
       const imageUrl = uploadResult.secure_url;

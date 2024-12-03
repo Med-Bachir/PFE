@@ -22,7 +22,7 @@ import PersonIcon from "@mui/icons-material/Person";
 import newRequest from "../utils/newRequest";
 import RemoveRedEyeTwoToneIcon from "@mui/icons-material/RemoveRedEyeTwoTone";
 import { notifyTotal } from "../redux/notifications";
-import Cart from "./Cart";
+import Cart from "../features/Cart/Cart";
 
 const PagesContainer = styled.div``;
 const HeaderContainer = styled.header`
@@ -71,7 +71,6 @@ export const Left = styled.div`
   align-items: center;
   display: flex;
   justify-content: flex-start;
-
   @media (max-width: 768px) {
     justify-content: center;
   }
@@ -79,16 +78,15 @@ export const Left = styled.div`
 const Pages = styled.div`
 display: flex;
 align-items: center;
-margin-bottom: 12px;
 gap: 16px;
 `
 export const Right = styled.div`
   flex: ${(props) =>
     props.user == null ? 3 : props.user?.userRole == "client" ? 3 : 2};
   display: flex;
-  justify-content: space-between;
+  justify-content: end;
   align-items: center;
-
+  gap: 20px;
   @media (max-width: 768px) {
     flex-direction: column;
     gap: 10px;

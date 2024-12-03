@@ -1,7 +1,7 @@
 
 import './index.css'
-import Register from './Pages/Register'
-import Login from './Pages/Login'
+import Register from './features/Auth/Register'
+import Login from './features/Auth/Login'
 
 import {
   createBrowserRouter,
@@ -15,38 +15,38 @@ import {
 
 
 
-import AdminPf from './Pages/Profiles/admin/AdminPf';
-import Drawer from './Components/Drawer';
-import ShopList from './Components/ShopList';
-import Shipping from './Components/Shipping';
-import RefundsRepport from './Components/RefundsRepport';
-import OwnerPf from './Pages/Profiles/shop/OwnerPf';
-import Products from './Components/Products';
-import Store from './Pages/Profiles/shop/Store';
-import CategoryList from './Components/CategoryList';
-import UsersList from './Components/UsersList';
-import Banned from './Components/Banned';
+import AdminPf from './Profiles/admin/Dashboard';
+import Drawer from './Components/drawer/Drawer';
+import ShopList from './Profiles/admin/shops manager/ShopList';
+import Shipping from './Profiles/admin/categories manager/Shipping';
+
+import OwnerPf from './Profiles/owner/Dashboard';
+import Products from './Profiles/owner/product manager/Products';
+import Store from './Profiles/owner/shop manager/Store';
+import CategoryList from './Profiles/admin/categories manager/CategoryList';
+import UsersList from './Profiles/admin/user manager/UsersList';
+
 import Settings from './Components/Settings';
 import Shops from './Pages/Shops';
 import ShopPage from './Pages/ShopPage';
 import OrderPage from './Pages/OrderPage';
-import CreatShop from './Components/CreatShop';
+import CreatShop from './Profiles/owner/shop manager/CreatShop';
 import Header from './Components/Header';
-import AddProduct from './Components/AddProduct';
+import AddProduct from './Profiles/owner/product manager/AddProduct';
 import { useSelector } from 'react-redux';
-import OwnersList from './Components/ownerList';
+import OwnersList from './Profiles/admin/user manager/ownerList';
 import Checkout from './Pages/Checkout';
-import ClientPf from './Pages/ClientPf';
-import  ClientProfile  from './Components/ClientProfile';
-import WishList from './Components/WishList';
+import ClientPf from './Profiles/client/Dashboard';
+import  ClientProfile  from './Profiles/client/ClientProfile';
+import WishList from './Profiles/client/WishList';
 import Compare from './Pages/Compare';
-import Home from './Pages/productFolder/PHomepage';
-import CardProduct from './Pages/productFolder/CardProduct';
+import Home from './Pages/Home';
+import CardProduct from './features/Products/CardProduct';
 import ContactUs from './Pages/ContactUs';
-import MyOrder from './Components/Orders';
-import Stock from './Components/Stock';
+import MyOrder from './Profiles/client/Orders';
+import Stock from './Profiles/owner/product manager/Stock';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import AddCategory from './Components/AddCategory';
+import AddCategory from './Profiles/admin/categories manager/AddCategory';
 
 
 
@@ -167,10 +167,7 @@ function App() {
           path: "order/:id",
           element: <MyOrder />,
         },
-        {
-          path: "repports",
-          element: <RefundsRepport />,
-        },
+       
         {
           path: "products",
           element: <Products />,
@@ -195,10 +192,7 @@ function App() {
           path: "owners",
           element: <OwnersList />,
         },
-        {
-          path: "banned",
-          element: <Banned />,
-        },
+        
         {
           path: "settings/:id",
           element: <Settings />,

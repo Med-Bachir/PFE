@@ -187,6 +187,7 @@ router.get(
       // Query to fetch all products associated with the specified seller
       const getProductsQuery = `
           SELECT
+          distinct
           p.idPRODUCT,
            p.productname ,
           p.productimage ,
@@ -212,7 +213,7 @@ router.get(
            p.productname ,
           p.productimage ,
           p.productprice ,
-          p.discount , c.categoryname , sh.shopname , su.name , t.name ,r.rate , s.qte ,p.attributes ;
+          p.discount , c.categoryname , sh.shopname , su.name , t.name  , s.qte ,p.attributes ;
       `;
       const getProductsValues = [sellerId];
 
