@@ -344,7 +344,7 @@ const OwnerPf = () => {
             <ItemIcon src="https://img.icons8.com/arcade/50/money-transfer.png" />
             <ItemInfo>
               <ItemTitle>Taxes</ItemTitle>
-              <ItemStatic>$ 0</ItemStatic>
+              <ItemStatic>$ {stats.subs == 'Monthly' ? '40.00' : '400.00'}</ItemStatic>
             </ItemInfo>
           </Item>
           <Item color={`blue`}>

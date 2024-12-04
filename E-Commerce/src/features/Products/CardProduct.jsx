@@ -5,9 +5,8 @@ import RemoveIcon from "@mui/icons-material/Remove";
 import FavoriteBorderIcon from "@mui/icons-material/FavoriteBorder";
 import newRequest from "../../utils/newRequest.js";
 import { Link, useLocation } from "react-router-dom";
-import FilterProduct from "../../Pages/productFolder/FilterProduct.jsx";
-import { useDispatch, useSelector } from "react-redux";
-import { fetchCart} from "../../redux/cartRedux.js";
+import {  useSelector } from "react-redux";
+
 import { Rating } from "@mui/material";
 import { Avatar } from "antd";
 import AlertMessage from "../../Components/Alert.jsx";

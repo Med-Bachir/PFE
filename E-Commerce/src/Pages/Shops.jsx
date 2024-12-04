@@ -33,28 +33,23 @@ font-size:24px;
 font-weight: 600;
 padding: 0 80px;
 margin: 24px 0;
-
 @media (max-width: 768px) {
  padding: 0px;
 
 }
 `;
 const AllShops = styled.div`
-
 display: flex;
 flex-wrap: wrap;
 flex-direction: row;
 justify-content: start;
 gap:20px;
 padding: 0 80px 32px 80px;
-
-
 @media (max-width: 768px) {
   flex-direction: column;
   padding: 0 0 32px 0;
 
 }
-
 `;
 const Shop = styled.div`
 
@@ -66,6 +61,7 @@ border-radius: 8px;
 gap: 20px;
 flex:1;
 min-width: 32%;
+max-width: 32%;
 
 
 
@@ -94,7 +90,6 @@ font-weight: 300;
   justify-content: center;
   align-items: center;
 }
-
 `;
 
 const Shops = () => {

@@ -1,7 +1,7 @@
 
 
 
-import Product from "../../Components/Product.jsx";
+import Product from "./Product.jsx";
 import styled from "styled-components";
 import { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
@@ -105,6 +105,7 @@ const Products = () => {
             productname={item.productname}
             productprice={item.productprice}
             discount={item.discount}
+            rate={item.rate}
           />
         ))
       ) : (

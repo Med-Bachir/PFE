@@ -9,6 +9,7 @@ import newRequest from '../utils/newRequest'
 import me from "./../assets/Lotties/Animation - 1716145973359.json";
 import Lottie from 'lottie-react'
 import { useSelector } from 'react-redux'
+import ShopProduct from '../Components/ShopProduct'
 
 
 
@@ -105,58 +106,6 @@ cursor: ${props => props.role === 'admin' || props.role == 'seller' ? 'not-allow
 filter: ${props => props.role === 'admin' || props.role == 'seller' ? "brightness(70%)" : ""} ;
 `
 
-
-const Product = styled.div`
-
-margin-bottom:16px;
-background-color: white;
-display: flex;
-flex-direction: column;
-align-items: center;
-border-radius:4px;
-padding: 16px;
-contain: paint;
-min-height: 400px;
-
-`
-const ProductImage = styled.img`
-height: 350px;
-width: 100%;
-object-fit: contain;
-
-`
-const Name = styled.span`
-margin-top: auto;
-font-size: 15px;
-font-weight: 500;
-`
-const Price = styled.span`
-margin-top: 16px;
-font-size: 15px;
-font-weight: 300;
-`
-const OldPrice = styled.span`
-margin-top: 16px;
-font-size: 13px;
-font-weight: 300;
-text-decoration: line-through;
-color: #c1c1c1;
-`
-const CurrentPrice = styled.span`
-margin-top: 16px;
-font-size: 15px;
-font-weight: 300;
-`
-
-const Discount = styled.div`
-background-color:#EAB12D;
-position: absolute;
-color: white;
-font-size: 12px;
-padding: 2px 10px;
-border-radius: 8px;
-right: 20px;
-`
 
 
 const Top = styled.div`
@@ -378,23 +327,14 @@ const ShopPage = () => {
 <ShopProducts role={user?.userRole} >
  {products.map((item) => (
     
-<Link 
+<Link key={item.idPRODUCT}
   style={user?.userRole === 'admin' || user?.userRole === 'seller' ? notAllowed : {cursor:''}} 
   to={user?.userRole === 'client' ? `/cardproduct/${item.idPRODUCT}` : undefined}
 >
  
+<ShopProduct name={item?.productname} id={item?.idPRODUCT} price={item?.productprice} discount={item?.discount} image={item?.productimage} rate={item.rate} />
 
-
-    <Product>
-        {item.discount == 0 ? '' : <Discount>{item.discount}%</Discount>}
-    <ProductImage src={item.productimage} />
-    <Name>{item.productname}</Name>
-    <Price> <CurrentPrice> ${item.productprice - item.productprice * item.discount / 100} </CurrentPrice>{item.discount == 0 ? '' : <OldPrice>${item.productprice}</OldPrice>} </Price>
-<Link to={`/cardproduct/${item.idPRODUCT}`}>
-    <Button style={{padding:'8px 16px' , marginTop:8 , backgroundColor:'#009f7f' ,color:'white' , fontWeight:500 , position:'absolute' , bottom:16, right:20}}>+</Button>
-</Link>
-
-</Product>
+    
     </Link>
 ))}
 </ShopProducts>

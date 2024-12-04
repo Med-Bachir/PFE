@@ -3,6 +3,7 @@ import AddIcon from "@mui/icons-material/Add";
 import { Link } from "react-router-dom";
 import { Skeleton } from "@mui/material";
 import { useEffect, useState } from "react";
+import RadioGroupRating from "../../Components/rating";
 
 const Container = styled.div`
   display: flex;
@@ -50,7 +51,7 @@ const Title = styled.p`
   max-width: 350px;
   contain: paint;
   
-  margin-top: auto;
+
   white-space: nowrap;        /* Prevents text from wrapping to a new line */
   overflow: hidden;           /* Hides overflowed text */
   text-overflow: ellipsis;    /* Adds ellipsis (...) to indicate overflow */
@@ -108,7 +109,14 @@ const AddToCart = styled.span`
   }
 `;
 
-const Product = ({ id, productname, productprice, productimage, discount }) => {
+const RateContainer = styled.div`
+display: flex;
+align-items: center;
+justify-content: space-between;
+`
+const Rate = styled.div
+
+const Product = ({ id, productname, productprice, productimage, discount , rate }) => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -172,7 +180,12 @@ const Product = ({ id, productname, productprice, productimage, discount }) => {
           </ImageContainer>
 
           <InfoContainer>
+            <RateContainer>
+
             <Title>{productname}</Title>
+            <RadioGroupRating rate={rate} />
+            </RateContainer>
+            
 
             <PriceContainer>
               <Price discount={discount}>$ {productprice.toFixed(2)}</Price>

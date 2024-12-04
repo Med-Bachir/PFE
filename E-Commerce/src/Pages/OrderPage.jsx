@@ -287,13 +287,13 @@ const TotalName = styled.span`
 const TypePrice = styled.div``;
 const Processing = styled.div`
   display: flex;
-  flex-direction: column;
+  flex-direction: flex;
   align-items: center;
   padding: 20px;
 
  
   @media (max-width: 768px) {
-   
+   flex-direction: column;
    padding: 0;
    justify-content: center;
   
@@ -303,13 +303,16 @@ const StepContainer = styled.div`
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
+  
+  height: 100px;
+  
 
   gap: 8px;
   @media (max-width: 768px) {
     flex-direction: row;
     justify-content: center;
     width: 100%;
+    height: 50px;
   }
 `;
 
@@ -331,6 +334,7 @@ const StepLabel = styled.label`
   font-size: 12px;
   text-align: center;
   max-width: 60px;
+  
 
 
   display: flex;
@@ -347,7 +351,6 @@ const Span = styled.span`
     props.status == "complete" || props.status == "in progress"
       ? "#90efa892"
       : "#90EFA733"};
-
   height: 100%;
   border-radius: 50%;
   width: 100%;
@@ -360,7 +363,7 @@ const Span = styled.span`
 const Connector = styled.progress`
   height: 4px;
   border-radius: 1px;
-  margin: 25px 0;
+ margin-bottom: 45px;
   width: 20%;
   display: ${(props) => (props.step ? "none" : "")};
   &::-webkit-progress-bar {

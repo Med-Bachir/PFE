@@ -494,8 +494,8 @@ const AdminPf = () => {
         <Statics>
           <ItemContainer color='red' title='My Shops' icon="https://img.icons8.com/arcade/50/shop.png" value={stats.myshop} />
           <ItemContainer color='green' title='Order Incom' icon="https://img.icons8.com/dusk/64/purchase-order.png" value={`$ ${stats?.TotalArrivedOrderValue == null ? 0 : stats?.TotalArrivedOrderValue.toFixed(2) }`} />
-          <ItemContainer color='blue' title='Tax Income' icon="https://img.icons8.com/arcade/50/money-transfer.png" value={`$ ${stats?.TotalTxValue == null ? 0 : stats?.TotalTaxValue.toFixed(2) }`} />
-          <ItemContainer color='teal' title='Total Income' icon="https://img.icons8.com/color/48/man-holding-bags-with-money-skin-type-3.png" value={`$ ${(stats?.TotalArrivedOrderValue + 0).toFixed(2)  }`} />
+          <ItemContainer color='blue' title='Tax Income' icon="https://img.icons8.com/arcade/50/money-transfer.png" value={`$ ${stats?.totalMonthSubs * 40 + stats?.totalAnnualSubs * 400 == 0 ? 0 : (stats?.totalMonthSubs * 40 + stats?.totalAnnualSubs * 400 ).toFixed(2) }`} />
+          <ItemContainer color='teal' title='Total Income' icon="https://img.icons8.com/color/48/man-holding-bags-with-money-skin-type-3.png" value={`$ ${(stats?.TotalArrivedOrderValue + stats?.totalMonthSubs * 40 + stats?.totalAnnualSubs * 400 ).toFixed(2)  }`} />
         </Statics> 
       </StaticContainer>
 
