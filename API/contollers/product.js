@@ -154,10 +154,13 @@ router.get("/shop-products/:shopId", async (req, res) => {
 
     // Query to fetch all products associated with the specified shop
     const getProductsQuery = `
-          SELECT p.*
+          SELECT p.idPRODUCT , p.productname , p.discount , p.productprice , p.productimage , AVG(r.rate) AS rate
           FROM PRODUCT p
           JOIN STOCK s ON p.idPRODUCT = s.id_Product
-          WHERE s.id_Shop = ?;
+          LEFT JOIN reviews r ON r.id_Product = p.idPRODUCT
+          WHERE s.id_Shop = ?
+          GROUP BY p.idPRODUCT , p.productname , p.discount , p.productprice , p.productimage
+          ;
       `;
     const getProductsValues = [shopId];
 
@@ -561,7 +564,9 @@ router.get("/", async (req, res) => {
     // Fetch all products with their corresponding category names
     const getAllProductsWithCategoriesQuery = `
               SELECT 
-                  * from product
+                  p.idPRODUCT , p.productname , p.productprice , p.productimage , p.discount , AVG(r.rate) AS rate from product p 
+                  LEFT JOIN reviews r ON r.id_Product = p.idPRODUCT
+                  GROUP BY p.idPRODUCT , p.productname , p.productprice , p.productimage , p.discount ORDER BY AVG(r.rate) desc
                
           `;
 

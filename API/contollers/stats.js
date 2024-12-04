@@ -58,6 +58,9 @@ WITH OwnerProducts AS (
 )
 
 SELECT 
+    (SELECT COUNT(*) FROM ecommerce.user WHERE subscription = 'Monthly') AS totalMonthSubs,
+    (SELECT COUNT(*) FROM ecommerce.user WHERE subscription = 'Annual') AS totalAnnualSubs,
+
     (SELECT COUNT(*) FROM ecommerce.user WHERE userRole = 'seller') AS totalOwners,
     (SELECT COUNT(*) FROM ecommerce.user WHERE userRole != 'admin') AS totalUsers,
     (SELECT COUNT(*) FROM ecommerce.user WHERE userRole = 'client') AS totalClients,
@@ -328,6 +331,9 @@ router.get(
         )
         
         SELECT 
+            (SELECT subscription from user where idUSER = ${connection.escape(
+              sellerId
+            )}  ) AS subs ,
             (SELECT COUNT(*) 
              FROM ecommerce.stock s 
              JOIN ecommerce.shop sh ON s.id_Shop = sh.idSHOP 
