@@ -1,49 +1,53 @@
 import * as React from "react";
 import styled from "styled-components";
 
-import { Avatar, Button, Fab, IconButton, TextField, Tooltip } from "@mui/material";
+import {
+  Avatar,
+  Button,
+  Fab,
+  IconButton,
+  TextField,
+  Tooltip,
+} from "@mui/material";
 import { useSelector } from "react-redux";
-import SaveAsTwoToneIcon from '@mui/icons-material/SaveAsTwoTone';
+import SaveAsTwoToneIcon from "@mui/icons-material/SaveAsTwoTone";
 import { EditTwoTone } from "@ant-design/icons";
 import AlertMessage from "../Components/Alert";
 import newRequest from "../utils/newRequest";
-import Cookies from 'js-cookie'; 
+import Cookies from "js-cookie";
 import SaveAltTwoToneIcon from "@mui/icons-material/SaveAltTwoTone";
+import { colorAccentDarkTransparent, colorAccentLight, colorAccentMain, colorAccentMediumTransparent, colorAccentSoft, colorAccentSub, colorAccentSubDark, colorBackgroundBlack, colorBackgroundGray, colorPrimaryBlack, darkMain, lightMain, main, medMain, primaryTextColor, whiteTextColor } from "../Colors";
 
 const Container = styled.div`
-  
   width: 100%;
- 
- padding: 32px;
- position: relative;
+  padding: 32px;
+  position: relative;
   display: flex;
   flex-direction: column;
-
   overflow-y: auto;
   height: calc(100vh - 60px);
+  color: ${props => props.theme == "light" ? primaryTextColor : whiteTextColor};
+  @media (max-width: 768px) {
+    padding: 12px;
+  }
 `;
 const SettingContainer = styled.div`
- display: flex;
-gap: 32px;
-@media (max-width: 768px ){
-  flex-direction: column;
-  
-  gap: 0px;
+  display: flex;
+  gap: 32px;
+  @media (max-width: 768px) {
+    flex-direction: column;
+
+    gap: 0px;
   }
-
-
 `;
 const Top = styled.div`
- display: flex;
-justify-content:space-between;
-
-
+  display: flex;
+  justify-content: space-between;
 `;
 const SettingGroup = styled.div`
   padding: 32px;
   border-radius: 8px;
-  background-color: white;
-  
+  background-color: ${props => props.theme == "light" ? whiteTextColor  : colorPrimaryBlack};
   margin-bottom: 32px;
   flex: 1;
   display: flex;
@@ -52,8 +56,6 @@ const SettingGroup = styled.div`
 const SettingTitle = styled.span`
   font-size: 20px;
   font-weight: 500;
-  
-
 `;
 const ImageSetting = styled.div`
   padding: 32px 0;
@@ -62,30 +64,28 @@ const ImageSetting = styled.div`
   gap: 28px;
 
   @media (max-width: 768px) {
-   flex-direction: column;
+    flex-direction: column;
   }
-
 `;
 const Options = styled.div`
   display: flex;
   flex-direction: column;
   gap: 12px;
-  
 `;
 
 const ButtonGroup = styled.div`
   display: flex;
   gap: 12px;
-  @media (max-width: 768px ){
-  flex-direction: column;
+  @media (max-width: 768px) {
+    flex-direction: column;
   }
 `;
 const MyButton = styled.button`
-  background-color: ${(props) => (props.type == "delete" ? "transparent" : "")};
+  background-color: ${(props) => (props.type == "delete" ? "transparent" : props.theme == "light" ? "" : colorAccentDarkTransparent)};
   border: ${(props) => (props.type == "delete" ? "1.5px solid" : "")};
-  color: green;
+  color: ${props => props.theme == "light" ? main : colorAccentSub};
+
   font-size: 14px;
-  
 `;
 
 const Required = styled.span`
@@ -97,10 +97,10 @@ const Required = styled.span`
   -webkit-box-orient: vertical; /* Required for line clamping */
   overflow: hidden; /* Hide overflow */
   text-overflow: ellipsis; /* Add ellipsis at the end of the second line */
-  
+
   @media (max-width: 768px) {
     /* Add media query for mobile */
-    -webkit-line-clamp: 2; 
+    -webkit-line-clamp: 2;
   }
 `;
 const ProfileInfo = styled.div`
@@ -119,15 +119,21 @@ const Label = styled.span``;
 const Input = styled.input`
   padding: 12px;
   border-radius: 4px;
-  border: 1px solid #e0e0e0;
+  border: 1px solid ${props => props.theme == "light" ? "#e0e0e0" : colorBackgroundGray } ;
   font-size: 16px;
+  background-color: ${props => props.theme == "light" ? "" : props.edit ? colorAccentLight : colorAccentDarkTransparent};
+  cursor: ${props => props.edit ? 'text': 'not-allowed' };
+  color: ${props => props.theme == "light" ? colorPrimaryBlack : whiteTextColor };
+  
+
 `;
 const HiddenInput = styled.input`
   display: none;
 `;
 const UploadButton = styled.label`
-  background-color: #f8f8f8;
-  color: green;
+  background-color: ${props => props.theme == "light" ? "#f8f8f8 ": colorAccentDarkTransparent };
+  color: ${props => props.theme == "light" ? main : colorAccentSub};
+  
   font-size: 14px;
   padding: 10px 20px;
   border-radius: 4px;
@@ -137,75 +143,71 @@ const UploadButton = styled.label`
   justify-content: center;
 
   &:hover {
-    background-color: #e0e0e0;
+    background-color: ${props => props.theme == "light" ? "#e0e0e0":  colorBackgroundBlack};
+    transform: translateY(2px);
   }
   transition: 200ms;
 `;
 
 const Settings = () => {
   const user = useSelector((state) => state.user?.currentUser);
-  const [newUser, setNewUser] = React.useState(user || {
-    firstname:'',
-lastname:"",
-username:"",
-email:""
-  });
-  const token = Cookies.get('accessToken');
-  console.log(token)
-  
+  const theme = useSelector((state) => state.theme.mode);
+  const [newUser, setNewUser] = React.useState(
+    user || {
+      firstname: "",
+      lastname: "",
+      username: "",
+      email: "",
+    }
+  );
+  const token = Cookies.get("accessToken");
+  console.log(token);
+
   const [message, setMessage] = React.useState("");
   const [type, setType] = React.useState("");
   const [open, setOpen] = React.useState(false);
   const [edit, setEdit] = React.useState();
   const [profileImage, setProfileImage] = React.useState(null);
-  console.log(newUser)
-  
+  console.log(newUser);
+
   const handleChange = (e) => {
+    e.preventDefault();
+    const { name, value, files } = e.target;
 
-
-    e.preventDefault()
-  const { name, value, files } = e.target;
-
-
- 
-
-  if (name === 'userimg' && files.length > 0) {
-    setProfileImage(files[0]);
-    const reader = new FileReader();
-    reader.onload = (event) => {
-      setNewUser({...user  , userimg : files[0].name });
-    };
-    reader.readAsDataURL(files[0]); // Convert blob URL to data URL
-  } else {
-    setNewUser((prev) => ({ ...prev, [name]: value }));
-  }
-};
+    if (name === "userimg" && files.length > 0) {
+      setProfileImage(files[0]);
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        setNewUser({ ...user, userimg: files[0].name });
+      };
+      reader.readAsDataURL(files[0]); // Convert blob URL to data URL
+    } else {
+      setNewUser((prev) => ({ ...prev, [name]: value }));
+    }
+  };
 
   const data = [
     {
       Label: "First Name",
-      name:"firstname",
+      name: "firstname",
       value: newUser?.firstname,
     },
     {
       Label: "Last Name",
-      name:"lastname",
+      name: "lastname",
       value: newUser?.lastname,
     },
     {
       Label: "Username",
-      name:"username",
+      name: "username",
       value: newUser?.username,
     },
     {
       Label: "Email",
-      name:"email",
+      name: "email",
       value: newUser?.email,
     },
-    
   ];
-  
-
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -217,17 +219,18 @@ email:""
 
     const formData = new FormData();
     if (profileImage) {
-      formData.append('userimg', profileImage);
+      formData.append("userimg", profileImage);
     }
-    Object.keys(newUser).forEach(key => {
+    Object.keys(newUser).forEach((key) => {
       formData.append(key, newUser[key]);
     });
 
     const headers = {
-      Authorization: `Bearer ${token}`
+      Authorization: `Bearer ${token}`,
     };
 
-    newRequest.put(`/users/${user?.idUSER}`, newUser, { headers })
+    newRequest
+      .put(`/users/${user?.idUSER}`, newUser, { headers })
       .then((res) => {
         if (res.status === 200) {
           setMessage("Update Saved");
@@ -245,32 +248,46 @@ email:""
           setType("error");
           setOpen(true);
         }
-      }).finally(() => {
-        setEdit(false)
-
       })
-
-      
+      .finally(() => {
+        setEdit(false);
+      });
   };
 
-  
-  
   return (
-    <Container>
-      <AlertMessage open={open} setOpen={setOpen} message={message} type={type} />
-      
-      <SettingGroup>
-       <Top>
-        <SettingTitle>Profile Details</SettingTitle>
-        <IconButton onClick={() => setEdit(!edit)}><EditTwoTone/></IconButton>
-       </Top>
+    <Container theme={theme}>
+      <AlertMessage
+        open={open}
+        setOpen={setOpen}
+        message={message}
+        type={type}
+      />
+
+      <SettingGroup theme={theme}>
+        <Top>
+          <SettingTitle>Profile Details</SettingTitle>
+          <IconButton onClick={() => setEdit(!edit)}>
+            <EditTwoTone />
+          </IconButton>
+        </Top>
         <ImageSetting>
-          <Avatar sx={{ width: 80, height: 80 ,bgcolor:'#eeeeee89' }}  src={user?.userimg == null ? 'e' : user?.userimg} alt={user?.username} />
+          <Avatar
+            sx={{ width: 80, height: 80, bgcolor: theme == "light" ? "#eeeeee89" : colorAccentDarkTransparent }}
+            src={user?.userimg == null ? "e" : user?.userimg}
+            alt={user?.username}
+          />
           <Options>
             <ButtonGroup>
-            <HiddenInput type="file" id="file-upload" name="userimg" onChange={handleChange} />
-              <UploadButton htmlFor="file-upload">Upload Profile Image</UploadButton>
-              <MyButton type="delete">Delete</MyButton>
+              <HiddenInput
+                type="file"
+                id="file-upload"
+                name="userimg"
+                onChange={handleChange}
+              />
+              <UploadButton theme={theme} htmlFor="file-upload">
+                Upload Profile Image
+              </UploadButton>
+              <MyButton theme={theme} type="delete">Delete</MyButton>
             </ButtonGroup>
             <Required>
               *Image size should be at least 320px big,and less then 500kb .
@@ -282,38 +299,46 @@ email:""
           {data.map((item) => (
             <Information>
               <Label>{item.Label}</Label>
-              
-              <Input  name={item.name} placeholder={edit ? '' : item.value} value={edit ? item.value : item.value} onChange={handleChange} disabled={edit ? false : true}  />
 
+              <Input 
+              theme={theme}
+                name={item.name}
+                placeholder={edit ? "" : item.value}
+                value={edit ? item.value : item.value}
+                onChange={handleChange}
+                disabled={edit ? false : true}
+                edit={edit}
+              />
             </Information>
           ))}
         </ProfileInfo>
         <Button
-            color="success"
-            variant="contained"
-            sx={{width : 200}}
-            startIcon={<SaveAltTwoToneIcon />}
-            onClick={handleSubmit}
-          >
-            Save
-          </Button>
-        
+          color="success"
+          variant="contained"
+          sx={{ width: 200 , color: theme == "light" ? whiteTextColor : colorAccentMain , bgcolor: theme == "light" ? main : colorAccentMediumTransparent , "&:hover" : {bgcolor: theme == "light" ? lightMain  : colorAccentDarkTransparent , color : theme == "light" ? main  : ""}  }}
+          startIcon={<SaveAltTwoToneIcon />}
+          onClick={handleSubmit}
+        >
+          Save
+        </Button>
       </SettingGroup>
-      
-      <SettingContainer>
 
-      <SettingGroup style={{gap:16}} >
-        <SettingTitle >Change Password</SettingTitle>
-        <Required>Change Password Only If You Feel Unsafe</Required>
-        <MyButton style={{padding:'12px 0 '}}>Change Your Password</MyButton>
-      </SettingGroup>
-      <SettingGroup style={{gap:16}}>
-      <SettingTitle >Delete Account</SettingTitle>
-        <Required>If You Deleted You Account It Will Not Restore</Required>
-        <MyButton type="delete" style={{padding:'12px 0 '}}>Delete Account</MyButton>
-      </SettingGroup>
+      <SettingContainer>
+        <SettingGroup theme={theme} style={{ gap: 16 }}>
+          <SettingTitle>Change Password</SettingTitle>
+          <Required>Change Password Only If You Feel Unsafe</Required>
+          <MyButton theme={theme} style={{ padding: "12px 0 " }}>
+            Change Your Password
+          </MyButton>
+        </SettingGroup>
+        <SettingGroup theme={theme} style={{ gap: 16 }}>
+          <SettingTitle>Delete Account</SettingTitle>
+          <Required>If You Deleted You Account It Will Not Restore</Required>
+          <MyButton theme={theme} type="delete" style={{ padding: "12px 0 " }}>
+            Delete Account
+          </MyButton>
+        </SettingGroup>
       </SettingContainer>
-      
     </Container>
   );
 };

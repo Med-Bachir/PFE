@@ -8,6 +8,7 @@ import CloudUploadTwoTone from '@mui/icons-material/CloudUploadTwoTone';
 import { CircularProgress, Tooltip } from '@mui/material';
 import { useSelector } from 'react-redux';
 import newRequest from '../../../utils/newRequest';
+import { colorAccentDarkTransparent, colorBackgroundBlack, colorPrimaryBlack, grayBackground, main, primaryTextColor, whiteTextColor } from '../../../Colors';
 
 const Container = styled.div`
   height: calc(100vh - 80px);
@@ -16,6 +17,7 @@ const Container = styled.div`
   flex-direction: column;
   gap: 20px;
   overflow-y: auto;
+  color: ${props => props.theme == "light" ? primaryTextColor : whiteTextColor};
 `;
 
 const FormContainer = styled.div`
@@ -24,6 +26,7 @@ const FormContainer = styled.div`
   border-top: 1px dashed #bebebe;
   padding: 32px 0;
   gap: 32px;
+  
 `;
 
 const FormTitle = styled.h3`
@@ -50,7 +53,7 @@ const Desc = styled.span`
 
 const Right = styled.div`
   flex: 2;
-  background-color: white;
+  background-color: ${props => props.theme == "light" ? whiteTextColor : colorPrimaryBlack};
   padding: 32px;
   border-radius: 4px;
 `;
@@ -58,12 +61,13 @@ const Right = styled.div`
 const Required = styled.span`
   font-size: 14px;
   font-weight: 400;
+  color: ${props => props.theme == "light" ? primaryTextColor : whiteTextColor};
 `;
 
 const Span = styled.span`
   font-size: 16px;
   font-weight: 600;
-  color: #46A25D;
+  color: ${main};
 `;
 
 const InputContainer = styled.div`
@@ -79,9 +83,11 @@ const Input = styled.input`
   padding: 14px 16px;
   outline: none;
   border-radius: 4px;
-  border: 1px solid #d4d4d4;
+  border: 1px solid ${props => props.theme == "light" ? grayBackground : colorBackgroundBlack};
+  background-color: ${props => props.theme == "light" ? whiteTextColor : colorAccentDarkTransparent};
+  color: ${props => props.theme == "light" ? primaryTextColor : whiteTextColor};
   &:focus {
-    border: 1px solid #46A25D;
+    border: 1px solid ${main};
   }
 `;
 
@@ -89,9 +95,11 @@ const Area = styled.textarea`
   padding: 14px 16px;
   outline: none;
   border-radius: 4px;
-  border: 1px solid #d4d4d4;
+  border: 1px solid ${props => props.theme == "light" ? grayBackground : colorBackgroundBlack};
+  background-color: ${props => props.theme == "light" ? whiteTextColor : colorAccentDarkTransparent};
+  color: ${props => props.theme == "light" ? primaryTextColor : whiteTextColor};
   &:focus {
-    border: 1px solid #46A25D;
+    border: 1px solid ${main};
   }
 `;
 
@@ -115,6 +123,7 @@ const beforeUpload = (file) => {
 
 const CreateShop = () => {
   const user = useSelector((state) => state.user?.currentUser);
+  const theme = useSelector((state) => state.theme.mode);
   const [shop, setShop] = useState({});
   const [logoImageUrl, setLogoImageUrl] = useState(null);
 const [coverImageUrl, setCoverImageUrl] = useState(null);
@@ -196,12 +205,13 @@ const [isLoading, setIsLoading] = useState(false);
     <button
       style={{
         border: 0,
-        background: 'none',
+        width:"100%",
+        background: theme == "light" ? "none" : colorAccentDarkTransparent,
       }}
       type="button"
     >
-      {loading ? <LoadingOutlined style={{ fontSize: 50, color: '#46A25D' }} /> : <CloudUploadTwoTone style={{ color: '#50BA6A', fontSize: 50 }} />}
-      <div style={{ marginTop: 8 }}>
+      {loading ? <LoadingOutlined style={{ fontSize: 50, color: main }} /> : <CloudUploadTwoTone style={{ color: main, fontSize: 50 }} />}
+      <div style={{ marginTop: 8  }}>
         <Required><Span>Upload an image</Span> Or drag and drop. png, jpg</Required>
       </div>
     </button>
@@ -218,12 +228,13 @@ const [isLoading, setIsLoading] = useState(false);
           showUploadList={true}
           beforeUpload={beforeUpload}
           onChange={(info) => handleChange(info, 'logo')}
+          
         >
           {logoImageUrl ? (
             <img
               src={logoImageUrl}
               alt="avatar"
-              style={{ width: '30%' }}
+              style={{ width:400 , height:400 , objectFit:'contain' }}
             />
           ) : (
             uploadButton
@@ -236,6 +247,7 @@ const [isLoading, setIsLoading] = useState(false);
       desc: <>Upload your shop cover image from here. Dimension of the cover image should be <Span>1170 x 435px</Span></>,
       body: (
         <Upload
+        
           name="shopcover"
           listType="picture-card"
           showUploadList={true}
@@ -246,7 +258,7 @@ const [isLoading, setIsLoading] = useState(false);
             <img
               src={coverImageUrl}
               alt="cover"
-              style={{ width: '100%' }}
+              style={{ width:'100%' , height:400 , objectFit:'contain' }}
             />
           ) : (
             uploadButton
@@ -260,17 +272,17 @@ const [isLoading, setIsLoading] = useState(false);
       desc: <>Add some basic information about your shop here</>,
       body: (
         <>
-          <InputContainer>
+          <InputContainer theme={theme}>
             <Label>Name <Span style={{ color: 'red' }}>*</Span></Label>
-            <Input name='shopname' onChange={handleNameChange} value={name} />
+            <Input theme={theme} name='shopname' onChange={handleNameChange} value={name} />
           </InputContainer>
           <InputContainer>
             <Label>Slug</Label>
-            <Input disabled={true} style={{ cursor: 'no-drop' }} value={name} />
+            <Input theme={theme} disabled={true} style={{ cursor: 'no-drop' }} value={name} />
           </InputContainer>
           <InputContainer>
             <Label>Description</Label>
-            <Area name='shopdesc' onChange={handleChangeInfo}></Area>
+            <Area theme={theme} name='shopdesc' onChange={handleChangeInfo}></Area>
           </InputContainer>
         </>
       ),
@@ -280,17 +292,17 @@ const [isLoading, setIsLoading] = useState(false);
       desc: <>Add Your Personal Information Here</>,
       body: (
         <>
-          <InputContainer>
+          <InputContainer theme={theme}>
             <Label>Name <Span style={{ color: 'red' }}>*</Span></Label>
-            <Input value={user?.username} disabled />
+            <Input theme={theme} value={user?.username} disabled />
           </InputContainer>
           <InputContainer>
             <Label>Email <Span style={{ color: 'red' }}>*</Span></Label>
-            <Input value={user?.email} disabled />
+            <Input theme={theme} value={user?.email} disabled />
           </InputContainer>
           <InputContainer>
             <Label>Phone Number <Span style={{ color: 'red' }}>*</Span></Label>
-            <Input name='number' onChange={handleChangeInfo} />
+            <Input theme={theme} name='number' onChange={handleChangeInfo} />
           </InputContainer>
         </>
       ),
@@ -300,21 +312,21 @@ const [isLoading, setIsLoading] = useState(false);
       desc: <>Add your physical shop address from here</>,
       body: (
         <>
-          <InputContainer>
+          <InputContainer theme={theme}>
             <Label>Country <Span style={{ color: 'red' }}>*</Span></Label>
-            <Input name='country' onChange={handleChangeInfo} />
+            <Input theme={theme} name='country' onChange={handleChangeInfo} />
           </InputContainer>
-          <InputContainer>
+          <InputContainer theme={theme}>
             <Label>State <Span style={{ color: 'red' }}>*</Span></Label>
-            <Input name='state' onChange={handleChangeInfo} />
+            <Input theme={theme} name='state' onChange={handleChangeInfo} />
           </InputContainer>
-          <InputContainer>
+          <InputContainer theme={theme}>
             <Label>City <Span style={{ color: 'red' }}>*</Span></Label>
-            <Input name='city' onChange={handleChangeInfo} />
+            <Input theme={theme} name='city' onChange={handleChangeInfo} />
           </InputContainer>
-          <InputContainer>
+          <InputContainer theme={theme}>
             <Label>Street <Span style={{ color: 'red' }}>*</Span></Label>
-            <Input name='street' onChange={handleChangeInfo} />
+            <Input theme={theme} name='street' onChange={handleChangeInfo} />
           </InputContainer>
         </>
       ),
@@ -322,23 +334,24 @@ const [isLoading, setIsLoading] = useState(false);
   ];
 
   return (
-    <Container>
+    <Container theme={theme}>
       <FormTitle>Create Shop</FormTitle>
       {form.map((item, index) => (
-        <FormContainer key={index}>
+        <FormContainer theme={theme} key={index}>
           <Left>
             <Title>{item.title}</Title>
             <Desc>{item.desc}</Desc>
           </Left>
-          <Right>
+          <Right theme={theme}>
             {item.body}
           </Right>
         </FormContainer>
       ))}
       <Tooltip title="Send Request">
         <Fab
+        
           color="success"
-          style={{ position: "absolute", bottom: 96, right: 32 }}
+          sx={{ position: "absolute", bottom: 96, right: 32  , bgcolor:main }}
           aria-label="add"
           onClick={handleCreate}
           disabled={isLoading ? true : false}

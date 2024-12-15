@@ -7,23 +7,23 @@ import { Divider } from "@mui/material";
 import KeyboardArrowRightIcon from "@mui/icons-material/KeyboardArrowRight";
 import CategoryOutlinedIcon from "@mui/icons-material/CategoryOutlined";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-const Container = styled.div`
- 
-`;
+import { colorAccentDarkTransparent, colorAccentLight, colorAccentMain, colorAccentMediumTransparent, colorAccentSoftTransparent, colorAccentTransparent, colorBackgroundBlack, colorElementBackgroundGray, grayBackground, lightMain, main, primaryTextColor, secondaryTextColor, whiteTextColor } from "../Colors";
+const Container = styled.div``;
 
 const Title = styled.span`
-  font-size: 20px;
-  font-weight: 500;
-  color: #9a9a9a;
+  font-size: 18px;
+  font-weight: 400;
+  color: ${secondaryTextColor};
 `;
 
 const Category = styled.div`
   width: 100%;
   display: flex;
   flex-direction: column;
+  gap: 4px;
   contain: paint;
   padding: 12px 10px;
-  max-height: ${({ open }) => (open ? '500px' : '50px')}; 
+  max-height: ${({ open }) => (open ? "500px" : "50px")};
   overflow: hidden;
   transition: max-height 0.5s ease-in-out;
 `;
@@ -32,7 +32,8 @@ const SubCategory = styled.div`
   display: flex;
   flex-direction: column;
   padding: 0px 0px 0 20px;
-  max-height: ${({ open }) => (open ? '500px' : '40px')}; 
+  gap: 4px;
+  max-height: ${({ open }) => (open ? "500px" : "40px")};
   contain: paint;
   transition: max-height 0.4s ease-in-out;
 `;
@@ -40,13 +41,16 @@ const SubCategory = styled.div`
 const Information = styled.div`
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 12px;
   padding: 8px 10px;
   border-radius: 8px;
   cursor: pointer;
-
+background-color: ${props => props.open ? props.theme == 'light' ? lightMain :  colorAccentDarkTransparent :  ""};
+color: ${props => props.open ? props.theme == 'light' ?  main : colorAccentMain : ''};
   &:hover {
-    background-color: #eeeeee61;
+    background-color: ${props => props.theme == 'light' ? grayBackground : colorElementBackgroundGray};
+    color: ${props => props.theme == 'light' ? primaryTextColor : whiteTextColor};
+
   }
 
   transition: 200ms ease-in-out;
@@ -63,6 +67,11 @@ const Type = styled.div`
 const Icon = styled.img`
   width: 25px;
   height: 25px;
+  filter: ${props => props.theme === "light" ? "brightness(1) invert(0)" : "brightness(0) invert(1)"};
+
+  //filter: brightness(0) invert(1); /* Works for solid white backgrounds */
+  filter: ${props => props.open ? "brightness(0) invert(0.28) sepia(1) saturate(1000%) hue-rotate(160deg);" : ""} ;
+
 
   @media (max-width: 768px) {
     width: 20px;
@@ -86,10 +95,11 @@ const DividerStyled = styled(Divider)`
   }
 `;
 
-const Side = () => {
+const Side = ({theme}) => {
   const [categories, setCategories] = useState([]);
   const [openCategoryId, setOpenCategoryId] = useState(null);
   const [openSubcategoryId, setOpenSubcategoryId] = useState(null);
+  const [openTypeId, setOpenTypeId] = useState(null);
   const queryClient = useQueryClient();
   const dispatch = useDispatch();
 
@@ -111,7 +121,14 @@ const Side = () => {
   };
 
   const handleSubcategoryClick = (subcategoryId) => {
-    setOpenSubcategoryId(openSubcategoryId === subcategoryId ? null : subcategoryId);
+    setOpenSubcategoryId(
+      openSubcategoryId === subcategoryId ? null : subcategoryId
+    );
+  };
+  const handleTypeClick = (typeId) => {
+    setOpenTypeId(
+      openTypeId === typeId ? null : typeId
+    );
   };
 
   const onClickFilter = (name, type) => {
@@ -119,6 +136,9 @@ const Side = () => {
       dispatch(categoryName(""));
       dispatch(subName(""));
       dispatch(typeName(""));
+      setOpenCategoryId('')
+      setOpenSubcategoryId('')
+      setOpenTypeId('')
     } else if (type === "category") {
       dispatch(categoryName(name));
       dispatch(subName(""));
@@ -138,7 +158,7 @@ const Side = () => {
         resolve();
       }),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['filter'] });
+      queryClient.invalidateQueries({ queryKey: ["filter"] });
     },
   });
 
@@ -149,8 +169,8 @@ const Side = () => {
   return (
     <Container>
       <Category>
-        <Information onClick={() => onClickFilter("", "")}>
-          <CategoryOutlinedIcon />
+        <Information theme={theme} onClick={() => onClickFilter("", "")}>
+          <CategoryOutlinedIcon  />
           <Name>All</Name>
         </Information>
       </Category>
@@ -160,22 +180,46 @@ const Side = () => {
       </div>
       {categories.length > 0 ? (
         categories.map((category) => (
-          <Category key={category.categoryname} open={openCategoryId === category.categoryname}>
-            <Information onClick={() => { handleCategoryClick(category.categoryname); onClickFilter(category.categoryname, "category"); handleAction(); }}>
-              <Icon src={category.icon} />
+          <Category
+            key={category.categoryname}
+            open={openCategoryId === category.categoryname}
+          >
+            <Information
+            theme={theme}
+              onClick={() => {
+                handleCategoryClick(category.categoryname);
+                onClickFilter(category.categoryname, "category");
+                handleAction();
+              }}
+            open={openCategoryId === category.categoryname}
+
+            >
+              <Icon theme={theme} open={openCategoryId === category.categoryname} src={category.icon} />
               <Name>{category.categoryname}</Name>
               <KeyboardArrowRightIcon
                 sx={{
                   marginLeft: "auto",
-                  rotate: openCategoryId === category.categoryname ? "90deg" : "0",
+                  rotate:
+                    openCategoryId === category.categoryname ? "90deg" : "0",
                   transition: "0.4s ease-in-out",
                 }}
               />
             </Information>
             {category.subcategories.map((sub) => (
-              <SubCategory key={sub.subname} open={openSubcategoryId === sub.subname}>
-                <Information onClick={() => { handleSubcategoryClick(sub.subname); onClickFilter(sub.subname, "sub"); }}>
-                  <Icon src={sub.subIcon} />
+              <SubCategory
+                key={sub.subname}
+                open={openSubcategoryId === sub.subname}
+              >
+                <Information
+                theme={theme}
+                  onClick={() => {
+                    handleSubcategoryClick(sub.subname);
+                    onClickFilter(sub.subname, "sub");
+                  }}
+                open={openSubcategoryId === sub.subname}
+
+                >
+                  <Icon theme={theme} open={openSubcategoryId === sub.subname} src={sub.subIcon} />
                   <Name>{sub.subname}</Name>
                   <KeyboardArrowRightIcon
                     sx={{
@@ -187,8 +231,13 @@ const Side = () => {
                 </Information>
                 {sub.types.map((type) => (
                   <Type key={type.name}>
-                    <Information onClick={() => onClickFilter(type.name, "type")}>
-                      <Icon src={type.icon} />
+                    <Information
+                    theme={theme}
+                    onClick={() => {onClickFilter(type.name, "type"),handleTypeClick(type.name) }}
+                open={openTypeId === type.name}
+
+                    >
+                      <Icon theme={theme} open={openTypeId === type.name} src={type.icon} />
                       <Name>{type.name}</Name>
                     </Information>
                   </Type>

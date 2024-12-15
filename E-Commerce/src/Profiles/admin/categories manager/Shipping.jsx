@@ -3,9 +3,7 @@ import React from "react";
 import styled from "styled-components";
 import DeleteIcon from "@mui/icons-material/Delete";
 import VisibilityTwoToneIcon from "@mui/icons-material/VisibilityTwoTone";
-import DoneTwoToneIcon from "@mui/icons-material/DoneTwoTone";
-import CloseTwoToneIcon from "@mui/icons-material/CloseTwoTone";
-import PersonSearchIcon from "@mui/icons-material/PersonSearch";
+
 
 const data = [
   {
@@ -27,13 +25,16 @@ const data = [
   },
 ];
 
-import { StaticContainer, StaticTitle } from "../Dashboard";
 
 export const Container = styled.div`
   padding: 0 32px;
   overflow-y: scroll;
   height: 500px;
 `;
+
+
+const StaticTitle = styled.div``
+const StaticContainer = styled.div``
 
 const Table = styled.table`
   display: flex;

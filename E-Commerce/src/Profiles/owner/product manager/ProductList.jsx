@@ -9,25 +9,48 @@ import { Link, useLocation } from "react-router-dom";
 import me from "../../../assets/Lotties/Animation - 1716145973359.json"
 import Lottie from "lottie-react";
 import MoreHorizTwoToneIcon from "@mui/icons-material/MoreHorizTwoTone";
+import Loading from "../../../Components/Pending/Loading";
+import Product from "../../../Components/updateForms/Product";
+import { colorAccentDark, colorAccentDarkTransparent, colorAccentLight, colorAccentMedium, colorAccentMediumTransparent, colorAccentSoft, colorAccentSoftTransparent, colorAccentSub, colorAccentSubDark, colorBackgroundBlack, colorBackgroundGray, colorPrimaryBlack, grayBackground, lightSoftMain, main, primaryTextColor, subColumnMain, whiteTextColor } from "../../../Colors";
 
-const Container = styled.div``;
+
+
+
+const Container = styled.div`
+  background-color: ${props => props.theme == "light" ? whiteTextColor : colorPrimaryBlack};
+  
+
+`;
+const Table = styled.div`
+  background-color: ${props => props.theme == "light" ? whiteTextColor : colorPrimaryBlack};
+  @media (max-width: 768px) {
+  min-width: 200vh;
+}
+
+`;
 const Tags = styled.div`
   display: flex;
-  background-color: #cbfef48d;
+  background-color: ${props => props.theme == "light" ? main : colorAccentDark};
   padding: 12px;
-  border-top-right-radius: 4px;
-  border-top-left-radius: 4px;
+  @media (max-width: 768px) {
+  min-width: 200vh;
+}
 `;
 const TagRow = styled.div`
   text-align: center;
   flex: 1;
+  color: ${whiteTextColor};
+
 `;
 const Row = styled.div`
   display: flex;
   align-items: center;
   padding: 12px;
+  background-color: ${props => props.theme == "light" ? whiteTextColor : colorAccentDarkTransparent};
+  color: ${props => props.theme == "light" ? primaryTextColor : whiteTextColor};
 
-  border-top: 1px solid #eee;
+  border-top: 1px solid ${props => props.theme == "light" ? grayBackground : colorBackgroundGray};
+  
 `;
 const ProductInfo = styled.div`
   display: flex;
@@ -51,16 +74,14 @@ const Image = styled.img`
   width: 45px;
   height: 45px;
   object-fit: contain;
-  border: 1px solid #eee;
-  padding: 4px;
+  border: 1px solid ${props => props.theme == "light" ? grayBackground : colorBackgroundGray};
   border-radius: 4px;
 `;
 const Name = styled.span``;
 
 
 const OrderDetails = styled.div`
-  background-color: #ffffffb8;
-  margin: 0 20px;
+
   border-radius: 4px;
   max-height: ${(props) =>
     props.show
@@ -76,7 +97,8 @@ const OrderDetails = styled.div`
 
 const Details = styled.div`
   padding: 20px;
-  background-color: #dcfff729;
+  background-color: ${props => props.theme == "light" ? lightSoftMain : colorAccentSoftTransparent};
+  color: ${props => props.theme == "light" ? primaryTextColor : whiteTextColor};
   border-radius: 4px;
   display: flex;
   align-items: center;
@@ -216,9 +238,13 @@ const getTagsForCategory = (product) => {
 
 
 
-const ProductList = ({ productData }) => {
+const ProductList = ({ productData , loading , handle }) => {
+  const theme = useSelector((state) => state.theme.mode);
+
   const [selectedOrderId, setSelectedOrderId] = useState(null);
-  const [edited, setEdited] = useState(null);
+  const [edited, setEdited] = useState(false);
+  const [selectedProduct, setSelectedProduct] = useState();
+  
   const Location = useLocation().pathname.split("/")[1]
   const user = useSelector((state) => state.user?.currentUser);
 
@@ -226,27 +252,13 @@ const ProductList = ({ productData }) => {
     setSelectedOrderId(selectedOrderId === orderId ? null : orderId);
   };
 
-  const handleDelete = async (id) => {
-    try {
-      const response = await newRequest.delete(
-        `/products/delete-product/${id}`
-      );
-      console.log(response.status);
-
-      if (response.status === 200) {
-        message.success("Product added successfully.");
-      } else {
-        message.error("Failed to add product.");
-      }
-    } catch (error) {
-      console.error("Error adding product:", error);
-      message.error("Failed to add product.");
-    }
-  };
+ 
+  
+ 
   return (
-    <Container>
+    <Container theme={theme}>
     {/* Render table headers based on user role */}
-    <Tags>
+    <Tags theme={theme}>
       {(user?.userRole === "admin" && Location == "products" ? tableTagsAdmin : tableTagsOwner).map((item, index) => (
         <TagRow key={index} style={{ flex: item.flex, textAlign: item.position }}>
           {item.title}
@@ -255,19 +267,19 @@ const ProductList = ({ productData }) => {
     </Tags>
 
     {/* Render product rows */}
-    {productData.length > 0 ? (
-      productData.map((product) => {
+    {productData != '' && !loading ? (
+      productData.map((product , index) => {
         const tags = getTagsForCategory(product);
         const parsedAttributes = product?.attributes ? JSON.parse(product.attributes) : null;
 
         return (
-          < >
-            <Row>
-              <ProductInfo>
-                <Image src={product.productimage} />
+          <Table theme={theme} >
+            <Row theme={theme}>
+              <ProductInfo theme={theme}>
+                <Image theme={theme} src={product.productimage} />
                 <Name>{product.productname}</Name>
               </ProductInfo>
-              <Detail>{product.categoryName}</Detail>
+              <Detail theme={theme}>{product.categoryName}</Detail>
 
               {user?.userRole === "admin" && Location == "products" ? (
                 <ShopList>
@@ -280,21 +292,22 @@ const ProductList = ({ productData }) => {
               )}
 
               <Detail>
-                <Rating value={product.avgRate} readOnly />
+                <Rating sx={{borderColor:'white'}} value={product.avgRate} readOnly />
               </Detail>
               <Detail>${product.productprice}</Detail>
               <Detail>{product.discount}%</Detail>
 
               <Detail>
-                <IconButton>
-                  <EditTwoToneIcon style={{ color: "#02C3D1" }} />
+                <IconButton color="success" onClick={() => {setEdited(product?.idPRODUCT) , setSelectedProduct(product)}}>
+                  <EditTwoToneIcon  style={{ color: main }} />
                 </IconButton>
-                <IconButton onClick={() => handleDelete(product.idPRODUCT)}>
-                  <DeleteForeverOutlinedIcon style={{ color: "#E60000" }} />
+                <IconButton color="error" onClick={() => handle(product.idPRODUCT)}>
+                  <DeleteForeverOutlinedIcon color="error" />
                 </IconButton>
                 {user?.userRole == "admin" && Location != "stock" ? ''
                 :
                 <IconButton
+                color="secondary"
                 onClick={() => handleToggleOrderDetails(product?.idPRODUCT)}
                 style={{
                   rotate: selectedOrderId === product.idPRODUCT ? "90deg" : "0deg",
@@ -308,13 +321,13 @@ const ProductList = ({ productData }) => {
             </Row>
             {/* Order Details */}
 {user?.userRole == "admin" && Location != "stock" ? '' :
-            <OrderDetails show={selectedOrderId === product?.idPRODUCT}>
-              <Tags>
+            <OrderDetails theme={theme} show={selectedOrderId === product?.idPRODUCT}>
+              <Tags style={{backgroundColor: theme == "light" ? subColumnMain : colorAccentMedium}}>
                 {tags.map((tag, index) => (
                   <TagRow key={index}>{tag}</TagRow>
                 ))}
               </Tags>
-              <Details>
+              <Details theme={theme}>
                 {product?.categoryName == "Cloths" ? 
                 <>
                 <Detail>{parsedAttributes?.size}</Detail>
@@ -373,15 +386,17 @@ const ProductList = ({ productData }) => {
               </Details>
             </OrderDetails>
         }
-          </>
+          </Table>
         );
       })
-    ) : (
+    ) : loading ? <Loading /> : (
       <LottieContainer>
         <Lottie animationData={me} style={{ width: "33%" }} />
         No Product Found
       </LottieContainer>
     )}
+
+    {edited && selectedProduct != "" ? <Product product={selectedProduct} /> : ""}
   </Container>
   );
 };

@@ -1,16 +1,18 @@
 import React, { useEffect, useState } from "react";
 import styled from "styled-components";
-import { gradientBackground } from "../../Colors";
-import newRequest from "../../utils/newRequest";
+import { colorAccentDark, colorAccentDarkTransparent, colorAccentLight, colorAccentMain, colorAccentMedium, colorAccentMediumTransparent, colorAccentSoft, colorAccentSoftTransparent, colorAccentSub, colorAccentSubDark, colorAccentTransparent, colorErrorDark, colorErrorSoft, colorHighlightDarkYellow, colorHighlightSoftYellow, colorPrimaryBlack, colorWarningDark, colorWarningSoft, darkOrange, darkYellow, gradientBackground, grayBackground, lightSoftMain, main, primaryTextColor, softOrange, softRed, softYellow, subColumnMain, whiteTextColor } from "../../../Colors";
+import newRequest from "../../../utils/newRequest";
 import { Avatar, Divider, FormControl, FormControlLabel, IconButton, InputLabel, MenuItem, Select, Switch, Tooltip } from "@mui/material";
 import EditTwoToneIcon from "@mui/icons-material/EditTwoTone";
 import DeleteTwoToneIcon from "@mui/icons-material/DeleteTwoTone";
 import MoreHorizTwoToneIcon from "@mui/icons-material/MoreHorizTwoTone";
 import SaveTwoToneIcon from '@mui/icons-material/SaveTwoTone';
-import AlertMessage from "../../Components/Alert";
+import AlertMessage from "../../../Components/Alert";
 import Lottie from "lottie-react";
-import me from "../../assets/Lotties/Animation - 1716145973359.json"
+import me from "../../../assets/Lotties/Animation - 1716145973359.json"
 import { useSelector } from "react-redux";
+import EmptyData from "../../../Components/Pending/EmptyData";
+import Loading from "../../../Components/Pending/Loading";
 const Container = styled.div`
  
   padding: 32px;
@@ -20,14 +22,14 @@ const Container = styled.div`
 `;
 
 const FilterContainer = styled.div`
-  background-color: white;
+  background-color: ${props => props.theme == "light" ? whiteTextColor : colorPrimaryBlack};
+  color: ${props => props.theme == "light" ? colorPrimaryBlack :  whiteTextColor};
   border-radius: 4px;
   padding: 20px;
   width: 50%;
   margin-bottom: 20px;
   width: auto;
 min-width: 200px;
-contain: paint;
 overflow-x: auto;
 &::-webkit-scrollbar {
     height: 4px;
@@ -54,21 +56,26 @@ const FilterList = styled.div`
 `;
 
 const ListContainer = styled.div`
-  background-color: white;
+  background-color: ${props => props.theme == "light" ? whiteTextColor : colorAccentDarkTransparent};
+  color: ${props => props.theme == "light" ? primaryTextColor : whiteTextColor};
   border-radius: 4px;
   contain: paint;
   padding-bottom: 32px;
   overflow: auto;
+  
 `;
 
 const Tags = styled.div`
   display: flex;
   padding: 20px;
-  background-color: ${gradientBackground};
-  color: white;
+  background-color: ${props => props.theme == "light" ? main : colorAccentLight};
+  color: ${whiteTextColor};
   text-align: center;
   width: auto;
 min-width: 600px;
+@media (max-width: 768px) {
+  min-width: 200vh;
+}
 `;
 
 const Tag = styled.div`
@@ -82,6 +89,9 @@ const Order = styled.div`
   padding: 20px;
   width:auto;
 min-width: 600px;
+@media (max-width: 768px) {
+  min-width: 200vh;
+}
 `;
 
 const OrderTag = styled.div`
@@ -100,7 +110,7 @@ const Informations = styled.div`
 `;
 
 const OrderDetails = styled.div`
-  background-color: #f9f9f9;
+  background-color: ${props => props.theme == "light" ? whiteTextColor : primaryTextColor};
   margin: 0 20px;
   border-radius: 4px;
   max-height: ${(props) =>
@@ -111,12 +121,15 @@ const OrderDetails = styled.div`
   flex-direction: column;
   width: auto;
 min-width: 600px;
+@media (max-width: 768px) {
+  min-width: 200vh;
+}
 
 `;
 
 const Details = styled.div`
   padding: 20px;
-  background-color: #f9f9f9;
+  background-color: ${props => props.theme == "light" ? grayBackground : colorAccentSoftTransparent};
   border-radius: 4px;
   display: flex;
   align-items: center;
@@ -143,8 +156,8 @@ const Circle = styled.div`
 `;
 
 const Status = styled.span`
-  background-color: ${(props) => (props.status === 'Arrived' ? '#E0FAF6' : props.status === 'Waiting' ? '#FFE6CC' : '#FFFFCC')};
-  color: ${(props) => (props.status === 'Arrived' ? '#4FA193' : props.status === 'Waiting' ? '#E67300' : '#CCCC00')};
+  background-color: ${(props) => (props.status === 'Arrived' ? props.theme == "light" ? lightSoftMain : colorAccentLight : props.status === 'Waiting' ? props.theme == "light" ? softOrange : colorWarningSoft : props.theme == "light" ? softYellow : colorHighlightSoftYellow)};
+  color: ${(props) => (props.status === 'Arrived' ? props.theme == "light" ? main : colorAccentMain : props.status === 'Waiting' ? props.theme == "light" ? darkOrange : colorWarningDark : props.theme == "light" ? darkYellow : colorHighlightDarkYellow)};
   padding: 8px 20px;
   border-radius: 4px;
 `;
@@ -172,6 +185,7 @@ const rowTagProduct = ["Product", "Color", "Size","Status","Current Place" ,"Qua
 
 const Orders = () => {
   const user = useSelector((state) => state.user?.currentUser);
+  const theme = useSelector((state) => state.theme.mode);
 
   const [message, setMessage] = useState("");
   const [type, setType] = useState("");
@@ -182,6 +196,7 @@ const Orders = () => {
   const [edited, setEdited] = useState(null);
   const [status, setStatus] = useState("");
   const [place, setPlace] = useState("");
+  const [loading, setLoading] = useState(false);
   const [state, setState] = useState({
     Waiting: false,
     "On Way": false,
@@ -197,9 +212,15 @@ const Orders = () => {
       }
       const res = await newRequest.get(endpoint);
       setOrders(res.data);
+      setLoading(true)
     } catch (err) {
       console.error("Error fetching orders:", err);
-    }
+    } finally {
+      setTimeout(() => {
+
+        setLoading(false)
+      }, [1000])
+      }
   };
   
   useEffect(() => {
@@ -256,14 +277,14 @@ const Orders = () => {
   return (
     <Container>
       <AlertMessage open={open} setOpen={setOpen} message={message} type={type} />
-      <FilterContainer>
+      <FilterContainer theme={theme}>
         <Title>Filter Orders</Title>
         <FilterList>
           {["Waiting", "On Way", "Arrived"].map((status) => (
             <FormControlLabel
               key={status}
               value={status}
-              control={<Switch color="success" />}
+              control={<Switch color="success" sx={{".css-1yjjitx-MuiSwitch-track": {backgroundColor: theme == "light" ? softRed : colorErrorDark } , ".css-1xvpzln-MuiButtonBase-root-MuiSwitch-switchBase.Mui-checked" : {color:colorAccentMain} , ".css-1xvpzln-MuiButtonBase-root-MuiSwitch-switchBase.Mui-checked+.MuiSwitch-track " :{backgroundColor: colorAccentTransparent}}} />}
               label={status}
               labelPlacement="start"
               name={status}
@@ -272,29 +293,31 @@ const Orders = () => {
           ))}
         </FilterList>
       </FilterContainer>
-      <ListContainer>
-        <Tags>
+      <ListContainer theme={theme}>
+        <Tags theme={theme}>
           {rowTag.map((tag, index) => (
             <Tag key={index} tag={tag}>
               {tag}
             </Tag>
           ))}
         </Tags>
-        {orders.length > 0 ? (
+        {orders && !loading && orders.length > 0 ? (
           orders.map((order, index) => (
-            <div key={index}>
-              <Order>
+            <div theme={theme} key={index}>
+              <Order theme={theme}>
                 <Informations type="ID">#{order?.orderId}</Informations>
                 <Informations>0{order?.phone}</Informations>
-                <Informations>
+                <Informations >
                 {edited === index ? (
-                    <FormControl sx={{ minWidth: 80, width: "80%" }} size="small">
-                      <InputLabel>Places</InputLabel>
+                    <FormControl  sx={{ minWidth: 80, width: "80%"  , bgcolor:theme == "light" ? whiteTextColor : colorAccentMediumTransparent , borderRadius:1 }} size="small">
+                      <InputLabel sx={{color : theme == "light" ?  primaryTextColor : whiteTextColor}} >Places</InputLabel>
                       <Select
+                      sx={{color : theme == "light" ?  primaryTextColor : whiteTextColor }}
+                      label='Places'
                         value={place}
                         onChange={(e) => setPlace(e.target.value)}
                       >
-                        <MenuItem value="Mall Storage">Mall Storage</MenuItem>
+                        <MenuItem  value="Mall Storage">Mall Storage</MenuItem>
                         <MenuItem value="Out For Delivery">Out For Delivery</MenuItem>
                         <MenuItem value={order?.state}>{order?.state}</MenuItem>
                         <MenuItem value={order?.city}>{order?.city}</MenuItem>
@@ -309,10 +332,13 @@ const Orders = () => {
                 </Informations>
                 <Informations>
                 {edited === index ? (
-                      <FormControl sx={{ minWidth: 80, width: "80%" }} size="small">
-                      <InputLabel>Status</InputLabel>
+                      <FormControl  sx={{ minWidth: 80, width: "80%"  , bgcolor:theme == "light" ? whiteTextColor : colorAccentMediumTransparent , borderRadius:1 }}  size="small">
+                      <InputLabel sx={{color : theme == "light" ?  primaryTextColor : whiteTextColor}}>Status</InputLabel>
                       <Select
+                      sx={{color : theme == "light" ?  primaryTextColor : whiteTextColor }}
                         value={status}
+                      label='Status'
+
                         onChange={(e) => setStatus(e.target.value)}
                       >
                         <MenuItem value="Waiting">Waiting</MenuItem>
@@ -322,7 +348,7 @@ const Orders = () => {
                     </FormControl>
                   ) :(
                   
-                    <Status status={order?.status}>{order?.status}</Status>
+                    <Status theme={theme} status={order?.status}>{order?.status}</Status>
           )}
                 </Informations>
                 <Informations>{order?.state}</Informations>
@@ -334,21 +360,24 @@ const Orders = () => {
                 {edited === index ? (
                     <Tooltip title="Save">
                       <IconButton
+                      color="success"
                         onClick={() => handleUpdate(index, "submit", order?.orderId, order?.clientId , user?.idUSER)}
                       >
-                        <SaveTwoToneIcon color="primary" />
+                        <SaveTwoToneIcon sx={{color:main}} />
                       </IconButton>
                     </Tooltip>
                   ) : (
                     <Tooltip title="Edit">
                       <IconButton
+                      color="success"
                         onClick={() => setEdited(index)}
                       >
-                        <EditTwoToneIcon color="primary" />
+                        <EditTwoToneIcon sx={{color:main}} />
                       </IconButton>
                     </Tooltip>
                   )}
                   <IconButton
+                  color="secondary"
                     onClick={() => handleToggleOrderDetails(order?.orderId)}
                     sx={{ rotate: selectedOrderId === order?.orderId ? "90deg" : "0deg", transition: "200ms" }}
                   >
@@ -357,8 +386,8 @@ const Orders = () => {
                   
                 </Informations>
               </Order>
-              <OrderDetails show={selectedOrderId === order?.orderId}>
-                <Tags>
+              <OrderDetails theme={theme} show={selectedOrderId === order?.orderId}>
+                <Tags style={{backgroundColor: theme == "light" ? subColumnMain : colorAccentMedium}}>
                   {rowTagProduct.map((tag, index) => (
                     <OrderTag key={index} tag={tag}>
                       {tag}
@@ -366,7 +395,7 @@ const Orders = () => {
                   ))}
                 </Tags>
                 {order?.products.map((product, index) => (
-                  <Details key={index}>
+                  <Details theme={theme} key={index}>
                     <Detail type="Product">
                       <Avatar
                         src={product.image}
@@ -399,8 +428,8 @@ const Orders = () => {
                     <Detail>${product.price.toFixed(2)}</Detail>
                     <Detail type="Action">
                   
-                  <IconButton onClick={() => handleDelete(order?.orderId)}>
-                    <DeleteTwoToneIcon color="error" />
+                  <IconButton color="error" onClick={() => handleDelete(order?.orderId)}>
+                    <DeleteTwoToneIcon color="error"  />
                   </IconButton>
                   
                 </Detail>
@@ -409,12 +438,11 @@ const Orders = () => {
               </OrderDetails>
             </div>
           ))
-        ) : (
-          <LottieContainer>
-            <Lottie animationData={me} style={{ width: "40%" }} />
-            No Orders Found
-          </LottieContainer>
-        )}
+        ) : loading ? <Loading /> : <LottieContainer>
+          <Lottie animationData={me} />
+        </LottieContainer>
+          
+        }
       </ListContainer>
     </Container>
   );

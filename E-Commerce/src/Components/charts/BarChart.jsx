@@ -25,23 +25,21 @@ function BarChart({ chartData }) {
       
     },
     scales: {
-      xAxes: [
-        {
-          stacked: true, // Enable stacking if desired (adjust yAxes accordingly)
-          ticks: {
-            beginAtZero: true, // Start y-axis from 0
-          },
+      x: {
+        beginAtZero: true,
+        grid: {
+          display: true,
+          color: "rgba(200, 200, 200, 0.3)",
         },
-      ],
-      yAxes: [
-        {
-          stacked: true, // Enable stacking if desired (adjust xAxes accordingly)
-          ticks: {
-            beginAtZero: true, // Start y-axis from 0
-          },
+      },
+      y: {
+        beginAtZero: true,
+        grid: {
+          display: true,
+          color: "rgba(200, 200, 200, 0.3)",
         },
-      ],
-    },
+      },
+    }
   };
 
   return (

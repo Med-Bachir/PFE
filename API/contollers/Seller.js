@@ -32,6 +32,47 @@ router.put("/become-seller/:id", verifyToken, async (req, res) => {
     }
 });
 
+// SELLER APprove
+router.put("/approve-seller/:id", verifyTokenAndAdmin, async (req, res) => {
+    try {
+        const userId = req.params.id;
+
+        // Update userRole to 'seller'
+        const query = "UPDATE USER SET approved = 1 WHERE idUSER = ?";
+        const values = [userId];
+
+        connection.query(query, values, (err, result) => {
+            if (err) {
+                res.status(500).json({ error: "Failed to update user role." + err});
+                return;
+            }
+
+            // Check if any rows were affected
+            if (result.affectedRows === 0) {
+                res.status(404).json({ error: "User not found." });
+                return;
+            }
+
+            res.status(200).json({ message: "User has become a seller successfully." });
+             // Insert notification for admin
+             const notificationText = ` Admin have accepted your approvment request , You can now enjoy your Benifits .`;
+             const insertNotificationQuery = "INSERT INTO NOTIFICATION (text, type, reciver) VALUES (?, ?, ?)";
+             const insertNotificationValues = [notificationText, 'Request Accepted', userId];
+
+             connection.query(insertNotificationQuery, insertNotificationValues, (err) => {
+                 if (err) {
+                     console.error("Failed to create notification:", err);
+                     // Don't send an error response here as it's an optional step and doesn't affect shop creation
+                 }
+
+                 res.status(200).json({ message: "Shop creation request submitted successfully. Please wait for admin approval." });
+             });
+        });
+    } catch (err) {
+        res.status(500).json({ error: "Internal server error." });
+    }
+});
+
 //GET ALL SELLERS
 router.get("/", verifyTokenAndAdmin, async (req, res, next) => {
     
@@ -70,6 +111,8 @@ router.get("/find/:id", verifyTokenAndAdmin, async (req, res) => {
             const user = result[0];
             const { password, ...others } = user;
             res.status(200).json(others);
+            
+            
         });
     } catch (err) {
         res.status(500).json({ error: "Internal server error." });

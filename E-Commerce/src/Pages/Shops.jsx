@@ -4,6 +4,8 @@ import { Link } from "react-router-dom";
 import styled from "styled-components";
 import LocationOnOutlinedIcon from '@mui/icons-material/LocationOnOutlined';
 import newRequest from "../utils/newRequest";
+import {colorAccentDarkTransparent, colorBackgroundBlack, colorPrimaryBlack, grayBackground, primaryTextColor, secondaryTextColor, secondText, whiteTextColor } from "../Colors";
+import { useSelector } from "react-redux";
 
 
 
@@ -19,7 +21,9 @@ height: calc(100vh - 80px);
 const ShopsContainer = styled.div`
 display: flex;
 flex-direction: column;
-background-color: #f8f8f8;
+background-color: ${props => props.theme == "light" ? grayBackground : colorBackgroundBlack};
+color: ${props => props.theme == "light" ? primaryTextColor : whiteTextColor};
+
 contain: paint;
 height: 100%;
 overflow-y: auto;
@@ -30,7 +34,7 @@ overflow-y: auto;
 `;
 const Title = styled.span`
 font-size:24px;
-font-weight: 600;
+font-weight: 500;
 padding: 0 80px;
 margin: 24px 0;
 @media (max-width: 768px) {
@@ -46,6 +50,9 @@ justify-content: start;
 gap:20px;
 padding: 0 80px 32px 80px;
 @media (max-width: 768px) {
+  padding: 0;
+}
+@media (max-width: 524px) {
   flex-direction: column;
   padding: 0 0 32px 0;
 
@@ -54,7 +61,8 @@ padding: 0 80px 32px 80px;
 const Shop = styled.div`
 
 
-background-color: white;
+background-color: ${props => props.theme == "light" ? whiteTextColor : colorPrimaryBlack};
+
 padding: 32px;
 display: flex;
 border-radius: 8px;
@@ -63,6 +71,10 @@ flex:1;
 min-width: 32%;
 max-width: 32%;
 
+@media (max-width: 1153px) {
+ max-width: 100%;
+}
+
 
 
 `;
@@ -70,30 +82,32 @@ const ShopInfo = styled.div`
 display: flex;
 flex-direction: column;
 gap: 8px;
-@media (max-width: 440px) {
+
+@media (max-width: 768px) {
   justify-content: center;
   align-items: center;
 }
 `;
 const ShopName = styled.span`
-
 font-weight: 500;
+color: ${props => props.theme == "light" ? primaryTextColor : whiteTextColor};
+
 `;
 const Location = styled.div`
 display: flex;
 align-items: start;
-color: #636363;
+color: ${secondaryTextColor};
 gap: 8px;
 font-size: 12px;
 font-weight: 300;
-@media (max-width: 440px) {
+@media (max-width: 768px) {
   justify-content: center;
   align-items: center;
 }
 `;
 
 const Shops = () => {
-
+const theme = useSelector(state => state.theme.mode)
   const [shops, setShops] = useState([]);
   
  
@@ -118,7 +132,7 @@ const Shops = () => {
   // Hook to track window size
   useEffect(() => {
     const handleResize = () => {
-      setIsMobile(window.innerWidth <= 440);
+      setIsMobile(window.innerWidth <= 768);
     };
 
     handleResize(); // Check initial window size
@@ -133,20 +147,20 @@ const Shops = () => {
   return (
     <Container>
     
-    <ShopsContainer>
+    <ShopsContainer theme={theme}>
         
       <Title>All Shops</Title>
       <AllShops>
         {shops.map((item) => (
             
           
-          <Shop key={item.idShop}>
+          <Shop theme={theme} key={item.idShop}>
           <Link style={{  width:'100%', display: 'flex' , alignItems:'center' , gap:20 , flexDirection : isMobile ? 'column' : 'row'}}
           to={`/Shops/${item.idShop}`}
         >
           <Avatar sx={{width:64,height:64 , border:'1px solid' }} src={item.ShopImage} />
           <ShopInfo>
-            <ShopName>{item.ShopName}</ShopName>
+            <ShopName theme={theme}>{item.ShopName}</ShopName>
             <Location><LocationOnOutlinedIcon sx={{fontSize:16}} /><>{item.Street + ' , ' + item.State + ' , ' + item.City + ' , ' + item.Country}</></Location>
           </ShopInfo>
         </Link>

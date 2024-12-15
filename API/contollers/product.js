@@ -81,7 +81,7 @@ router.post(
           connection.query(
             insertStockQuery,
             insertStockValues,
-            (err, stockResult) => {
+            (err) => {
               if (err) {
                 console.error("Error adding stock:", err);
                 res.status(500).json({ error: "Failed to add stock." });
@@ -101,6 +101,39 @@ router.post(
     }
   }
 );
+
+router.put("/update/:id", verifyTokenAndAuthorizationA_S, async (req, res) => {
+  const { id } = req.params; // Extract id from params
+  const { price, discount, quantity } = req.body;
+
+  const updateQuery = "UPDATE PRODUCTS SET productprice = ?, discount = ? WHERE idPRODUCT = ?";
+  const updateQuantity = "UPDATE STOCK SET qte = ? WHERE id_Product = ?";
+
+  try {
+    // Update the product price and discount
+    await new Promise((resolve, reject) => {
+      connection.query(updateQuery, [price, discount, id], (err, result) => {
+        if (err) return reject(err);
+        resolve(result);
+      });
+    });
+
+    // Update the product quantity in stock
+    await new Promise((resolve, reject) => {
+      connection.query(updateQuantity, [quantity, id], (err, result) => {
+        if (err) return reject(err);
+        resolve(result);
+      });
+    });
+
+    // Respond with success
+    res.status(200).json("Product Updated Successfully");
+  } catch (error) {
+    // Handle errors
+    res.status(404).json({ message: error.message || "Product Not Found" });
+  }
+});
+
 
 router.get("/all-products", verifyTokenAndAdmin, async (req, res) => {
   try {
@@ -196,6 +229,9 @@ router.get(
           p.productimage ,
           p.productprice ,
           p.discount,
+          p.id_Category,
+          p.id_SubCategory,
+          p.id_Type,
           p.attributes,
                  s.qte AS quantity,
                  c.categoryname AS categoryName,
@@ -216,7 +252,7 @@ router.get(
            p.productname ,
           p.productimage ,
           p.productprice ,
-          p.discount , c.categoryname , sh.shopname , su.name , t.name  , s.qte ,p.attributes ;
+          p.discount , c.categoryname , sh.shopname , su.name , t.name  , s.qte ,p.attributes  , p.id_Category,p.id_SubCategory, p.id_Type ;
       `;
       const getProductsValues = [sellerId];
 

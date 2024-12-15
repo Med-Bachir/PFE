@@ -5,18 +5,46 @@ import RemoveIcon from "@mui/icons-material/Remove";
 import FavoriteBorderIcon from "@mui/icons-material/FavoriteBorder";
 import newRequest from "../../utils/newRequest.js";
 import { Link, useLocation } from "react-router-dom";
-import {  useSelector } from "react-redux";
+import { useSelector } from "react-redux";
 
 import { Rating } from "@mui/material";
 import { Avatar } from "antd";
 import AlertMessage from "../../Components/Alert.jsx";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import FavoriteRoundedIcon from '@mui/icons-material/FavoriteRounded';
+import FavoriteRoundedIcon from "@mui/icons-material/FavoriteRounded";
+import {
+  colorAccentDark,
+  colorAccentDarkTransparent,
+  colorAccentMain,
+  colorAccentMedium,
+  colorAccentMediumTransparent,
+  colorAccentSoft,
+  colorAccentSoftTransparent,
+  colorAccentSub,
+  colorAccentSubDark,
+  colorAccentTransparent,
+  colorBackgroundBlack,
+  colorBackgroundGray,
+  colorElementBackgroundGray,
+  colorPrimaryBlack,
+  darkMain,
+  elementGrayBackground,
+  grayBackground,
+  lightMain,
+  main,
+  primaryTextColor,
+  secondaryTextColor,
+  softMain,
+  whiteTextColor,
+} from "../../Colors.jsx";
 
-const Container = styled.div``;
+const Container = styled.div`
+background-color: ${props => props.theme == "light" ? whiteTextColor : colorBackgroundBlack};
+color: ${props => props.theme == "light" ? colorPrimaryBlack : elementGrayBackground};
+`;
 const Wrapper = styled.div`
   padding: 30px;
-  border-bottom: 1px solid #2e2e2e21;
+  border-bottom: 2px solid ${props => props.theme == "light" ? elementGrayBackground :colorElementBackgroundGray};
   display: flex;
 
   &::-webkit-scrollbar {
@@ -28,9 +56,10 @@ const Wrapper = styled.div`
   &::-webkit-scrollbar-thumb {
     background-color: rgba(147, 147, 147, 0.543);
   }
+  transition: 200ms ease-in-out;
 `;
 const HeartContainer = styled.div`
-  border: 2px solid #009f7f;
+  border: 2px solid ${props => props.theme == "light" ? main : colorAccentMain};
   border-radius: 50%;
   width: 30px;
   display: flex;
@@ -48,31 +77,32 @@ const ImageContainer = styled.div`
   flex: 1;
   display: flex;
   justify-content: center;
- 
 `;
 const InfoContainer = styled.div`
   flex: 1;
+  
 `;
 const Image = styled.img`
-height: 100%;
-height: calc(100vh - 144px);
-width: 100%;
-object-fit: contain;
+  height: 100%;
+  height: calc(100vh - 144px);
+  width: 100%;
+  object-fit: contain;
 `;
 const Title = styled.h2`
   margin-bottom: 20px;
   font-size: 24px;
   font-weight: 600;
   flex: 4;
+  
 `;
 const Desc = styled.p`
   margin-bottom: 20px;
   font-size: 13px;
-  color: #2e2e2eb1;
+  color: ${secondaryTextColor};
 `;
 const Price = styled.span`
   margin-bottom: 30px;
-  color: #009f7f;
+  color: ${props => props.theme == "light" ? main : colorAccentMain};
   font-size: 35px;
 `;
 const ColorContainer = styled.div`
@@ -90,10 +120,9 @@ const ColorDot = styled.span`
   display: flex;
   align-items: center;
   justify-content: center;
-  border: ${({ isSelected }) => (isSelected ? "1px solid #009f7f" : "none")};
-  transition: border 200ms ease-in-out;
-  box-shadow: rgba(0, 0, 0, 0.05) 0px 6px 24px 0px, rgba(0, 0, 0, 0.08) 0px 0px 0px 1px;
 
+  box-shadow: rgba(0, 0, 0, 0.05) 0px 6px 24px 0px,
+    rgba(0, 0, 0, 0.08) 0px 0px 0px 1px;
 `;
 const Color = styled.div`
   background-color: ${(props) => props.color};
@@ -101,15 +130,15 @@ const Color = styled.div`
   height: 30px;
   border-radius: 50%;
   cursor: pointer;
-  opacity: ${({ isSelected }) => (isSelected ? "1" : "0.7")}; 
-  &:hover{
-
+  border: ${({ isSelected , theme }) =>
+    isSelected ? `2px solid ${theme == "light" ? softMain : colorAccentMain}` : "none"};
+  opacity: ${({ isSelected }) => (isSelected ? "1" : "0.7")};
+  &:hover {
     opacity: 1;
   }
   transition: 200ms ease-in-out;
 `;
 const SizeContainer = styled.div`
-  
   width: fit-content;
   display: flex;
   align-items: center;
@@ -120,46 +149,49 @@ const SizeT = styled.span`
   margin-right: 30px;
 `;
 const Size = styled.span`
-  border: 2px solid teal;
+  border: 1px solid ${lightMain};
   padding: 7px 15px;
   border-radius: 20px;
   margin-right: 10px;
   cursor: pointer;
-  color: ${(props) => (props.isSelected ? "white" : "black")};
-  background-color: ${(props) => (props.isSelected ? "teal" : "")};
+  color: ${(props) => (props.isSelected ? props.theme == "light" ? main : colorAccentMain: props.theme == "light" ? primaryTextColor : elementGrayBackground)};
+  background-color: ${(props) => (props.isSelected ? lightMain : "")};
   transition: 200ms ease-in-out;
-
 `;
 const AmountContainer = styled.div`
   display: flex;
-  border: solid;
   width: 40%;
   border-radius: 10px;
   padding: 10px;
   justify-content: space-between;
-  background-color: #009f7f;
-  color: white;
+  background-color: ${lightMain};
+  color: ${props => props.theme == "light" ? main : colorAccentMain};
   margin-bottom: 30px;
+  min-width: 200px;
+
 `;
 const AddToCardContainer = styled.div`
   display: flex;
   margin-top: 20px;
-  width: 30%;
+  width: 40%;
   border-radius: 10px;
   padding: 10px;
   align-items: center;
   justify-content: center;
-  background-color: #009f7f;
-  color: white;
+  background-color: ${props => props.theme == "light" ? main : lightMain};
+  color: ${whiteTextColor};
   cursor: pointer;
   margin-bottom: 30px;
+  min-width: 200px;
+  &:hover{
+  background-color: ${props => props.theme == "light" ? colorAccentMedium : colorAccentDark};
+
+  }
 `;
 const Amount = styled.span``;
 const RelatedProduct = styled.div`
- display: grid;
+  display: grid;
   gap: 20px;
-
-  // Conditionally set the number of columns based on props
   grid-template-columns: repeat(5, 5fr);
 `;
 
@@ -183,7 +215,7 @@ const Seller = styled.div`
   margin-right: 50px;
 `;
 const Shope = styled.div`
-  color: #009f7f;
+  color: ${main};
   text-decoration: underline;
   cursor: pointer;
   &:hover {
@@ -192,16 +224,21 @@ const Shope = styled.div`
 `;
 const CompareBtn = styled.button`
   padding: 15px 10px;
-  background-color: #009f7f;
-  color: white;
+  background-color: ${main};
+  color: ${whiteTextColor};
   cursor: pointer;
   width: 10%;
 `;
 const Button = styled.button`
-  background-color: #009f7f;
-  width: 225px;
-  color: white;
+  background-color: ${props => props.theme == "light" ? main : lightMain};
+  width: 40%;
+  min-width: 200px;
+  color: ${whiteTextColor};
   margin-bottom: 32px;
+  &:hover{
+  background-color: ${props => props.theme == "light" ? colorAccentMedium : colorAccentDark};
+
+  }
 `;
 
 const Input = styled.input`
@@ -209,7 +246,10 @@ const Input = styled.input`
   width: 60%;
   height: 45px;
   border-radius: 4px;
-  border: 1px solid #c9c9c9;
+  background-color: ${props => props.theme == "light" ? whiteTextColor : lightMain};
+  border: 1px solid ${props => props.theme == "light" ? grayBackground : colorElementBackgroundGray};
+  color: ${props => props.theme == "light" ? primaryTextColor : elementGrayBackground};
+  transition: 200ms ease-in-out;
 `;
 const ReviewContainer = styled.div`
   display: flex;
@@ -217,9 +257,10 @@ const ReviewContainer = styled.div`
   justify-content: space-evenly;
   gap: 8px;
   padding: 10px 20px;
-  border: 1px dashed #eee;
+  border: 1px dashed ${lightMain};
   border-radius: 4px;
-  background-color: white;
+  background-color: ${props => props.theme == "light" ? whiteTextColor : lightMain};
+  
 `;
 const Fog = styled.div`
   display: flex;
@@ -232,33 +273,33 @@ const Name = styled.span`
 `;
 const Text = styled.span`
   font-size: 14px;
-  color: #5c5c5c;
+  color: ${secondaryTextColor};
 `;
 const AttributeContainer = styled.div`
-display: flex;
-flex-direction: column;
-padding: 20px 0;
-gap: 8px;
+  display: flex;
+  flex-direction: column;
+  padding: 20px 0;
+  gap: 8px;
 `;
 const Attribute = styled.div`
-display: flex;
-gap: 8px;
-align-items: center;
-margin: 10px 0;
-
-
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  margin: 10px 0;
 `;
 const AttributeName = styled.span`
   font-size: 18px;
-  color: #4e4e4e;
+  color: ${props => props.theme == "light" ? primaryTextColor : elementGrayBackground};
+
 `;
 const AttributeValue = styled.span`
   font-size: 16px;
-  color: #959595;
+  color: ${secondaryTextColor};
 `;
 
 const CardProduct = () => {
   const user = useSelector((state) => state.user?.currentUser);
+  const theme = useSelector((state) => state.theme.mode);
   const [message, setMessage] = useState("");
   const [type, setType] = useState("");
   const [open, setOpen] = useState(false);
@@ -266,10 +307,8 @@ const CardProduct = () => {
   const Location = useLocation().pathname.split("/")[2];
   const [selectedAttributes, setSelectedAttributes] = useState(null);
 
-  const [selectedColor, setSelectedColor] = useState(null);
-  const [selectedSize, setSelectedSize] = useState(null);
   const [qte, setQte] = useState(0);
-  const queryClinet = useQueryClient()
+  const queryClinet = useQueryClient();
 
   //const [isReadyToAdd, setIsReadyToAdd] = useState(false);
   const [product, setProduct] = useState({});
@@ -280,13 +319,9 @@ const CardProduct = () => {
       ...prev,
       [name]: value,
     }));
-  
+
     console.log(selectedAttributes);
   };
-  
- 
-
-
 
   const Wish = async () => {
     try {
@@ -311,16 +346,13 @@ const CardProduct = () => {
   }, [Location]);
 
   useEffect(() => {
-    
-
     Wish();
   }, [Location]);
-
-  
 
   ////reactredux
   const quantity = useSelector((state) => state.cartProduct?.quantity);
   console.log("State:", quantity);
+  console.log(selectedAttributes)
 
   const handleQte = (option) => {
     {
@@ -328,75 +360,67 @@ const CardProduct = () => {
     }
   };
 
- 
 
-  
-  const [price, setPrice] = useState(0);
-
-
-  
-
-const handlAction = () => {
-  mutation.mutate()
-}
+  const handlAction = () => {
+    mutation.mutate();
+  };
   const handleSubmitCart = async () => {
     const productDetails = {
       ...product,
-      attributes:selectedAttributes,
-      quantity:qte
+      attributes: selectedAttributes,
+      quantity: qte,
     };
-
+    if( (product.categoryname == "Cloths" || product.categoryname == "Dicors") && selectedAttributes == null){
+      setMessage("Please Select item attributes");
+      setType("error");
+      setOpen(true);
+      return;
+    }
 
     try {
-      if(user?.idUSER != null){
-
+      if (user?.idUSER != null) {
         const response = await newRequest.post(
           `cards/cart/${user?.idUSER}/add/${Location}`,
           productDetails
         );
         if (response.status === 200) {
-        
-        
-
-        setMessage("Product Added Successfully to the cart");
-        setType("success");
-        setOpen(true);
+          setMessage("Product Added Successfully to the cart");
+          setType("success");
+          setOpen(true);
+        } else if(response.status === 400){
+          setMessage("Product Already exist in the Cart!!");
+          setType("error");
+          setOpen(true);
+        }
       } else {
-        setMessage("Product Added Failed to the cart");
+        setMessage("You need to LOGIN first");
         setType("error");
         setOpen(true);
       }
-      }else{
-        setMessage("You need to LOGIN first");
-            setType("error");
-            setOpen(true);
-      }
-
-      
     } catch (error) {
       console.error("Error adding product:", error);
       message.error("Failed to add product.");
     }
   };
   const mutation = useMutation({
-    mutationFn:handleSubmitCart,
+    mutationFn: handleSubmitCart,
     onSuccess: () => {
-      queryClinet.invalidateQueries(['cart'])
-    }
-  })
+      queryClinet.invalidateQueries(["cart"]);
+    },
+  });
   const handleWish = async () => {
     try {
-if(!user){
-  setMessage("Please login first !!");
+      if (!user) {
+        setMessage("Please login first !!");
         setType("error");
         setOpen(true);
         return;
-}
+      }
 
       const response = await newRequest.post(
         `wish/${user?.idUSER}/add/${Location}`
       );
-      
+
       if (response.status === 200) {
         setMessage("Product add to wish list");
         setType("success");
@@ -415,12 +439,12 @@ if(!user){
       const response = await newRequest.delete(
         `wish/${user?.idUSER}/delete/${Location}`
       );
-      
+
       if (response.status === 200) {
         setMessage("Product removed successfully");
         setType("success");
         setOpen(true);
-        Wish()
+        Wish();
       } else {
         setMessage("Failed to remove product!! Contact Us");
         setType("error");
@@ -446,47 +470,39 @@ if(!user){
     }
   };
 
-  
   const handleSubmit = async () => {
-   
     const reviewDetails = {
       rate: value,
       text: text.text,
     };
-    if(user){
-
+    if (user) {
       try {
         const response = await newRequest.post(
           `review/submit-review/${user?.idUSER}/${Location}`,
           reviewDetails
         );
-      
-      
-      if (response.status === 200) {
-        message.success("Review added successfully.");
-      } else {
-        message.error("Review to add product.");
-      }
-    } catch (error) {
-      console.error("Error adding product:", error);
-      message.error("Failed to add Review.");
-    } finally {
-      getReviews();
 
+        if (response.status === 200) {
+          message.success("Review added successfully.");
+        } else {
+          message.error("Review to add product.");
+        }
+      } catch (error) {
+        console.error("Error adding product:", error);
+        message.error("Failed to add Review.");
+      } finally {
+        getReviews();
+      }
+    } else {
+      setMessage("Please Login First!!");
+      setType("error");
+      setOpen(true);
     }
-  } else {
-    setMessage("Please Login First!!");
-        setType("error");
-        setOpen(true);
-  }
-    
   };
-  
+
   const [reviews, setReviews] = useState([]);
 
   useEffect(() => {
-   
-
     getReviews();
   }, []);
 
@@ -504,8 +520,6 @@ if(!user){
 
     getTotal();
   }, []);
-
-
 
   const categoryAttributesConfig = {
     Cloths: {
@@ -530,13 +544,24 @@ if(!user){
         { key: "GPU", label: "GPU" },
         { key: "battery", label: "Battery Capacity", suffix: " MAH" },
         { key: "storage", label: "Storage", suffix: " GB" },
-        { key: "camera", label: "Camera", suffix: " PX", condition: (p) => ["Tablet", "Mobile"].includes(p.subname) },
+        {
+          key: "camera",
+          label: "Camera",
+          suffix: " PX",
+          condition: (p) => ["Tablet", "Mobile"].includes(p.subname),
+        },
       ],
     },
     Fitness: {
       fields: [
         { key: "height", label: "Height", suffix: " cm" },
-        { key: "weight", label: "Weight", type: "size", split: true, suffix: " KG" },
+        {
+          key: "weight",
+          label: "Weight",
+          type: "size",
+          split: true,
+          suffix: " KG",
+        },
         { key: "material", label: "Craft Material" },
       ],
     },
@@ -551,134 +576,172 @@ if(!user){
       ],
     },
   };
-  
+
   const categoryConfig = categoryAttributesConfig[product.categoryname];
   if (!categoryConfig) return null;
 
   return (
-    <Container>
-        <AlertMessage open={open} setOpen={setOpen} message={message} type={type} />
+    <Container theme={theme}>
+      <AlertMessage
+        open={open}
+        setOpen={setOpen}
+        message={message}
+        type={type}
+      />
 
-      <Wrapper>
-        <ProductConatainer>
+      <Wrapper theme={theme} >
+        <ProductConatainer theme={theme}>
           <ImageContainer>
             <Image src={product.productimage} />
           </ImageContainer>
-          <InfoContainer>
+          <InfoContainer theme={theme}>
             <Title>{product.productname}</Title>
 
-            <Desc>{product.productdesc}</Desc>
-            <Price>{product?.discount == 0 ? '': <Price  style={{fontSize:24 , textDecoration: 'line-through' , color:'#b9b9b9' , marginRight:20}}>$ {product.productprice.toFixed(2)} </Price>}  $ {(product.productprice - ((product.productprice * product.discount) / 100)).toFixed(2)} </Price>
-            <AttributeContainer>
-      {categoryConfig.fields.map((field) => {
-        const value = product?.attributes?.[field.key];
-        if (!value || (field.condition && !field.condition(product))) return null;
-
-        if (field.type === "color") {
-          const colors = field.split ? value.split(",") : [value];
-          return (
-            <ColorContainer key={field.key}>
-              <ColorT>{field.label}</ColorT>
-              {colors.map((color, index) => (
-               <ColorDot
-               key={index}
-               
-               isSelected={color === selectedColor}
-               onClick={() => handleAttributes("color", color)}
-             >
-               <Color color={color} isSelected={color === selectedAttributes?.color} />
-             </ColorDot>
-             
-              ))}
-            </ColorContainer>
-          );
-        }
-
-        if (field.type === "size") {
-          const sizes = field.split ? value.split(",") : [value];
-          return (
-            <SizeContainer key={field.key}>
-              <SizeT>{field.label}</SizeT>
-              {sizes.map((size, index) => (
-                <Size
-                  key={index}
-                  isSelected={size === selectedAttributes?.size}
-                  onClick={() => handleAttributes("size", size)}
-
+            <Desc theme={theme}>{product.productdesc}</Desc>
+            <Price theme={theme}>
+              {product?.discount == 0 ? (
+                ""
+              ) : (
+                <Price
+                  style={{
+                    fontSize: 24,
+                    textDecoration: "line-through",
+                    color:secondaryTextColor ,
+                    marginRight: 20,
+                  }}
                 >
-                  {size} {field.suffix || ""}
-                </Size>
-              ))}
-            </SizeContainer>
-          );
-        }
+                  $ {product.productprice.toFixed(2)}{" "}
+                </Price>
+              )}{" "}
+              ${" "}
+              {(
+                product.productprice -
+                (product.productprice * product.discount) / 100
+              ).toFixed(2)}{" "}
+            </Price>
+            <AttributeContainer theme={theme}>
+              {categoryConfig.fields.map((field) => {
+                const value = product?.attributes?.[field.key];
+                if (!value || (field.condition && !field.condition(product)))
+                  return null;
 
-        return (
-          <Attribute key={field.key}>
-            <AttributeName>{field.label}:</AttributeName>
-            <AttributeValue>
-              {value} {field.suffix || ""}
-            </AttributeValue>
-          </Attribute>
-        );
-      })}
-    </AttributeContainer>
-           
+                if (field.type === "color") {
+                  const colors = field.split ? value.split(",") : [value];
+                  return (
+                    <ColorContainer key={field.key}>
+                      <ColorT>{field.label}</ColorT>
+                      {colors.map((color, index) => (
+                        <ColorDot
+                          key={index}
+                          onClick={() => handleAttributes("color", color)}
+                        >
+                          <Color
+                          theme={theme}
+                            color={color}
+                            isSelected={color === selectedAttributes?.color}
+                          />
+                        </ColorDot>
+                      ))}
+                    </ColorContainer>
+                  );
+                }
+
+                if (field.type === "size") {
+                  const sizes = field.split ? value.split(",") : [value];
+                  return (
+                    <SizeContainer key={field.key}>
+                      <SizeT>{field.label}</SizeT>
+                      {sizes.map((size, index) => (
+                        <Size
+                          key={index}
+                          theme={theme}
+                          isSelected={size === selectedAttributes?.size}
+                          onClick={() => handleAttributes("size", size)}
+                        >
+                          {size} {field.suffix || ""}
+                        </Size>
+                      ))}
+                    </SizeContainer>
+                  );
+                }
+
+                return (
+                  <Attribute theme={theme} key={field.key}>
+                    <AttributeName theme={theme}>{field.label}:</AttributeName>
+                    <AttributeValue theme={theme}>
+                      {value} {field.suffix || ""}
+                    </AttributeValue>
+                  </Attribute>
+                );
+              })}
+            </AttributeContainer>
+
             {qte == 0 ? (
-              <AddToCardContainer onClick={() => handleQte("add")}>
+              <AddToCardContainer theme={theme} onClick={() => handleQte("add")}>
                 ADD TO CARD
               </AddToCardContainer>
             ) : (
               <>
-                <AmountContainer>
+                <AmountContainer theme={theme}>
                   <AddIcon
                     className="cursor-pointer"
                     onClick={() => handleQte("add")}
-                    sx={{cursor:'pointer'}}
+                    sx={{ cursor: "pointer" , color: theme == "light" ? main : colorAccentMain }}
                   />
-                  <Amount>{qte}</Amount>
+                  <Amount style={{color: theme == "light" ? main : colorAccentMain}}>{qte}</Amount>
                   <RemoveIcon
                     className="cursor-pointer"
                     onClick={() => handleQte("remove")}
-                    sx={{cursor:'pointer'}}
+                    sx={{ cursor: "pointer" , color: theme == "light" ? main : colorAccentMain }}
                   />
                 </AmountContainer>
                 <Button
                   onClick={() => {
-                    
-                    setPrice(product.productprice);
                     handlAction();
                   }}
+                  theme={theme}
                 >
                   ADD TO CARD
                 </Button>
               </>
             )}
 
-            <hr style={{ marginBottom: 60 }}></hr>
-            <CategorieContainer>
-              <Categorie>Categories : <p style={{fontSize:16 , color:'teal'}}>{product?.categoryname}</p> </Categorie>
-              <Categorie>Sub category : <p style={{fontSize:16 , color:'teal'}}>{product?.subname}</p> </Categorie>
-              <Categorie>Type : <p style={{fontSize:16 , color:'teal'}}>{product?.typename}</p> </Categorie>
+            <hr style={{ marginBottom: 60 , borderColor: theme == "light" ? "" : colorElementBackgroundGray }}></hr>
+            <CategorieContainer theme={theme}>
+              <Categorie>
+                Categories :{" "}
+                <p style={{ fontSize: 16, color: theme == "light" ? main : colorAccentMain }}>
+                  {product?.categoryname}
+                </p>{" "}
+              </Categorie>
+              <Categorie>
+                Sub category :{" "}
+                <p style={{ fontSize: 16, color: theme == "light" ? main : colorAccentMain}}>{product?.subname}</p>{" "}
+              </Categorie>
+              <Categorie>
+                Type :{" "}
+                <p style={{ fontSize: 16, color: theme == "light" ? main : colorAccentMain }}>{product?.typename}</p>{" "}
+              </Categorie>
             </CategorieContainer>
             <SellerContainer>
               <Seller>Owner</Seller>
               <Link to={`/Shops/${product?.idSHOP}`}>
-              <Shope>{product?.shopname}</Shope>
+                <Shope theme={theme}>{product?.shopname}</Shope>
               </Link>
             </SellerContainer>
           </InfoContainer>
-          <HeartContainer onClick={ !isWish ? handleWish : removeWish}>
-            {isWish ? 
-            <FavoriteRoundedIcon sx={{ color: "#009f7f" , cursor: "pointer" }}  />
-            :
-            <FavoriteBorderIcon sx={{ color: "#009f7f" , cursor: "pointer" }} />
-            }
+          <HeartContainer theme={theme} onClick={!isWish ? handleWish : removeWish}>
+            {isWish ? (
+              <FavoriteRoundedIcon sx={{ color: theme == "light" ? main : colorAccentMain, cursor: "pointer" }} />
+            ) : (
+              <FavoriteBorderIcon sx={{ color: theme == "light" ? main : colorAccentMain, cursor: "pointer" }} />
+            )}
           </HeartContainer>
         </ProductConatainer>
       </Wrapper>
 
       <Wrapper
+      theme={theme}
         style={{
           alignItems: "center",
           padding: 0,
@@ -700,13 +763,13 @@ if(!user){
         </Title>
       </Wrapper>
       {reviews == null ? (
-        <Wrapper style={{ padding: "0", height: 100 }}>
+        <Wrapper theme={theme} style={{ padding: "0", height: 100 }}>
           <Title
             style={{
               display: "flex",
               justifyContent: "center",
               alignItems: "center",
-              color: "#2e2e2e71",
+              color: primaryTextColor,
             }}
           >
             No reviews found
@@ -714,10 +777,11 @@ if(!user){
         </Wrapper>
       ) : (
         <Wrapper
+        theme={theme}
           style={{
             padding: "20px 20px",
             gap: 20,
-            backgroundColor: "#eee",
+            backgroundColor: theme == "light" ? grayBackground : colorBackgroundGray,
             height: 140,
             contain: "paint",
             width: "100%",
@@ -725,7 +789,7 @@ if(!user){
           }}
         >
           {reviews?.map((item) => (
-            <ReviewContainer>
+            <ReviewContainer theme={theme}>
               <Fog>
                 <Avatar src={item.userimage} />
                 <Name>{item.reviewer}</Name>
@@ -742,39 +806,40 @@ if(!user){
         </Wrapper>
       )}
 
-      <Wrapper>
+      <Wrapper theme={theme}>
+    
         <Title
           style={{
             display: "flex",
             justifyContent: "center",
             alignItems: "center",
-            color: "#2e2e2e71",
+            color: primaryTextColor,
             gap: "32px",
           }}
         >
           <Rating
             name="simple-controlled"
             value={value}
-            onChange={(event, newValue) => {
+            sx={{bgcolor: theme == "light" ? '' : colorElementBackgroundGray , padding:'2px 8px' , borderRadius:8}}
+            onChange={(event , newValue) => {
               setValue(newValue);
             }}
           />
-          <Input name="text" placeholder="Add Review" onChange={handlChange} />
-          <Button onClick={handleSubmit} style={{ fontSize: 16, margin: 0 }}>
+          <Input theme={theme} name="text" placeholder="Add Review" onChange={handlChange} />
+          <Button theme={theme} onClick={handleSubmit} style={{ fontSize: 16, margin: 0 , width:200 }}>
             Add Review
           </Button>
         </Title>
       </Wrapper>
-      <Wrapper style={{ display: "flex", flexDirection: "column" }}>
+      <Wrapper theme={theme} style={{ display: "flex", flexDirection: "column" }}>
         <Title>Compare Between Product</Title>
         <Link to={`/compare/${Location}`}>
           <CompareBtn>Compare</CompareBtn>
         </Link>
       </Wrapper>
-      <Wrapper style={{ display: "flex", flexDirection: "column" }}>
-          <Title>Similar Product</Title>
-        <RelatedProduct>
-        </RelatedProduct>
+      <Wrapper theme={theme} style={{ display: "flex", flexDirection: "column" }}>
+        <Title>Similar Product</Title>
+        <RelatedProduct></RelatedProduct>
       </Wrapper>
     </Container>
   );

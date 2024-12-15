@@ -40,7 +40,7 @@ router.post("/cart/:userId/add/:productId", verifyToken, async (req, res) => {
   
         return res.status(200).json({ message: "Product added to cart successfully." });
       } else {
-        return res.status(200).json({ message: "Product is already in the cart." });
+        return res.status(400).json({ message: "Product is already in the cart." });
       }
     } catch (error) {
       console.error("Error adding product to cart:", error);
@@ -126,9 +126,10 @@ c.idCART,
 
 //update USER Cart
 
-router.put("/update/:userId/:productId",verifyToken , async(req,res)=>{
+router.put("/update/:userId/:productId/:item",verifyToken , async(req,res)=>{
     const userId = req.params.userId; // Extracting userId from params
     const idP = req.params.productId;
+    const item = req.params.item;
     const qte = req.body.quantity;
     
     try {
@@ -137,10 +138,10 @@ router.put("/update/:userId/:productId",verifyToken , async(req,res)=>{
       const UpdateCartQuery = `
          UPDATE CART 
             SET quantity = ? 
-            WHERE id_Client = ? AND id_Product = ?;
+            WHERE id_Client = ? AND id_Product = ? AND idCART = ?;
       `;
 
-      connection.query(UpdateCartQuery, [qte,userId, idP]);
+      connection.query(UpdateCartQuery, [qte,userId, idP , item]);
       
       res.status(200).json("Product Updated !")
 

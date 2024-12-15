@@ -2,10 +2,23 @@ import styled from "styled-components";
 import Products from "../features/Products/Products.jsx";
 import Side from "../Components/side.jsx";
 import { useEffect } from "react";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { reset } from "../redux/category.js";
+import ism from "./../assets/ecommerce.json";
+import {
+  colorAccentDarkTransparent,
+  colorAccentLight,
+  colorAccentMedium,
+  colorBackgroundBlack,
+  colorPrimaryBlack,
+  grayBackground,
+  lightSoftMain,
+  main,
+  primaryTextColor,
+  whiteTextColor,
+} from "../Colors.jsx";
+import Lottie from "lottie-react";
 
-//Styled Component
 // Styled Component
 
 const All = styled.div``;
@@ -13,32 +26,42 @@ const All = styled.div``;
 const MotherContainer = styled.div`
   transition: all 0.5s ease-in-out;
   filter: ${(props) => (props.open ? "brightness(80%)" : "")};
+  width: 100%;
 `;
 
 const Container = styled.div`
   display: flex;
   justify-content: center;
   align-items: center;
-  background-image: url("https://pickbazar-graphql.redq.io/_next/image?url=https%3A%2F%2Fpickbazarlaravel.s3.ap-southeast-1.amazonaws.com%2F908%2Fcloths.png&w=1920&q=75");
   background-size: cover;
   background-position: center;
-  background-color: #eee;
+  mix-blend-mode: multiply;
+  background-color: ${(props) =>
+    props.theme == "light" ? whiteTextColor : colorPrimaryBlack};
+  transition: 200ms ease-in-out;
 
   @media (max-width: 768px) {
-    padding: 20px;
+    
     text-align: center;
   }
 `;
 
 const Wrapper = styled.div`
-  height: calc(100vh - 80px);
+  transition: 200ms ease-in-out;
+
+  width: 100%;
+  min-height: calc(100vh - 80px);
   display: flex;
-  justify-content: center;
+  justify-content: space-evenly;
   align-items: center;
+  position: relative;
+  overflow: hidden;
 
   @media (max-width: 768px) {
-    height: auto;
-    padding: 20px;
+    
+    
+    flex-direction: column-reverse;
+    
   }
 `;
 
@@ -48,18 +71,23 @@ const SearchContainer = styled.div`
   text-align: center;
   align-items: center;
   justify-content: center;
-
+  width: 50%;
   height: 100%;
+  padding: 0 32px;
+  color: ${(props) =>
+    props.theme == "light" ? primaryTextColor : whiteTextColor};
+  transition: 200ms ease-in-out;
 
   @media (max-width: 768px) {
     padding: 20px;
+  
+    width: 100%;
   }
 `;
 
 const SearchTitle = styled.h1`
   font-size: 48px;
   margin-bottom: 20px;
-  color: black;
 
   @media (max-width: 768px) {
     font-size: 32px;
@@ -67,7 +95,6 @@ const SearchTitle = styled.h1`
 `;
 
 const SearchPara = styled.p`
-  color: black;
   font-size: 17px;
   margin-bottom: 30px;
 
@@ -81,6 +108,7 @@ const SearchInputContainer = styled.div`
   justify-content: center;
   width: 100%;
   max-width: 600px;
+  transition: 200ms ease-in-out;
 
   @media (max-width: 768px) {
     flex-direction: column;
@@ -92,11 +120,21 @@ const SearchInput = styled.input`
   flex: 4;
   border-top-left-radius: 10px;
   border-bottom-left-radius: 10px;
+  transition: 200ms ease-in-out;
+
   border: none;
   padding: 20px 10px;
+  background-color: ${(props) =>
+    props.theme == "light" ? grayBackground : colorAccentDarkTransparent};
+  color: ${(props) =>
+    props.theme == "light" ? primaryTextColor : whiteTextColor};
 
   &:focus {
-    outline-color: #009f7f;
+    border: ${(props) =>
+      props.theme == "light"
+        ? `2px solid ${main}`
+        : `2px solid ${colorAccentMedium}`};
+    outline: none;
   }
 
   @media (max-width: 768px) {
@@ -108,19 +146,25 @@ const SearchInput = styled.input`
 
 const SearchButton = styled.button`
   flex: 1;
+  border-radius: 0;
   border-top-right-radius: 10px;
   border-bottom-right-radius: 10px;
-  background-color: #009f7f;
-  color: white;
+  background-color: ${(props) =>
+    props.theme == "light" ? main : colorAccentMedium};
+
+  color: ${whiteTextColor};
   font-weight: 600;
   font-size: 17px;
   cursor: pointer;
-  border: none;
+  border: 2px solid;
+  border-color: ${(props) =>
+    props.theme == "light" ? main : colorAccentMedium};
+
   padding: 20px 10px;
-  transition: all 0.3s ease-in-out;
+  transition: all 0.2s ease-in-out;
 
   &:hover {
-    opacity: 0.9;
+    opacity: 0.8;
   }
 
   @media (max-width: 768px) {
@@ -131,7 +175,9 @@ const SearchButton = styled.button`
 
 const ProductConatiner = styled.div`
   display: flex;
-  background-color: #eee;
+  background-color: ${(props) =>
+    props.theme == "light" ? grayBackground : colorBackgroundBlack};
+  transition: 200ms ease-in-out;
 
   @media (max-width: 768px) {
     flex-direction: column;
@@ -141,13 +187,16 @@ const ProductConatiner = styled.div`
 // SideBarcontainer
 const SideBarContainer = styled.div`
   height: calc(100vh - 80px);
-  background-color: white;
+  background-color: ${(props) =>
+    props.theme == "light" ? whiteTextColor : colorPrimaryBlack};
+  color: ${(props) =>
+    props.theme == "light" ? primaryTextColor : whiteTextColor};
+
   position: sticky;
   top: 80px;
   flex: 0.25;
 
   @media (max-width: 768px) {
-
     position: static;
     height: auto;
     flex: unset;
@@ -161,9 +210,17 @@ const ProductsContainer = styled.div`
     width: 100%;
   }
 `;
+const LottieContainer = styled.div`
+  width: 40%;
+
+  @media (max-width: 768px) {
+    width: 100%;
+  }
+`;
 
 // Body of PHomepage
 const PHomepage = () => {
+  const theme = useSelector((state) => state.theme.mode);
   const dispatch = useDispatch();
   useEffect(() => {
     dispatch(reset());
@@ -171,30 +228,51 @@ const PHomepage = () => {
 
   return (
     <All>
-      <MotherContainer>
-        <Container>
-          <Wrapper>
-            <SearchContainer>
+      <MotherContainer theme={theme}>
+        <Container theme={theme}>
+          <Wrapper theme={theme}>
+            <SearchContainer theme={theme}>
               <SearchTitle>Shop your designer dresses</SearchTitle>
               <SearchPara>
                 Ready to wear dresses tailored for you online. Hurry up while
                 stock lasts.
               </SearchPara>
-              <SearchInputContainer>
-                <SearchInput placeholder="Search your product from here"></SearchInput>
-                <SearchButton>Search</SearchButton>
+              <SearchInputContainer theme={theme}>
+                <SearchInput
+                  theme={theme}
+                  placeholder="Search your product from here"
+                ></SearchInput>
+                <SearchButton theme={theme}>Search</SearchButton>
               </SearchInputContainer>
             </SearchContainer>
+            <LottieContainer>
+
+            <Lottie animationData={ism} style={{ width: "100%" }} />
+            </LottieContainer>
+
+            <div
+              style={{
+                width: "50%",
+                height: "100%",
+                position: "absolute",
+                right: -50,
+                bottom: -150,
+                borderRadius: "80% 0 0 0",
+                backgroundColor:
+                  theme == "light" ? lightSoftMain : colorAccentLight,
+                zIndex: -1,
+              }}
+            />
           </Wrapper>
         </Container>
 
-        <ProductConatiner>
-          <SideBarContainer>
-            <Side />
+        <ProductConatiner theme={theme}>
+          <SideBarContainer theme={theme}>
+            <Side theme={theme} />
           </SideBarContainer>
 
           <ProductsContainer>
-            <Products />
+            <Products theme={theme} />
           </ProductsContainer>
         </ProductConatiner>
       </MotherContainer>

@@ -13,6 +13,9 @@ import { useSelector } from "react-redux";
 import ControlPointTwoToneIcon from '@mui/icons-material/ControlPointTwoTone';
 import { Link } from "react-router-dom";
 import AddTwoToneIcon from '@mui/icons-material/AddTwoTone';
+import Loading from "../../../Components/Pending/Loading";
+import EmptyData from "../../../Components/Pending/EmptyData";
+import { colorAccentDark, colorAccentDarkTransparent, colorAccentLight, colorAccentMedium, colorAccentMediumTransparent, colorAccentSoft, colorAccentSoftTransparent, colorPrimaryBlack, main, primaryTextColor, subColumnMain, subSubColumnMain, whiteTextColor } from "../../../Colors";
 const Container = styled.div`
  
   padding: 32px;
@@ -25,21 +28,44 @@ const Container = styled.div`
 
 
 const ListContainer = styled.div`
-  background-color: white;
+  background-color: ${props => props.theme == "light" ? whiteTextColor : colorAccentDarkTransparent};
+  color: ${props => props.theme == "light" ? primaryTextColor : whiteTextColor};
   border-radius: 4px;
   contain: paint;
   padding-bottom: 32px;
   overflow: auto;
+  height: calc(100vh - 150px);
+  &::-webkit-scrollbar {
+    width: 6px; /* width of the entire scrollbar */
+  }
+  &::-webkit-scrollbar-track {
+    background: transparent; /* color of the tracking area */
+  }
+  &::-webkit-scrollbar-thumb {
+    background-color: rgba(147, 147, 147, 0.7); /* color of the scroll thumb */
+    border-radius: 20px; /* roundness of the scroll thumb */
+    /* creates padding around scroll thumb */
+  }
+  &::-webkit-scrollbar-thumb:hover {
+    background-color: rgba(147, 147, 147, 1); /* color of the scroll thumb */
+    width: 8px;
+    border-radius: 20px; /* roundness of the scroll thumb */
+    /* creates padding around scroll thumb */
+  }
+  
 `;
 
 const Tags = styled.div`
+position: sticky;
+top: 0;
   display: flex;
   padding: 20px;
-  background-color: ${props => props.type == "Container" ? "#28997Ba8" : props.type == "Sub" ? "#31BF98a8" : props.type == "Type" ? "#53ccaca8" : ''} ;
-  color: white;
+  background-color: ${props => props.type == "Container" ? props.theme == "light" ? main : colorAccentDark : props.type == "Sub" ? props.theme == "light" ? subColumnMain : colorAccentSoft : props.type == "Type"  ? props.theme == "light" ? subSubColumnMain : colorAccentMedium: ''} ;
+  color: ${whiteTextColor};
   text-align: center;
   width: auto;
 min-width: 600px;
+z-index: ${props => props.type == "Container" ? 2 : 1};
 `;
 
 const Tag = styled.div`
@@ -63,7 +89,7 @@ const Informations = styled.div`
 `;
 
 const OrderDetails = styled.div`
-  background-color: ${props => props.type == "sub" ? "#f9f9f950" : "#f9f9f9"} ;
+  background-color: ${props => props.type == "sub" ? props.theme == "light" ? "#f9f9f950" : colorAccentSoftTransparent : props.theme == "light" ? "#f9f9f9" : colorAccentMediumTransparent} ;
   margin: 0 20px;
   border-radius: 4px;
   max-height: ${(props) =>
@@ -91,6 +117,8 @@ flex-direction: column;
 const Icon = styled.img`
 width: 30px;
 height:30px;
+filter: ${props => props.theme === "light" ? "brightness(1) invert(0)" : "brightness(0) invert(1)"};
+
 `
 
 
@@ -117,6 +145,7 @@ const rowTagType = [ "ID",
   ];
 
   const CategoryList = () => {
+    const theme = useSelector(state => state.theme.mode)
     const [categories, setCategories] = useState([]);
 
   const [message, setMessage] = useState('');
@@ -124,14 +153,20 @@ const rowTagType = [ "ID",
   const [open, setOpen] = useState(false);
   const [selectedOrderId, setSelectedOrderId] = useState(null);
   const [selectedSub, setSelectedSub] = useState(null);
+  const [loding , setLoading] = useState(false)
   
   const getCategories = async () => {
     try {
       const res = await newRequest.get(`/category/getallcat`);
       console.log("Fetched categories:", res.data);
       setCategories(res.data);
+     setLoading(true)
     } catch (err) {
       console.error("Error fetching categories:", err);
+    }finally{
+      setTimeout(() => {
+        setLoading(false)
+      } , [1000])
     }
   };
   
@@ -206,17 +241,17 @@ const rowTagType = [ "ID",
   return (
     <Container>
       <AlertMessage open={open} setOpen={setOpen} message={message} type={type} />
-      <ListContainer>
-        <Tags type="Container">
+      <ListContainer theme={theme}>
+        <Tags theme={theme} type="Container">
           {rowTagCat.map((tag, index) => (
             <Tag key={index} tag={tag} >{tag}</Tag>
           ))}
         </Tags>
-        {categories.length > 0 ? categories.map((cat, index) => (
+        {categories != "" && !loding ? categories.length > 0 ? categories.map((cat, index) => (
           <div key={index}>
-            <Order>
+            <Order theme={theme}>
               <Informations type="ID">#{cat?.id}</Informations>
-              <Informations type="Icon"><Icon src={cat?.icon} /> </Informations>
+              <Informations type="Icon"><Icon theme={theme} src={cat?.icon} /> </Informations>
               <Informations>
                 
                   {cat?.categoryname}
@@ -226,11 +261,12 @@ const rowTagType = [ "ID",
               <Informations type="Action">
               <Tooltip title='Delete' arrow>
 
-                <IconButton onClick={() => handleDelete(cat?.id , 'cat')}>
+                <IconButton color="error" onClick={() => handleDelete(cat?.id , 'cat')}>
                   <DeleteTwoToneIcon color="error" />
                 </IconButton>
               </Tooltip>
                 <IconButton
+                color="secondary"
                   onClick={() => handleToggleOrderDetails(cat?.id , 'Cat')}
                   sx={{ rotate: selectedOrderId === cat?.id ? "90deg" : "0", transition: "200ms" }}
                 >
@@ -238,17 +274,17 @@ const rowTagType = [ "ID",
                 </IconButton>
               </Informations>
             </Order>
-            <OrderDetails type="sub" show={selectedOrderId === cat?.id}>
-              <Tags type="Sub">
+            <OrderDetails theme={theme} type="sub" show={selectedOrderId === cat?.id}>
+              <Tags type="Sub" theme={theme}>
                 {rowTagSub.map((tag, index) => (
                   <Tag key={index} tag ={tag}>{tag}</Tag>
                 ))}
               </Tags>
               {cat?.subcategories && cat.subcategories.map((subcategory, idx) => (
                 <div key={idx}>
-                  <Order>
+                  <Order theme={theme}>
                     <Informations type="ID">#{subcategory?.id}</Informations>
-                    <Informations type="Icon"><Icon src={subcategory?.subIcon} /> </Informations>
+                    <Informations type="Icon"><Icon theme={theme} src={subcategory?.subIcon} /> </Informations>
                     <Informations>
                       
                         {subcategory?.subname}
@@ -271,8 +307,8 @@ const rowTagType = [ "ID",
                     </Informations>
                     
                   </Order>
-                  <OrderDetails  show={selectedSub === subcategory?.id}>
-              <Tags type="Type">
+                  <OrderDetails theme={theme}  show={selectedSub === subcategory?.id}>
+              <Tags theme={theme} type="Type">
                 {rowTagType.map((tag, index) => (
                   <Tag key={index} tag={tag}>{tag}</Tag>
                 ))}
@@ -283,7 +319,7 @@ const rowTagType = [ "ID",
                 <div key={idx}>
                   <Order>
                     <Informations type="ID">#{type?.id}</Informations>
-                    <Informations type="Icon"><Icon src={type?.icon} /> </Informations>
+                    <Informations type="Icon"><Icon theme={theme} src={type?.icon} /> </Informations>
                     <Informations>
                       
                         {type?.name}
@@ -314,13 +350,15 @@ const rowTagType = [ "ID",
             <Lottie animationData={me} style={{ width: "40%" }} />
             No Orders Found
           </LottieContainer>
-        )}
+        ) : loding ? 
+      <Loading />
+    : <EmptyData />}
       </ListContainer>
 
       <Link to={'/add-cat'}>
       <Tooltip title='add category' arrow>
-      <Fab color="success" aria-label="add" sx={{position:'absolute' , right : 32 , bottom:'108px'}}>
-        <ControlPointTwoToneIcon sx={{color : 'white'}} />
+      <Fab color="success"  aria-label="add" sx={{position:'absolute' , right : 32 , bottom:'108px' , bgcolor:main}}>
+        <ControlPointTwoToneIcon sx={{color : whiteTextColor}} />
  
 </Fab>
       </Tooltip>

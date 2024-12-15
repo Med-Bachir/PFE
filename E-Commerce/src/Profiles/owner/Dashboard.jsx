@@ -9,8 +9,11 @@ import { useSelector } from "react-redux";
 
 import newRequest from "../../utils/newRequest";
 import Lottie from "lottie-react";
+import ItemContainer from "../../Components/ItemContainer"
 
 import me from "../../assets/Lotties/Animation - 1716145973359.json";
+import Loading from "../../Components/Pending/Loading";
+import { colorAccentDarkTransparent, colorAccentLight, colorAccentMain, colorAccentMedium, colorAccentMediumTransparent, colorAccentSoft, colorAccentSoftTransparent, colorAccentTransparent, colorBackgroundBlack, colorBackgroundGray, colorPrimaryBlack, grayBackground, lightSoftMain, main, primaryTextColor, transparentMain, whiteTextColor } from "../../Colors";
 
 const Container = styled.div`
   padding: 0 32px;
@@ -19,15 +22,17 @@ const Container = styled.div`
   overflow-y: scroll;
   height: calc(100vh - 80px);
 `;
-export const StaticContainer = styled.div`
+ const StaticContainer = styled.div`
   margin: 32px 0;
   display: flex;
   flex-direction: column;
   border-radius: 12px;
-  background-color: white;
+  background-color: ${props => props.theme == "light" ? whiteTextColor  : colorPrimaryBlack};
+  color: ${props => props.theme == "light" ? colorPrimaryBlack :  whiteTextColor };
+
   padding: 32px 0;
 `;
-export const StaticTitle = styled.h3`
+const StaticTitle = styled.h3`
   margin-bottom: 32px;
   font-weight: 500;
   padding-left: 32px;
@@ -39,47 +44,7 @@ const Statics = styled.div`
   gap: 24px;
   padding: 0 32px;
 `;
-const Item = styled.div`
-  flex: 1;
-  border: 1px solid #33333331;
-  border-bottom: 4px solid
-    ${(props) =>
-      props.color === "red"
-        ? "#ff8383"
-        : props.color === "green"
-        ? "#ff80d5"
-        : props.color === "blue"
-        ? "#c06dff"
-        : "#745eff"};
 
-  border-radius: 8px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 32px 24px;
-`;
-const ItemIcon = styled.img`
-  width: 60px;
-  padding: 12px;
-  border-radius: 4px;
-  background-color: #eeeeeea4;
-`;
-const ItemInfo = styled.div`
-  display: flex;
-  text-align: end;
-  flex-direction: column;
-  justify-content: space-between;
-  align-items: end;
-  gap: 8px;
-`;
-
-const ItemTitle = styled.span`
-  color: gray;
-`;
-const ItemStatic = styled.span`
-  font-weight: 600;
-  font-size: 20px;
-`;
 
 const StaticButContainer = styled.div`
   display: flex;
@@ -96,6 +61,8 @@ const ButtonGroup = styled.div`
   gap: 2px;
   background-color: #eeeeee6e;
   padding: 4px;
+  background-color: ${props => props.theme == 'light' ? grayBackground : colorBackgroundBlack};
+
 `;
 const Button = styled.button`
   background-color: transparent;
@@ -109,7 +76,8 @@ const Button = styled.button`
 
 const PopularContainer = styled.div`
   width: 50%;
-  background-color: white;
+  background-color:${props => props.theme == "light" ? whiteTextColor : colorPrimaryBlack};
+
   display: flex;
   flex-direction: column;
   border-radius: 12px;
@@ -120,7 +88,7 @@ const PopularContainer = styled.div`
 const PopularInfo = styled.div`
   display: flex;
   contain: paint;
-
+  color: ${props => props.theme == "light" ? colorPrimaryBlack :  whiteTextColor };
   width: 100%;
 `;
 const Product = styled.div`
@@ -131,12 +99,16 @@ const Product = styled.div`
 
 const ProductImage = styled.div`
   transition: 500ms;
-  width: ${(props) => (props.open == true ? "100%" : "100%")};
-  padding: 12px 64px;
+  
+  border: 1px ${props => props.theme == "light" ? "#eee" : colorBackgroundGray} solid;
+  margin: 12px 64px;
+  border-radius:8px ;
+ 
   & img {
     width: 100%;
-    border: 1px #eee solid;
     border-radius: 8px;
+    height: 300px;
+    object-fit: contain;
   }
 `;
 const ProductInfo = styled.div`
@@ -144,6 +116,8 @@ const ProductInfo = styled.div`
   display: flex;
   flex-direction: column;
   gap: 4px;
+padding: 12px 64px;
+
 `;
 const Title = styled.div`
   display: flex;
@@ -170,7 +144,7 @@ const SliderSpan = styled.div`
   gap: 5px;
 `;
 const Span = styled.span`
-  background-color: #0080805d;
+    background-color: ${transparentMain};
   padding: 4px;
   border-radius: 40px;
   transition: 500ms;
@@ -200,6 +174,7 @@ const ListItemConatiner = styled.div`
   padding: 0 32px;
   display: flex;
   align-items: center;
+  
 `;
 const ItemImage = styled.img`
   border: 1px solid #eee;
@@ -234,17 +209,24 @@ const LottieContainer = styled.div`
 const OwnerPf = () => {
   const open = useSelector((state) => state.cart.open);
   const user = useSelector((state) => state.user?.currentUser);
-
+  const theme = useSelector((state) => state.theme.mode);
+ 
   const [activeButton, setActiveButton] = useState("Today");
-  const [stats, setStats] = useState([]);
+  const [stats, setStats] = useState(null);
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     const getStats = async () => {
       try {
         const res = await newRequest.get(`/stats/seller-stats/${user?.idUSER}`);
         setStats(res.data);
+        setLoading(true)
       } catch (err) {
         console.error("Error fetching users:", err);
+      } finally {
+        setTimeout(() => {
+          setLoading(false)
+        } , [1000])
       }
     };
     getStats();
@@ -257,7 +239,6 @@ const OwnerPf = () => {
       {
         label: "New Users",
         data: [],
-        backgroundColor: "#74b9ff",
       },
     ],
   });
@@ -281,7 +262,8 @@ const OwnerPf = () => {
             {
               label: "Incom History",
               data,
-              backgroundColor: "#00e1b4b4",
+              backgroundColor: theme == "light" ? main : colorAccentTransparent,
+              color: theme == "light" ? colorPrimaryBlack : whiteTextColor,
             },
           ],
         });
@@ -330,55 +312,55 @@ const OwnerPf = () => {
   };
   return (
     <Container>
-      <StaticContainer>
-        <StaticTitle className="bg-red-700">SUMMARY</StaticTitle>
+      <StaticContainer theme={theme}>
+        <StaticTitle >SUMMARY</StaticTitle>
         <Statics>
-          <Item color={`red`}>
-            <ItemIcon src="https://img.icons8.com/color/48/product--v1.png" />
-            <ItemInfo>
-              <ItemTitle>Products</ItemTitle>
-              <ItemStatic>{stats.totalProducts}</ItemStatic>
-            </ItemInfo>
-          </Item>
-          <Item color={`green`}>
-            <ItemIcon src="https://img.icons8.com/arcade/50/money-transfer.png" />
-            <ItemInfo>
-              <ItemTitle>Taxes</ItemTitle>
-              <ItemStatic>$ {stats.subs == 'Monthly' ? '40.00' : '400.00'}</ItemStatic>
-            </ItemInfo>
-          </Item>
-          <Item color={`blue`}>
-            <ItemIcon src="https://img.icons8.com/color/48/man-holding-bags-with-money-skin-type-3.png" />
-            <ItemInfo>
-              <ItemTitle>Income</ItemTitle>
-              <ItemStatic>
-                ${" "}
-                {stats.TotalArrivedOrderValue == null
-                  ? 0
-                  : stats.TotalArrivedOrderValue}
-              </ItemStatic>
-            </ItemInfo>
-          </Item>
-          <Item color={`teal`}>
-            <ItemIcon src="https://img.icons8.com/color/48/shopping-cart--v1.png" />
-            <ItemInfo>
-              <ItemTitle>Totale Shops</ItemTitle>
-              <ItemStatic>{stats.myshop}</ItemStatic>
-            </ItemInfo>
-          </Item>
+        
+          <ItemContainer
+            color="red"
+            title="Products"
+            icon="https://img.icons8.com/color/48/product--v1.png"
+            value={stats?.totalProducts}
+            loading={loading}
+          />
+         
+          
+          <ItemContainer
+            color="green"
+            title="Taxes"
+            icon="https://img.icons8.com/arcade/50/money-transfer.png"
+            value={`$ ${stats?.subs == 'Monthly' ? '40.00' : '400.00'}`}
+            loading={loading}
+          />
+         
+          <ItemContainer
+            color="blue"
+            title="Incom"
+            icon="https://img.icons8.com/color/48/man-holding-bags-with-money-skin-type-3.png"
+            value={`$ ${stats?.TotalArrivedOrderValue == null
+              ? 0.00
+              : (stats?.TotalArrivedOrderValue).toFixed(2)}`}
+            loading={loading}
+          />
+          <ItemContainer
+            color="teal"
+            title="Total Shops"
+            icon="https://img.icons8.com/color/48/shopping-cart--v1.png"
+            value={stats?.myshop}
+            loading={loading}
+          />
         </Statics>
       </StaticContainer>
 
-      <StaticContainer>
+      <StaticContainer theme={theme}>
         <StaticButContainer>
           <StaticTitle>Orders</StaticTitle>
-          <ButtonGroup>
+          <ButtonGroup theme={theme}>
             <Button
               onClick={() => handleClick("Today")}
               style={{
-                color: activeButton === "Today" ? "green" : "black",
-                backgroundColor: activeButton === "Today" ? "#EEFDF2" : "",
-                border: activeButton === "Today" ? "1px solid green" : "",
+                color: activeButton === "Today" ? theme == "light" ? main : colorAccentMain : theme == "light" ? primaryTextColor : whiteTextColor,
+                backgroundColor: activeButton === "Today" ? theme == 'light' ? lightSoftMain : colorAccentSoftTransparent : "",
               }}
             >
               Today
@@ -386,9 +368,8 @@ const OwnerPf = () => {
             <Button
               onClick={() => handleClick("Weakly")}
               style={{
-                color: activeButton === "Weakly" ? "green" : "black",
-                backgroundColor: activeButton === "Weakly" ? "#EEFDF2" : "",
-                border: activeButton === "Weakly" ? "1px solid green" : "",
+                color: activeButton === "Weakly" ? theme == "light" ? main : colorAccentMain : theme == "light" ? primaryTextColor : whiteTextColor,
+                backgroundColor: activeButton === "Weakly" ? theme == 'light' ? lightSoftMain : colorAccentSoftTransparent : "",
               }}
             >
               Weekly
@@ -396,9 +377,8 @@ const OwnerPf = () => {
             <Button
               onClick={() => handleClick("Monthly")}
               style={{
-                color: activeButton === "Monthly" ? "green" : "black",
-                backgroundColor: activeButton === "Monthly" ? "#EEFDF2" : "",
-                border: activeButton === "Monthly" ? "1px solid green" : "",
+                color: activeButton === "Monthly" ? theme == "light" ? main : colorAccentMain : theme == "light" ? primaryTextColor : whiteTextColor,
+                backgroundColor: activeButton === "Monthly" ? theme == 'light' ? lightSoftMain : colorAccentSoftTransparent : "",
               }}
             >
               Monthly
@@ -406,49 +386,49 @@ const OwnerPf = () => {
             <Button
               onClick={() => handleClick("Yearly")}
               style={{
-                color: activeButton === "Yearly" ? "green" : "black",
-                backgroundColor: activeButton === "Yearly" ? "#EEFDF2" : "",
-                border: activeButton === "Yearly" ? "1px solid green" : "",
+                color: activeButton === "Yearly" ? theme == "light" ? main : colorAccentMain : theme == "light" ? primaryTextColor : whiteTextColor,
+                backgroundColor: activeButton === "Yearly" ? theme == 'light' ? lightSoftMain : colorAccentSoftTransparent : "",
               }}
             >
               Yearly
             </Button>
           </ButtonGroup>
         </StaticButContainer>
-
-        <Statics>
-          <Item color={`red`}>
-            <ItemIcon src="https://img.icons8.com/color/48/data-pending.png" />
-            <ItemInfo>
-              <ItemTitle>Waiting</ItemTitle>
-              <ItemStatic>{stats.WaitingOrders}</ItemStatic>
-            </ItemInfo>
-          </Item>
-          <Item color={`green`}>
-            <ItemIcon src="https://img.icons8.com/color/48/delivery.png" />
-            <ItemInfo>
-              <ItemTitle>On Way</ItemTitle>
-              <ItemStatic>{stats.OnWayOrders}</ItemStatic>
-            </ItemInfo>
-          </Item>
-          <Item color={`blue`}>
-            <ItemIcon src="https://img.icons8.com/color/48/data-arrived.png" />
-            <ItemInfo>
-              <ItemTitle>Arrived</ItemTitle>
-              <ItemStatic>{stats.ArrivedOrders}</ItemStatic>
-            </ItemInfo>
-          </Item>
-          <Item color={`teal`}>
-            <ItemIcon src="https://img.icons8.com/color/48/product.png" />
-            <ItemInfo>
-              <ItemTitle>Totale</ItemTitle>
-              <ItemStatic>{stats.totalOrdersFromOwner}</ItemStatic>
-            </ItemInfo>
-          </Item>
+<Statics>
+        <ItemContainer
+            color="red"
+            title="Waiting"
+            icon="https://img.icons8.com/color/48/data-pending.png"
+            value={stats?.WaitingOrders}
+            loading={loading}
+          />
+          <ItemContainer
+            color="green"
+            title="OnWay"
+            icon="https://img.icons8.com/color/48/delivery.png"
+            value={stats?.OnWayOrders}
+            loading={loading}
+          />
+          <ItemContainer
+            color="blue"
+            title="Arrived"
+            icon="https://img.icons8.com/color/48/data-arrived.png"
+            value={stats?.ArrivedOrders}
+            loading={loading}
+          />
+          <ItemContainer
+            color="teal"
+            title="Total"
+            icon="https://img.icons8.com/color/48/product.png"
+            value={
+              stats?.WaitingOrders + stats?.OnWayOrders + stats?.ArrivedOrders
+            }
+            loading={loading}
+          />
         </Statics>
       </StaticContainer>
 
-      <StaticContainer>
+      <StaticContainer theme={theme}>
         <StaticTitle>INCOM HISTORY</StaticTitle>
         <LineChart chartData={userData} />
       </StaticContainer>
@@ -460,18 +440,19 @@ const OwnerPf = () => {
           gap: 32,
         }}
       >
-        <PopularContainer>
+        <PopularContainer theme={theme}>
           <StaticTitle className="bg-red-700">TOP 10 RATED PRODUCT</StaticTitle>
-          <PopularInfo>
-            {prod != "" ? (
+          <PopularInfo theme={theme}>
+            {prod != "" && !loading ? (
               prod.map((item) => (
                 <Product open={open} index={index}>
-                  <ProductImage open={open}>
+                  <ProductImage theme={theme} open={open}>
                     <img
-                      style={{ width: "100%" }}
-                      src={item.productimage}
-                      alt=""
+                   
+                    src={item.productimage}
+                    alt=""
                     />
+                    </ProductImage>
                     <ProductInfo>
                       <Title>
                         <ProductName>{item.productname}</ProductName>
@@ -485,10 +466,11 @@ const OwnerPf = () => {
                       <ProductShops>Bingo Shop | Niggas Shop</ProductShops>
                       <ProductPrice>${item.productprice}</ProductPrice>
                     </ProductInfo>
-                  </ProductImage>
                 </Product>
               ))
-            ) : (
+            ) : loading ? <LottieContainer style={{width:'100%'}}>
+              <Loading />
+            </LottieContainer> : (
               <LottieContainer>
                 <Lottie animationData={me} style={{ width: "40%" }} />
                 No Product Found
@@ -501,7 +483,7 @@ const OwnerPf = () => {
                 key={item.idPRODUCT}
                 style={{
                   width: `${idx === index ? "20px" : "0px"}`,
-                  backgroundColor: `${idx === index ? "#5AB8A8" : ""}`,
+                  backgroundColor: `${idx === index ? colorAccentMain : colorAccentMediumTransparent}`,
                 }}
                 onClick={() => {
                   const newIndex = prod.findIndex(
@@ -514,13 +496,13 @@ const OwnerPf = () => {
           </SliderSpan>
         </PopularContainer>
 
-        <PopularContainer>
+        <PopularContainer theme={theme}>
           <StaticTitle className="bg-red-700">
             TOP 10 SELLED PRODUCT
           </StaticTitle>
           <PopularProductList open={open}>
-            {prodS != "" ? (
-              prodS.map((item) => (
+            {prodS != '' && !loading ? (
+              prodS?.map((item) => (
                 <ListItemConatiner key={item.idPRODUCT}>
                   <ItemImage src={item.productimage} />
                   <ItemDesc>
@@ -530,7 +512,7 @@ const OwnerPf = () => {
                   <ItemPrice>$ {item.productprice}</ItemPrice>
                 </ListItemConatiner>
               ))
-            ) : (
+            ) :  loading ? <Loading />  : (
               <LottieContainer>
                 <Lottie animationData={me} style={{ width: "40%" }} />
                 No Product Found

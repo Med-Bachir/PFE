@@ -6,24 +6,32 @@ import DeleteIcon from "@mui/icons-material/Delete";
 import newRequest from "../../../utils/newRequest";
 
 import AlertMessage from "../../../Components/Alert";
+import Loading from "../../../Components/Pending/Loading";
+import EmptyData from "../../../Components/Pending/EmptyData";
+import { colorAccentDark, colorAccentDarkTransparent, colorAccentLight, colorAccentMain, colorAccentMedium, colorAccentMediumTransparent, colorAccentSoft, colorAccentSub, colorAccentSubDark, colorAccentTransparent, colorPrimaryBlack, darkRed, lightMain, main, primaryTextColor, whiteTextColor } from "../../../Colors";
+import { useSelector } from "react-redux";
 
 
 
 
 const Container = styled.div`
 padding: 32px;
+height: calc(100vh - 80px);
+overflow-y: auto;
 `
 const StaticContainer = styled.div`
-background-color: white;
+background-color: ${props => props.theme == "light" ? whiteTextColor : colorPrimaryBlack};
+color: ${props => props.theme == "light" ? colorPrimaryBlack : whiteTextColor };
 contain: paint;
 border-radius: 8px;
 padding: 20px 0;
 display: flex;
 flex-direction: column;
+
 `
 const StaticTitle = styled.span`
 font-size: 20px;
-border-left: 4px teal solid;
+border-left: 4px ${main} solid;
 padding: 0 20px;
 display: flex;
 align-items: center;
@@ -38,32 +46,58 @@ const Table = styled.table`
   justify-content: space-between;
   border-radius: 8px;
   margin-top: 20px;
-  background-color: white;
+  background-color: ${props => props.theme == "light" ? whiteTextColor  : colorPrimaryBlack};
+  
+overflow: auto;
+&::-webkit-scrollbar {
+    width: 6px;
+    height:6px; /* width of the entire scrollbar */
+  }
+  &::-webkit-scrollbar-track {
+    background: transparent; /* color of the tracking area */
+  }
+  &::-webkit-scrollbar-thumb {
+    background-color: rgba(147, 147, 147, 0.7); /* color of the scroll thumb */
+    border-radius: 20px; /* roundness of the scroll thumb */
+    /* creates padding around scroll thumb */
+  }
+  &::-webkit-scrollbar-thumb:hover {
+    background-color: rgba(147, 147, 147, 1); /* color of the scroll thumb */
+    width: 8px;
+    border-radius: 20px; /* roundness of the scroll thumb */
+    /* creates padding around scroll thumb */
+  }
+ 
 `;
 const Row = styled.tr`
   display: flex;
   justify-content: space-between;
-  height: 50px;
-  margin: 0 0 10px;
+ padding: 4px 0;
   align-items: center;
   justify-content: center;
+color: ${props => props.theme == "light" ? colorPrimaryBlack : whiteTextColor };
+
   background-color: ${(props) =>
-  props.type === "tag" ? `#cbfef42a` : `#f8f8f85a`};
-  
+  props.type === "tag" ? props.theme == "light" ? main : colorAccentLight : props.theme == "light" ? whiteTextColor : colorAccentDarkTransparent};
+   @media (max-width: 768px) {
+  min-width: 200vh;
+}
 `;
 const ColumnTag = styled.td`
 text-align: center;
   flex: 2;
-  color: #0e0037;
+  color: ${whiteTextColor};
   font-weight: 300;
-  padding-left: 10px;
-  border-right: 1px solid #c4c4c4;
+ 
+ padding: 8px 0;
+
+  border-right: 1px solid ${props => props.theme == "light" ? whiteTextColor : colorAccentMediumTransparent };
 `
 const Column = styled.th`
   flex: 2;
   display: flex;
   align-items: center;
-  color: #0e0037;
+  
   font-weight: 300;
   padding: 0 8px;
   gap: 8px;
@@ -89,7 +123,7 @@ text-overflow: ellipsis;
   
 `;
 const ColumnInfo = styled.th`
-  color: #000000;
+  
   font-weight: 300;
  width: 100%;
   padding: 4px 12px;
@@ -107,20 +141,31 @@ flex: 1;
 
 `;
 const UsersList = () => {
+  const theme = useSelector(state => state.theme.mode)
   const [users, setUsers] = useState([]);
   const [message, setMessage] = useState("");
   const [type, setType] = useState("");
   const [open, setOpen] = useState(false);
+  const [loading, setLoading] = useState(false);
+
+
+  const getUsers = async () => {
+    try {
+      const res = await newRequest.get("/users");
+      setUsers(res.data);
+      setLoading(true)
+    } catch (err) {
+      console.error("Error fetching users:", err);
+    }finally {
+      setTimeout(() => {
+
+        setLoading(false)
+      }, [1000])
+    }
+  };
 
   useEffect(() => {
-    const getUsers = async () => {
-      try {
-        const res = await newRequest.get("/users");
-        setUsers(res.data);
-      } catch (err) {
-        console.error("Error fetching users:", err);
-      }
-    };
+    
     getUsers();
   }, []);
 
@@ -143,15 +188,15 @@ const UsersList = () => {
     <Container>
       <AlertMessage open={open} setOpen={setOpen} message={message} type={type} />
 
-    <StaticContainer >
-  <StaticTitle>All Users</StaticTitle>
+    <StaticContainer theme={theme} >
+  <StaticTitle theme={theme}>All Users</StaticTitle>
     </StaticContainer>
   
   
-  
+
       
-      <Table>
-        <Row type={"tag"}>
+      <Table theme={theme}>
+        <Row theme={theme} type={"tag"}>
           <ColumnTag style={{flex:1}} >Category ID</ColumnTag>
           <ColumnTag>User Name</ColumnTag>
           <ColumnTag>Email</ColumnTag>
@@ -160,30 +205,31 @@ const UsersList = () => {
   
           <ColumnTag style={{ border: "none", flex: 1 }}>Action</ColumnTag>
         </Row>
-        {users.map((item) => (
+        {users !="" && !loading ?
+        users.map((item) => (
           <>
-            <Row key={item.idUSER} type={"normal"}>
-              <Column   style={{flex:1}}>
-                <ColumnInfo
+          <Row theme={theme} key={item.idUSER} type={"normal"}>
+          <Column   style={{flex:1}}>
+          <ColumnInfo
                   style={{
                     display: "flex",
                     backgroundColor: "transparent",
                     width: "100%",
                     alignItems: "center",
                     gap: 8,
-                    color: "#0e0037",
-                  
+                    color: theme == "light" ? primaryTextColor : whiteTextColor,
+                    
                   }}
                   >
                   #ID :{item.idUSER}
                 </ColumnInfo>
               </Column>
               
-              <Column><Avatar src={item.userimg == null ? 'e' : item.userimg} alt={item.username} sx={{bgcolor:'teal'}} />{item.username}</Column>
+              <Column><Avatar src={item.userimg == null ? 'e' : item.userimg} alt={item.username} sx={{bgcolor:theme == "light" ? main : colorAccentTransparent}} />{item.username}</Column>
               <Column style={{ textAlign:'left' }}><Text>{item.email}</Text></Column>
               <Column style={{alignItems: "center" ,flex:1}}>
                 {" "}
-                <ColumnInfo style={{backgroundColor:`${item.userRole == 'seller' ? '#64E98632' : '#02dae91b'}` , color:`${item.userRole == 'seller' ? '#50BA6A' : '#02ADBA'}` }}>
+                <ColumnInfo style={{backgroundColor:`${theme == 'light' ? lightMain : colorAccentLight}` , color:`${theme == 'light' ? main : colorAccentMain}` }}>
                 {item.userRole}
                 </ColumnInfo>
               </Column>
@@ -191,7 +237,7 @@ const UsersList = () => {
                 <ColumnInfo>{item.createdAt}</ColumnInfo>
               </Column>
   
-              <Column style={{ border: "none", flex: 1 }} key={item.key}>
+  <Column style={{ border: "none", flex: 1 }} key={item.key}>
                 <ColumnInfo
                   style={{
                     display: "flex",
@@ -201,14 +247,19 @@ const UsersList = () => {
                   }}
                   >
                   <IconButton onClick={() => handleDelete(item.idUSER)}>
-                    <DeleteIcon  sx={{ color: "#E92F4A" }} />
+                    <DeleteIcon  sx={{ color: darkRed }} />
                   </IconButton>
                 </ColumnInfo>
               </Column>
             </Row>
             <Divider />
           </>
-        ))}
+        ))
+        : loading ? 
+        <Loading />
+        : 
+        <EmptyData />
+      }
       </Table>
         </Container>
   )

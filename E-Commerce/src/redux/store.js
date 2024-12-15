@@ -15,6 +15,7 @@ import drawerReducer from "./drawer";
 import userReducer from "./user";
 import notifyReducer from "./notifications";
 import catyReducer from "./category";
+import themeReducer from "./theme";
 
 // Persist configuration
 const persistConfig = {
@@ -27,7 +28,8 @@ const rootReducer = combineReducers({
   cart: drawerReducer,
   user: userReducer,
   notify : notifyReducer,
-  caty:catyReducer
+  caty:catyReducer,
+  theme: themeReducer,
 });
 
 // Persisted reducer

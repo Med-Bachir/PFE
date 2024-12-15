@@ -8,11 +8,14 @@ import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
 import StoreTwoToneIcon from "@mui/icons-material/StoreTwoTone";
 
 import { useSelector } from "react-redux";
+import { colorAccentMain, colorAccentSoftTransparent, colorBackgroundBlack, colorPrimaryBlack, grayBackground, lightSoftMain, main, primaryTextColor, secondaryTextColor, whiteTextColor } from "../../Colors";
 
 const Menu = styled.div`
   width: 100%;
   padding: 24px 20px 12px;
-  
+  @media (max-width: 768px) {
+    padding: 24px 10px 12px;
+}
 `;
 
 const MenuTitle = styled.span`
@@ -20,7 +23,7 @@ const MenuTitle = styled.span`
   font-size: 14px;
   font-weight: 500;
   display: ${(props) => (props.open ? `block` : `none`)};
-  color: #adadadd2;
+  color: ${secondaryTextColor};
 `;
 
 const MenuItems = styled.div`
@@ -28,6 +31,7 @@ const MenuItems = styled.div`
   display: flex;
   flex-direction:column;
   gap: 0px;
+  
  
 `;
 
@@ -40,10 +44,12 @@ const Item = styled.div`
   border-radius: 8px;
   gap: 15px;
   font-weight: ${(props) => (props.isOpen ? `800` : `100`)};
-  background-color: ${(props) => (props.isOpen ? "#eeeeeea8" : "")};
+  background-color: ${(props) => (props.isOpen ? props.theme == 'light' ? grayBackground : colorBackgroundBlack : "")};
+  color:${props => props.theme == 'light' ? primaryTextColor : whiteTextColor};
+
   &:hover {
-    color: #01857a;
-    background-color: #eeeeeea8;
+    color: ${main};
+    background-color: ${props => props.theme == "light" ? grayBackground : colorBackgroundBlack};
   }
 `;
 
@@ -52,16 +58,17 @@ const ItemTitle = styled.span`
   font-size: 14px;
   display: ${(props) => (props.open ? `flex` : `none`)};
   align-items: center;
-  
   width:100%;
+  
 `;
 
 const DropDownMenu = styled.div`
   padding: 0 24px;
   margin: 0 10px 0 10px;
+  
   contain: paint;
   z-index: 2;
-  background-color: ${(props) => (props.drawer ? "#dcf4f22c" : "white")};
+  background-color: ${(props) => (props.drawer ? props.theme =='light' ? lightSoftMain : colorAccentSoftTransparent  : props.theme == "light" ? whiteTextColor : colorPrimaryBlack)};
   margin: ${(props) => (props.drawer ? "" : "-15px 61px")};
   box-shadow: ${(props) =>
     props.drawer
@@ -83,7 +90,9 @@ const Line = styled.span`
   display: ${(props) => (props.open ? "" : "none")};
   width: 24px;
   height: 1px;
+  
 `;
+
 
 const DropItem = styled.div`
   height: 100%;
@@ -93,6 +102,8 @@ const DropItem = styled.div`
   padding: 10px 0;
   border-left: ${(props) => (props.open ? "1px dashed #9c9c9c5c " : "none")};
   transition: 500ms;
+  color: ${(props) => (props.drawer ? props.theme =='light' ? lightSoftMain : colorAccentSoftTransparent  : props.theme == "light" ? whiteTextColor : colorPrimaryBlack)};
+
 `;
 
 const DropLine = styled.span`
@@ -106,6 +117,7 @@ const MenuL = ({ title, link, itemIcon , subTitle, dropList, menuList,dropHeight
   const Location = useLocation().pathname.split("/");
   console.log(Location)
   const open = useSelector((state) => state.cart.open);
+  const theme = useSelector((state) => state.theme.mode);
 
   const [dropdownState, setDropdownState] = useState({
     shops: false,
@@ -114,6 +126,7 @@ const MenuL = ({ title, link, itemIcon , subTitle, dropList, menuList,dropHeight
   });
   const isShop = true;
 
+  
   const toggleDropdown = (dropdown) => {
     setDropdownState({
       ...dropdownState,
@@ -131,22 +144,23 @@ const MenuL = ({ title, link, itemIcon , subTitle, dropList, menuList,dropHeight
             <Link to={item.menuLink}>
             <MenuItems open={open}>
               <Item
+              theme={theme}
                 open={open}
                 style={{
                   backgroundColor: `${title == 'MENU' ? `${
-                    Location[1] === '' ? "#cbfef4a1" : ""
+                    Location[1] === '' ? theme == "light" ? lightSoftMain : colorAccentSoftTransparent : ""
                   }` :  `${
-                    Location[1] + (Location[2] == null ? '' : '/' + Location[2]) === `${item.menuLink}` ? "#cbfef4a1" : ""
+                    Location[1] + (Location[2] == null ? '' : '/' + Location[2]) === `${item.menuLink}` ? theme == "light" ? lightSoftMain : colorAccentSoftTransparent : ""
                   }` }`,
                   color: `${title == 'MENU' ? `${
-                    Location[1] === '' ? "#00856a" : ""
+                    Location[1] === '' ? theme == "light" ? main : colorAccentMain : ""
                   }` : `${
-                   Location[1] + (Location[2] == null ? '' : '/' + Location[2]) === `${item.menuLink}` ? "#00856a" : ""
+                   Location[1] + (Location[2] == null ? '' : '/' + Location[2]) === `${item.menuLink}` ? theme == "light" ? main : colorAccentMain : ""
                   }`}`,
                 }}
                 >
                 {item.menuIcon}
-                <ItemTitle open={open}>{item.menuItemName}</ItemTitle>
+                <ItemTitle theme={theme} open={open}>{item.menuItemName}</ItemTitle>
               </Item>
             </MenuItems>
           </Link>
@@ -159,12 +173,13 @@ const MenuL = ({ title, link, itemIcon , subTitle, dropList, menuList,dropHeight
             <Link to={item.menuLink}>
               <MenuItems>
                 <Item
+                theme={theme}
                   open={open}
                   style={{
                     backgroundColor: `${
-                      Location[1] + (Location[2] == null ? '' : '/' + Location[2]) == `${item.menuLink}` ? "#cbfef4a1" : ""
+                      Location[1] + (Location[2] == null ? '' : '/' + Location[2]) == `${item.menuLink}` ? theme == "light" ? lightSoftMain : colorAccentSoftTransparent : ""
                     }`,
-                    color: `${Location[1] + (Location[2] == null ? '' : '/' + Location[2]) == `${item.menuLink}` ? "#007D64" : ""}`,
+                    color: `${Location[1] + (Location[2] == null ? '' : '/' + Location[2]) == `${item.menuLink}` ? theme == "light" ? main : colorAccentMain : ""}`,
                   }}
                 >
                   {item.menuIcon}
@@ -176,6 +191,8 @@ const MenuL = ({ title, link, itemIcon , subTitle, dropList, menuList,dropHeight
           ))}
           {isShop || subTitle != 'Refunds' ? <MenuItems>
             <Item
+                theme={theme}
+
               onClick={() => toggleDropdown("shops")}
               open={open}
               isOpen={dropdownState.shops}
@@ -192,6 +209,7 @@ const MenuL = ({ title, link, itemIcon , subTitle, dropList, menuList,dropHeight
             </Item>
 
             <DropDownMenu
+            theme={theme}
               drawer={open}
               open={dropdownState.shops}
               onClick={() => toggleDropdown("shops")}
@@ -205,8 +223,9 @@ const MenuL = ({ title, link, itemIcon , subTitle, dropList, menuList,dropHeight
                     
               }}
             >
-              <DropItem open={open}>
-                {dropList.map((item) => (
+              <DropItem theme={theme} open={open}>
+                {dropList.map((item) => 
+                  (
                   <DropLine>
                     {" "}
                     <Line open={open} />{" "}
@@ -214,7 +233,7 @@ const MenuL = ({ title, link, itemIcon , subTitle, dropList, menuList,dropHeight
                       style={{
                         fontSize: 14,
                         color: `${
-                          Location === `${item.dropLink}` ? "#4FA193" : "#162525"
+                          Location[1] === `${item.dropLink.split('/')[0]}` ? theme == "light" ? main : colorAccentMain : theme == "light" ? primaryTextColor : whiteTextColor
                         }`,
                         
                       }}

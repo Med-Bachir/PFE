@@ -13,12 +13,14 @@ import LockTwoToneIcon from "@mui/icons-material/LockTwoTone";
 import { useSelector } from "react-redux";
 import newRequest from "../utils/newRequest";
 import EmptyData from "../Components/Pending/EmptyData";
-import { hovredText } from "../Colors";
+import { colorAccentDark, colorAccentDarkTransparent, colorAccentLight, colorAccentMain, colorAccentMedium, colorAccentMediumTransparent, colorAccentMoreTransparent, colorAccentSoft, colorAccentSoftTransparent, colorAccentSub, colorAccentSubDark, colorAccentTransparent, colorBackgroundBlack, colorBackgroundGray, colorHighlightSoftYellow, colorHighlightText, colorPrimaryBlack, colorWarningDark, colorWarningSoft, darkOrange, darkYellow, elementGrayBackground, grayBackground, hovredText, lightMain, lightMedMain, lightSoftMain, main, medMain, primaryTextColor, secondaryTextColor, softMain, softMainTransparent, softOrange, softYellow, transparentMain, whiteTextColor } from "../Colors";
 
 const Container = styled.div`
-  height: calc(100vh - 70px);
+  height: calc(100vh - 132px);
+  
   contain: paint;
-  background-color: #eee;
+   color: ${({theme}) => theme == "light" ? primaryTextColor : elementGrayBackground};
+   background-color: ${({theme}) => theme == "light" ? whiteTextColor : colorBackgroundGray};
   padding: ${(props) => (props.location == "Orders" ? "32px" : 0)};
   @media (max-width:768px) {
     
@@ -27,11 +29,12 @@ const Container = styled.div`
   }
 `;
 const OrderContainer = styled.div`
-  height: 110vh;
+  height:100% ;
+  
 
   contain: paint;
 
-  background-color: #f3f3f3;
+  background-color: ${({theme}) => theme == "light" ? grayBackground : colorBackgroundGray};
   display: flex;
 
   gap: 32px;
@@ -46,18 +49,18 @@ const OrderContainer = styled.div`
 
 const Center = styled.div`
   width: 30%;
-  background-color: white;
+  background-color: ${({theme}) => theme == "light" ? whiteTextColor : colorPrimaryBlack};
   border-radius: 4px;
   padding: 20px;
   display: flex;
   flex-direction: column;
   gap: 20px;
 
-  contain: paint;
+  
   overflow-y: auto;
 
   &::-webkit-scrollbar {
-    width: 2px;
+    width: 4px;
   }
   &::-webkit-scrollbar-track {
     background: transparent;
@@ -66,7 +69,7 @@ const Center = styled.div`
     background-color: rgba(147, 147, 147, 0.543);
     border-radius: 20px;
   }
-  max-height: calc(100vh - 80px);
+  max-height: 100%;
   @media (max-width:768px) {
    width: 100%;
   }
@@ -87,9 +90,9 @@ const Order = styled.div`
 
   padding: 16px;
   border-radius: 4px;
-  background-color: #f5f5f5;
+  background-color: ${({theme}) => theme == "light" ? grayBackground : colorBackgroundGray};
   cursor: pointer;
-  border: ${({ isSelected }) => (isSelected ? "solid #50BA6A" : "none")};
+  border: ${({ isSelected }) => (isSelected ? `2px solid ${main}` : "none")};
   transition: 200ms;
 `;
 const OrderHeader = styled.div`
@@ -108,16 +111,16 @@ const Progress = styled.span`
   padding: 4px;
   background-color: ${(props) =>
     props.status == "Arrived"
-      ? "#C3F5EC7e"
+      ? props.theme == "light" ? lightSoftMain : colorAccentLight
       : props.status == "Waiting"
-      ? "#FF7F002f"
-      : "#E6C7002f"};
+      ? props.theme == "light" ? softOrange : colorWarningSoft 
+      : props.theme == "light" ? softYellow : colorHighlightSoftYellow};
   color: ${(props) =>
     props.status == "Arrived"
-      ? "#4FA193"
+      ? props.theme == "light" ? main : colorAccentMain
       : props.status == "Waiting"
-      ? "#FF7F00"
-      : "#E6C700"};
+      ? props.theme == "light" ? darkOrange : colorWarningDark
+      : props.theme == "light" ? darkYellow : colorHighlightText};
   border-radius: 4px;
   width: 50%;
   text-align: center;
@@ -140,14 +143,15 @@ const Right = styled.div`
   width: 70%;
   display: flex;
   flex-direction: column;
-  background-color: white;
+  background-color: ${({theme}) => theme == "light" ? whiteTextColor : colorPrimaryBlack};
   border-radius: 4px;
-  padding: 0 0 0;
+  padding: 0 0 0 0;
   gap: 20px;
-  border: 1px solid #dfdfdf;
+ 
   contain: paint;
   overflow-y: auto;
   max-height: calc(100vh - 80px);
+
   &::-webkit-scrollbar {
     width: 2px;
   }
@@ -162,6 +166,7 @@ const Right = styled.div`
    width: calc(100vw - 64px);
   }
 `;
+const SelectedOrder = styled.div``
 const OrderTitle = styled.div`
   display: flex;
   justify-content: space-between;
@@ -175,7 +180,8 @@ const Detail = styled.span`
   display: flex;
   align-items: center;
   gap: 8px;
-  color: #50ba6a;
+  color: ${({theme}) => theme == "light" ? main : colorAccentMain};
+
 `;
 const OrderInfos = styled.div`
   padding: 20px;
@@ -186,7 +192,8 @@ const Status = styled.div`
   display: flex;
 
   padding: 16px 32px;
-  background-color: #f5f5f5;
+  background-color: ${({theme}) => theme == "light" ? grayBackground : colorBackgroundGray};
+
   border-radius: 4px;
   margin-bottom: 20px;
   @media (max-width:768px) {
@@ -202,9 +209,9 @@ const TypeTitle = styled.span`
   gap: 20px;
   align-items: center;
   font-weight: 500;
-   @media (max-width:768px) {
+  @media (max-width:768px) {
     font-weight: 400;
-   justify-content: space-between;
+    justify-content: space-between;
   }
 `;
 const OrderProcessing = styled.span`
@@ -212,16 +219,16 @@ const OrderProcessing = styled.span`
   border-radius: 4px;
   background-color: ${(props) =>
     props.status == "Arrived"
-      ? "#C3F5EC7e"
+      ? props.theme == "light" ? lightSoftMain : colorAccentLight
       : props.status == "Waiting"
-      ? "#ff80002f"
-      : "#E6C7002f"};
+      ? props.theme == "light" ? softOrange : colorWarningSoft 
+      : props.theme == "light" ? softYellow : colorHighlightSoftYellow};
   color: ${(props) =>
     props.status == "Arrived"
-      ? "#4FA193"
+      ? props.theme == "light" ? main : colorAccentMain
       : props.status == "Waiting"
-      ? "#FF7F00"
-      : "#E6C700"};
+      ? props.theme == "light" ? darkOrange : colorWarningDark
+      : props.theme == "light" ? darkYellow : colorHighlightText};
   font-weight: 300;
   @media (max-width:768px) {
    width: 45%;
@@ -230,8 +237,15 @@ const OrderProcessing = styled.span`
 const PaymentType = styled.span`
   padding: 4px 12px;
   border-radius: 4px;
-  background-color: #c3f5ec7e;
-  color: #4fa193;
+  background-color: ${(props) =>
+    
+       props.theme == "light" ? lightSoftMain : colorAccentLight
+      };
+  color: ${(props) =>
+    
+      props.theme == "light" ? main : colorAccentMain
+      
+     };
   font-weight: 300;
   @media (max-width:768px) {
    width: 60%;
@@ -251,17 +265,26 @@ const Addresses = styled.div`
   justify-content: space-between;
   gap: 12px;
   padding: 16px 16px 0 0;
-  border-right: 1px solid #e8e8e8;
+  border-right: 1px solid ${grayBackground};
+  color: ${({theme}) => theme == "light" ? primaryTextColor : elementGrayBackground};
+
+  
+  @media (max-width:768px) {
+    border-right: none;
+    border-bottom: 1px solid ${grayBackground};
+  }
+
   
 `;
 const AddressType = styled.div`
   font-size: 14px;
   font-weight: 600;
+ 
 `;
 const Address = styled.div`
   font-size: 13px;
   margin-bottom: 8px;
-  color: #707070;
+  color: ${secondaryTextColor};
 `;
 
 const OrderTotal = styled.div`
@@ -280,7 +303,7 @@ const TotalType = styled.div`
   justify-content: space-between;
 `;
 const TotalName = styled.span`
-  color: ${(props) => (props.type == "total" ? "black" : "#707070 ")};
+  color: ${(props) => (props.type == "total" ? props.theme == "light" ? primaryTextColor : elementGrayBackground : secondaryTextColor)};
   font-size: ${(props) => (props.type == "total" ? "16px" : "14px ")};
   font-weight: ${(props) => (props.type == "total" ? "600" : "300 ")};
 `;
@@ -289,12 +312,14 @@ const Processing = styled.div`
   display: flex;
   flex-direction: flex;
   align-items: center;
+  justify-content: center;
   padding: 20px;
 
  
   @media (max-width: 768px) {
    flex-direction: column;
    padding: 0;
+   padding-bottom: 20px;
    justify-content: center;
   
   }
@@ -318,7 +343,7 @@ const StepContainer = styled.div`
 
 const Step = styled.div`
   border: ${(props) =>
-    props.status == "complete" ? "1px solid #72EA90" : "1px dashed #90EFA7"};
+    props.status == "complete" ? `3px solid ${medMain}` : `1px dashed ${medMain}`};
 
   width: 60px;
   height: 50px;
@@ -327,7 +352,6 @@ const Step = styled.div`
   contain: content;
   align-items: center;
   justify-content: center;
-  padding: 2px;
  
 `;
 const StepLabel = styled.label`
@@ -349,8 +373,8 @@ const StepLabel = styled.label`
 const Span = styled.span`
   background-color: ${(props) =>
     props.status == "complete" || props.status == "in progress"
-      ? "#90efa892"
-      : "#90EFA733"};
+      ? props . theme == "light" ? lightMedMain : colorAccentTransparent
+      : props . theme == "light" ? lightSoftMain : colorAccentLight};
   height: 100%;
   border-radius: 50%;
   width: 100%;
@@ -367,11 +391,11 @@ const Connector = styled.progress`
   width: 20%;
   display: ${(props) => (props.step ? "none" : "")};
   &::-webkit-progress-bar {
-    background-color: #eee;
-    color: #90efa7;
+    background-color: ${({theme}) => theme == "light" ? lightMain : colorAccentMedium};
+    color: ${({theme}) => theme == "light" ? main : colorAccentMain};
   }
   &::-webkit-progress-value {
-    background-color: #72ea90;
+    background-color: ${medMain};
   }
   @media (max-width: 768px) {
     height: 60px;
@@ -380,33 +404,41 @@ const Connector = styled.progress`
   }
 `;
 
-const Table = styled.div`
- 
-
-`;
+const Table = styled.div``;
 const TableItems = styled.div`
   display: flex;
   flex-direction: column;
- 
-  @media (max-width: 768px) {
-    overflow: auto;
+  overflow: auto;
+  position: relative;
+  &::-webkit-scrollbar {
+   
+    height: 4px;
   }
+  &::-webkit-scrollbar-track {
+    background: transparent;
+    
+  }
+  &::-webkit-scrollbar-thumb {
+    background-color: rgba(147, 147, 147, 0.543);
+    border-radius: 20px;
+    
+  }
+  
 `;
 const TagRow = styled.div`
   display: flex;
   position: sticky;
   top: 0;
-  background-color: #f4f4f4;
+  background-color: ${({theme}) => theme == "light" ? main : colorAccentMedium};
+  color: ${whiteTextColor};
   padding: 16px 0;
-  @media (max-width: 768px) {
-    contain: paint;
+  contain: paint;
     width: 1000px;
-  }
+  
   
 `;
 const Tag = styled.div`
   font-size: 14px;
-
   text-align: center;
 `;
 const Row = styled.div`
@@ -414,29 +446,28 @@ const Row = styled.div`
   align-items: center;
   text-align: center;
   font-size: 14px;
-  background-color: white;
-  @media (max-width: 768px) {
-    contain: paint;
-    width:1000px ;
-  }
+  background-color: ${({theme}) => theme == "light" ? transparentMain : colorAccentMoreTransparent};
+  contain: paint;
+  width:1000px ;
 `;
 const Product = styled.div`
   display: flex;
   align-items: center;
   justify-content: start;
-  gap: 20px;
+  gap: 12px;
   margin: 8px -20px 8px 20px;
 `;
 const ProductImage = styled.img`
   width: 40px;
-  height: 40px;
+  height: 50px;
+  object-fit: contain;
 `;
 const ProductName = styled.span``;
 const Qte = styled.span``;
 const Price = styled.span``;
 
 const Warning = styled.span`
-  color: ${hovredText};
+  color: ${secondaryTextColor};
   font-size: 10px;
 `;
 
@@ -495,6 +526,7 @@ const getProcessedSteps = (selectedOrder) => {
 };
 const OrderPage = () => {
   const user = useSelector((state) => state.user?.currentUser);
+  const theme = useSelector((state) => state.theme.mode);
   const Location = useLocation().pathname.split("/");
   const [ordersItems, setOrdersItems] = useState([]);
 
@@ -537,13 +569,14 @@ const OrderPage = () => {
   }, [user?.idUSER]);
 
   return (
-    <Container location={Location[1]}>
-      <OrderContainer>
-        <Center>
+    <Container theme={theme} location={Location[1]}>
+      <OrderContainer theme={theme}>
+        <Center theme={theme}>
           <Title>My Orders</Title>
           <Orders>
             {orders.map((order) => (
               <Order
+              theme={theme}
                 key={order.orderId}
                 isSelected={selectedOrderId === order.orderId}
                 onClick={() => handleOrderClick(order.orderId, order)}
@@ -552,7 +585,7 @@ const OrderPage = () => {
                   <OrderNumber>
                     Order<ID>#{order.orderId}</ID>
                   </OrderNumber>
-                  <Progress status={order.status}>{order.status}</Progress>
+                  <Progress theme={theme} status={order.status}>{order.status}</Progress>
                 </OrderHeader>
                 <Divider />
                 <Information>
@@ -576,7 +609,7 @@ const OrderPage = () => {
           </Orders>
         </Center>
 
-        <Right>
+        <Right theme={theme}>
           {selectedOrder == null ? (
             <div
               style={{
@@ -587,34 +620,34 @@ const OrderPage = () => {
                 justifyContent: "center",
               }}
             >
-              <EmptyData text={"Cart Is Empty"} />
+              <EmptyData text={"Please Select an Order!!"} />
             </div>
           ) : (
             selectedOrder && (
-              <>
+              <SelectedOrder>
                 <OrderTitle>
                   <OrderId>Order Details - {selectedOrder.orderId}</OrderId>{" "}
                   <Link>
-                    <Detail>
+                    <Detail theme={theme}>
                       <RemoveRedEyeOutlinedIcon fontSize="small" />
                       Details
                     </Detail>
                   </Link>
                 </OrderTitle>
                 <OrderInfos>
-                  <Status>
+                  <Status theme={theme}>
                     <TypeTitle>
                       Order Status :
-                      <OrderProcessing status={selectedOrder.status}>
+                      <OrderProcessing theme={theme} status={selectedOrder.status}>
                         {selectedOrder.status}
                       </OrderProcessing>
                     </TypeTitle>
                     <TypeTitle>
-                      Payment Method :<PaymentType>Pay In Cash</PaymentType>
+                      Payment Method :<PaymentType theme={theme}>Pay In Cash</PaymentType>
                     </TypeTitle>
                   </Status>
                   <Details>
-                    <Addresses>
+                    <Addresses theme={theme}>
                       <AddressType>Shipping Address</AddressType>
                       <Address>
                         {selectedOrder.state +
@@ -644,7 +677,7 @@ const OrderPage = () => {
                       </TotalType>
                       {selectedOrder && (
                         <TotalType>
-                          <TotalName type="total">Total</TotalName>
+                          <TotalName theme={theme} type="total">Total</TotalName>
                           <TypePrice>
                             $
                             {(
@@ -664,7 +697,7 @@ const OrderPage = () => {
                       <Tooltip title={step.stepStatus} arrow>
                         <StepContainer>
                           <Step status={step.stepStatus}>
-                            <Span status={step.stepStatus}>
+                            <Span theme={theme} status={step.stepStatus}>
                               {step.stepIcon}
                             </Span>
                           </Step>
@@ -672,6 +705,7 @@ const OrderPage = () => {
                         </StepContainer>
                       </Tooltip>
                       <Connector
+                      theme={theme}
                         value={step.stepStatus == "complete" ? 100 : 0}
                         max={100}
                         step={step.last}
@@ -682,7 +716,7 @@ const OrderPage = () => {
 
                 <Table>
                   <TableItems>
-                  <TagRow>
+                  <TagRow theme={theme}>
                     <Tag style={{ flex: 3 }}>Item</Tag>
                     <Tag style={{ flex: 2 }}>Color</Tag>
                     <Tag style={{ flex: 2 }}>
@@ -694,7 +728,7 @@ const OrderPage = () => {
                   </TagRow>
 
                   {ordersItems.map((product) => (
-                    <Row key={product.id}>
+                    <Row theme={theme} key={product.id}>
                       <Product style={{ flex: 3 }}>
                         <ProductImage
                           src={product.productimage}
@@ -713,7 +747,7 @@ const OrderPage = () => {
                           : JSON.parse(product.attributes)?.size}
                       </Qte>
                       <Qte style={{ flex: 2 }}>{product.qte}</Qte>
-                      <Progress status={product.status} style={{ flex: 2 }}>
+                      <Progress theme={theme} status={product.status} style={{ flex: 2 }}>
                         {product.status}
                       </Progress>
                       <Price style={{ flex: 2 }}>
@@ -722,7 +756,7 @@ const OrderPage = () => {
                           <p
                           style={{
                             textDecoration: "line-through",
-                            color: "#9e9e9e",
+                            color: secondaryTextColor,
                             fontSize: 12,
                           }}
                           >
@@ -741,7 +775,7 @@ const OrderPage = () => {
                   ))}
           </TableItems>
                 </Table>
-              </>
+              </SelectedOrder>
             )
           )}
         </Right>

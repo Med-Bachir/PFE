@@ -45,6 +45,7 @@ const Stock = () => {
   
 
   const [products, setProducts] = useState([]);
+  const [loading , setLoading] = useState(false)
 
   useEffect(() => {
     const getProducts = async () => {
@@ -54,9 +55,14 @@ const Stock = () => {
 
           const res = await newRequest.get(`/products/seller-products/${user?.idUSER}`);
           setProducts(res.data);
+          setLoading(true)
         }
       catch (err) {
         console.error("Error fetching users:", err);
+      }finally{
+        setTimeout(() => {
+setLoading(false)
+        },[1000])
       }
     };
     getProducts();
@@ -69,7 +75,7 @@ const Stock = () => {
     <Container  >
 
     <StaticContainer style={{borderRadius:4 , padding:0}}>
-        <ProductList productData={products} />
+        <ProductList productData={products} loading={loading} />
         
     </StaticContainer>
     <Link to='/products/Add'>

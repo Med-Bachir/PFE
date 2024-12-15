@@ -1,11 +1,11 @@
 import styled from "styled-components";
-
+import '../../../src/index.css'
 import InputLabel from "@mui/material/InputLabel";
 import MenuItem from "@mui/material/MenuItem";
 import FormControl from "@mui/material/FormControl";
 import Select from "@mui/material/Select";
 import newRequest from "../../utils/newRequest";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import CloseTwoToneIcon from '@mui/icons-material/CloseTwoTone';
 import {
   Divider,
@@ -26,6 +26,8 @@ import AlertMessage from "../../Components/Alert";
 import { ShootingStars } from "./Paiment";
 import { LoadingOutlined, PlusOutlined } from '@ant-design/icons';
 import { Flex, message, Upload } from 'antd';
+import { colorAccentDark, colorAccentDarkTransparent, colorAccentMain, colorAccentMedium, colorAccentMediumTransparent, colorAccentMoreTransparent, colorAccentSoft, colorBackgroundBlack, colorElementBackgroundGray, colorPrimaryBlack, elementGrayBackground, gradientBackground, grayBackground, lightMain, lightSoftMain, main, medMain, primaryTextColor, secondaryTextColor, secondText, whiteTextColor } from "../../Colors";
+import { useSelector } from "react-redux";
 const Container = styled.div`
   width: 100%;
   height: 100vh;
@@ -37,24 +39,45 @@ const Container = styled.div`
     ),
     url("https://images.pexels.com/photos/6984661/pexels-photo-6984661.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940")
       center;*/
-
+background-color: ${props => props.theme == "light" ? whiteTextColor :  colorBackgroundBlack};
   display: flex;
   align-items: center;
   justify-content: space-evenly;
+  color: ${props => props.theme == "light" ? primaryTextColor :  elementGrayBackground};
+  @media (max-width: 768px) and (max-height: 923px) {
+ flex-direction: column;
+ height:auto;
+}
+@media (max-width: 768px) and (min-height: 923px) {
+  flex-direction: column;
+}
+
 `;
 
 const Wrapper = styled.div`
   padding: 20px;
   width: 40%;
-  background-color: white;
+  @media (max-width: 768px) {
+    padding: 0;
+width: 100%;
+}
+
+
 `;
 const Title = styled.h1`
   font-size: 24px;
   font-weight: 500;
+  @media (max-width: 768px) {
+    padding-left: 20px;
+}
 `;
 const Form = styled.form`
   display: flex;
   flex-wrap: wrap;
+  background-color: ${({theme}) => theme == "light" ? whiteTextColor : colorBackgroundBlack};
+  @media (max-width: 768px) {
+    padding: 20px;
+}
 `;
 const Agreement = styled.span`
   font-size: 12px;
@@ -66,17 +89,18 @@ const CreatButton = styled.button`
   width: 40%;
   border: none;
   padding: 15px 20px;
-  background-color: #27272a;
-  color: white;
-  border: solid #27272a;
+  background-color: ${({theme}) => theme == "light" ? main : colorAccentMedium};
+  color: ${whiteTextColor};
   cursor: pointer;
   transition: 200ms ease-in-out;
 
   &:hover {
-    background-color: transparent;
-
-    color: #27272a;
+    background-color: ${({theme}) => theme == "light" ? lightSoftMain : colorAccentMoreTransparent};
+    color: ${({theme}) => theme == "light" ? main : colorAccentMain};
   }
+  @media (max-width: 768px) {
+ width: 50%;
+}
 `;
 const Paiment = styled.button`
   box-shadow: rgba(0, 0, 0, 0.09) 0px 3px 12px;
@@ -87,17 +111,39 @@ const Paiment = styled.button`
   border-radius: 8px;
   text-align: start;
   cursor: pointer;
+  display: flex;
+  background-color:${({theme}) => theme=="light" ? whiteTextColor : colorPrimaryBlack};
+  color:${({theme}) => theme=="light" ? primaryTextColor : elementGrayBackground};
+  
+  
   &:hover {
     background: rgb(0, 0, 0);
-    background: linear-gradient(
-      33deg,
-      rgba(0, 0, 0, 1) 68%,
-      rgba(219, 219, 219, 1) 100%
-    );
-    color: white;
+    background: ${({theme}) => theme == "light" ? 
+    ` linear-gradient(
+       33deg,
+       ${main} 68%,
+       ${lightMain} 100%
+      );`
+
+      :  ` linear-gradient(
+       33deg,
+       ${colorAccentMedium} 68%,
+       ${colorAccentMoreTransparent} 100%
+      );`
+    } ;
+
+    color: ${whiteTextColor};
     transform: translateY(8px);
+   
+    
+    
   }
-  transition: 200ms ease-in-out;
+  transition: all 200ms ease-in-out;
+  @media (max-width: 768px) {
+  width:100%;
+  gap:20px;
+}
+    
 `;
 const Details = styled.div`
   padding: 20px;
@@ -111,7 +157,8 @@ const Detail = styled.span`
 `;
 const Duration = styled.span`
   font-size: 18px;
-  color: #828282;
+  
+  
 `;
 const Benifits = styled.ul`
   margin-top: 20px;
@@ -119,6 +166,7 @@ const Benifits = styled.ul`
   display: flex;
   flex-direction: column;
   gap: 8px;
+
 `;
 const Benifit = styled.li`
   list-style: circle;
@@ -128,36 +176,43 @@ width: 100%;
 height:100%;
 left: 0;
 top: 0;
-position: absolute;
+position: fixed;
 backdrop-filter: brightness(40%);
 -webkit-backdrop-filter: brightness(20%);
 display: flex;
 align-items: center;
 justify-content: center;
 z-index: 99;
+
 `
 const PayContainer = styled.div`
 display: flex;
 flex-direction: column;
 justify-content: center;
 padding: 32px;
-background-color: white;
+background-color:${({theme}) => theme=="light" ? whiteTextColor : colorPrimaryBlack};
+
 width: 50%;
 height: auto;
 gap: 20px;
 transform: ${props => props.selected == null ? "translateY(-200%)" : "translateY(0)"} ;
 border-radius:8px;
 transition: 500ms ease-in-out;
+@media (max-width: 768px) {
+    width: 90%;
+}
 
 `
 const PayInformation = styled.div`
 display: flex;
 align-items: center;
 justify-content: space-between;
-background-color: black;
+background-color:${({theme}) => theme=="light" ? colorPrimaryBlack : colorAccentMediumTransparent};
+
 border-radius: 8px;
-color: white;
+color: ${whiteTextColor};
 padding: 20px;
+
 
 `
 const Information = styled.div``
@@ -165,6 +220,18 @@ const PaymentType = styled.div`
 display: flex;
 align-items: center;
 gap: 8px;
+@media (max-width: 768px) {
+    flex-direction: column;
+    
+}
+`
+const CardsContainer = styled.div`
+display: flex;
+flex-wrap: wrap;
+align-items: center;
+gap: 8px;
+width: 100%;
+
 `
 const Cards = styled.img`
 width: 95px;
@@ -178,7 +245,7 @@ const getBase64 = (img, callback) => {
   reader.readAsDataURL(img);
 };
 const beforeUpload = (file) => {
-  const isJpgOrPng = file.type === 'image/jpeg' || file.type === 'image/png';
+  const isJpgOrPng = file.type === 'image/jpeg' || file.type === 'image/png' || file.type === 'image/jpg';
   if (!isJpgOrPng) {
     message.error('You can only upload JPG/PNG file!');
   }
@@ -196,40 +263,89 @@ const Register = () => {
   const [open, setOpen] = useState(false);
   const [selected, setSelected] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [pending, setPending] = useState(false);
   const [imageUrl, setImageUrl] = useState();
   const [finished, setFinished] = useState(false);
+  const theme = useSelector(state => state.theme.mode);
+    const [isMobile, setIsMobile] = useState(false);
   const navigate = useNavigate();
 
+  useEffect(() => {
+      const handleResize = () => {
+        setIsMobile(window.innerWidth <= 768);
+      };
+  
+      handleResize(); // Check initial window size
+      window.addEventListener('resize', handleResize);
+  
+      return () => {
+        window.removeEventListener('resize', handleResize);
+      };
+    }, []);
   const handleChange2 = (e) => {
     e.preventDefault();
     setUser((prev) => ({ ...prev, [e.target.name]: e.target.value , subscription : selected , prof : imageUrl }));
-    console.log(user);
+   
   };
 
   const handleSubmit = (e) => {
     e.preventDefault();
+
+    // Validate user input
+    if (!user || !user.username || !user.email || !user.password || !user.firstname || !user.lastname) {
+      setMessage("Please fill in all the required fields.");
+      setType("error");
+      setOpen(true);
+      return;
+    }
+  
+    // Additional validation for email format
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(user.email)) {
+      setMessage("Invalid email format.");
+      setType("error");
+      setOpen(true);
+      return;
+    }
+  
+    // Validate password strength (e.g., minimum 6 characters)
+    if (user.password.length < 6) {
+      setMessage("Password must be at least 6 characters long.");
+      setType("error");
+      setOpen(true);
+      return;
+    }
+  
+    // Proceed with the API call
     newRequest
       .post("/auth/register", user)
       .then((res) => {
         console.log(user);
         if (res.status === 201) {
-          setMessage("User created successfully! Please login again");
+          setMessage("User created successfully! Please login again.");
           setType("success");
           setOpen(true);
-
+          setPending(false)
           setTimeout(() => {
             navigate("/login");
-          }, [2000]);
+            
+          }, 2000); // Removed brackets around delay
         }
       })
       .catch((err) => {
-        if (err.response.status === 409) {
-          setMessage("User already exist!");
+        // Handle server-side errors
+        if (err.response?.status === 401) {
+          setMessage("User already exists!");
+          setType("error");
+          setOpen(true);
+        } else {
+          setMessage("An error occurred. Please try again.");
           setType("error");
           setOpen(true);
         }
       });
   };
+  
 
   const [age, setAge] = useState("");
 
@@ -261,12 +377,15 @@ const Register = () => {
         setImageUrl(url);
       })
     }
+    
+
   };
   const uploadButton = (
     <button
       style={{
-        border: 0,
         background: 'none',
+        color: theme == "light" ? primaryTextColor : elementGrayBackground,
+        padding:20
       }}
       type="button"
     >
@@ -280,62 +399,109 @@ const Register = () => {
       </div>
     </button>
   );
+const customTextField = {
+  flex: 1, margin: "20px 10px 0 0" ,
+    minWidth:'40%', borderRadius:1 , bgcolor:theme == "light" ? whiteTextColor : colorAccentMoreTransparent ,  ".css-1t8l2tu-MuiInputBase-input-MuiOutlinedInput-input":{color: theme == "light" ? primaryTextColor : elementGrayBackground},
+                "& .MuiOutlinedInput-root": {
+                  
+                  "&:hover fieldset": {
+                    borderColor: theme == "light" ? lightMain : colorAccentSoft, // Hover border color
+                  },
+                  "&.Mui-focused fieldset": {
+                    borderColor: theme == "light" ? main : colorAccentMedium, // Focused border color
+                  },
+                },
+                "& .MuiInputLabel-root": {
+                  color: secondText, // Default label color
+                },
+                "& .MuiInputLabel-root.Mui-focused": {
+                  color: theme == "light" ? main : colorAccentMain, // Focused label color
+                },
+                "& .MuiInputLabel-root.Mui-error": {
+                  color: "orange", // Error label color
+                },
+            ".css-1n4twyu-MuiInputBase-input-MuiOutlinedInput-input" : { color:theme == "light" ? primaryTextColor : elementGrayBackground}
+              
+  };
+
+  const customPaiment = {
+    mt: 2,
+    width: "100%",
+    display: "flex",
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+   " @media (max-width: 768px) " :{
+      flexDirection: "column-reverse",
+    }
+        
+  }
+  
   return (
-    <Container>
+    <Container theme={theme}>
       <AlertMessage
         open={open}
         setOpen={setOpen}
         message={message}
         type={type}
       />
-      <Lottie animationData={me} style={{ width: "40%" }} />
-      <Divider orientation="vertical" style={{ height: 300 }} />
+     
+      <Lottie animationData={me} style={{ width: !isMobile ? "40%" : "60%" , opacity:theme == "light" ? 1 :0.8}} />
+      
+      <Divider orientation={!isMobile ? "vertical" : "horizontal"} style={{ height: !isMobile ? 300 : 1 , width:  !isMobile ? 1 : 300  ,borderColor:theme == "light" ? secondText : colorElementBackgroundGray }} />
       <Wrapper>
         <Title>CREATE AN ACCOUNT</Title>
-        <Form>
+        <Form theme={theme}>
           <TextField
-            sx={{ flex: 1, minWidth: "40%", margin: "20px 10px 0 0" }}
+            sx={customTextField}
             size="small"
             id="outlined-basic"
             label="first name"
             name="firstname"
             variant="outlined"
             onChange={handleChange2}
+            required
           />
           <TextField
-            sx={{ flex: 1, minWidth: "40%", margin: "20px 10px 0 0" }}
+            sx={customTextField}
             size="small"
             id="outlined-basic"
             label="last name"
             name="lastname"
             variant="outlined"
             onChange={handleChange2}
+            required
           />
           <TextField
-            sx={{ flex: 1, minWidth: "40%", margin: "20px 10px 0 0" }}
+            sx={customTextField}
             size="small"
             id="outlined-basic"
             label="user name"
             name="username"
             variant="outlined"
             onChange={handleChange2}
+            required
           />
           <TextField
-            sx={{ flex: 1, minWidth: "40%", margin: "20px 10px 0 0" }}
+           sx={customTextField}
             size="small"
             id="outlined-basic"
             label="email"
             name="email"
             variant="outlined"
             onChange={handleChange2}
+            required
+
           />
 
           <FormControl
-            sx={{ flex: 1, minWidth: "40%", margin: "20px 10px 0 0" }}
+           sx={customTextField}
             size="small"
             id="outlined-basic"
             label="password"
             variant="outlined"
+            required
+
           >
             <InputLabel htmlFor="outlined-adornment-password">
               Password
@@ -361,11 +527,13 @@ const Register = () => {
             />
           </FormControl>
           <FormControl
-            sx={{ flex: 1, minWidth: "40%", margin: "20px 10px 0 0" }}
+            sx={customTextField}
             size="small"
             id="outlined-basic"
             label="confirm password"
             variant="outlined"
+            required
+
           >
             <InputLabel htmlFor="outlined-adornment-password">
               Confirm Password
@@ -389,7 +557,9 @@ const Register = () => {
             />
           </FormControl>
 
-          <FormControl sx={{ mt: 2.5, mr: 3, minWidth: 120 }} size="small">
+          <FormControl required
+         
+          sx={customTextField } size="small">
             <InputLabel id="demo-select-small-label">Type</InputLabel>
             <Select
               labelId="demo-select-small-label"
@@ -401,24 +571,20 @@ const Register = () => {
                 handleChange2(event);
                 handleChange(event);
               }}
+              sx={{color:theme == "light" ? primaryTextColor : elementGrayBackground }}
             >
-              <MenuItem value="seller">Seller</MenuItem>
+              <MenuItem  value="seller">Seller</MenuItem>
 
               <MenuItem value="client">Client</MenuItem>
             </Select>
           </FormControl>
           {age == "seller" ? (
             <FormControl
-              sx={{
-                mt: 2,
-                width: "100%",
-                display: "flex",
-                flexDirection: "row",
-                justifyContent: "space-between",
-                alignItems: "center",
-              }}
+              sx={
+              customPaiment
+              }
             >
-              <Paiment onClick={(e) => handleSelect(e , "Monthly")}  selected={selected}>
+              <Paiment theme={theme} onClick={(e) => handleSelect(e , "Monthly")} value="Monthly"  selected={selected}>
                 <Details>
                   <Detail>
                     $40.00 <Duration> /month</Duration>
@@ -432,7 +598,7 @@ const Register = () => {
 
                 <ShootingStars />
               </Paiment>
-              <Paiment name="subscription" onClick={(e) => handleSelect(e , "Annual")} value="Annual" selected={selected}>
+              <Paiment theme={theme} name="subscription" onClick={(e) => handleSelect(e , "Annual")} value="Annual" selected={selected}>
                 <Details>
                   <Detail>
                     $400.00 <Duration> /year</Duration>
@@ -457,11 +623,11 @@ const Register = () => {
 
           {selected == null || finished ? '':
            <DisabledBackground >
-            <PayContainer selected={selected}>
-              <IconButton sx={{ ml:'auto' , width:30, height:30 , bgcolor:'black'}} onClick={() => setFinished(true)}>
-<CloseTwoToneIcon sx={{color:'white', fontSize:16}} />
+            <PayContainer theme={theme} selected={selected}>
+              <IconButton sx={{ ml:'auto' , width:30, height:30 , bgcolor: theme == "light" ? 'black' : colorAccentDark}} onClick={() => setFinished(true)}>
+              <CloseTwoToneIcon sx={{color:whiteTextColor, fontSize:16}} />
               </IconButton>
-              <PayInformation>
+              <PayInformation theme={theme}>
                 <Information>
                  CCP Number : 0799990023455436
                 </Information>
@@ -469,40 +635,50 @@ const Register = () => {
                  Monton :$ {selected == "Monthly" ? 40.00 : 400.00}
                 </Information>
               </PayInformation>
-
-            <Flex  gap="middle" style={{width:'100%' ,display:"flex" , flexDirection:'column'}} wrap>
               Add your paiment prof here 
-              
-      <Upload
-        name="avatar"
-        listType="picture-card"
-        className="avatar-uploader"
-        showUploadList={false}
-        action="https://660d2bd96ddfa2943b33731c.mockapi.io/api/upload"
-        beforeUpload={beforeUpload}
-        onChange={handleChangeImage}
-      >
-        {imageUrl ? (
-          <img
-            src={imageUrl}
-            alt="avatar"
-            style={{
-              width: '70%',
-              height:300,
-              objectFit:'contain'
-            }}
-          />
-        ) : (
-          uploadButton
-        )}
-      </Upload>
+              <Flex
+  gap="middle"
+  style={{
+    // Center alignment
+  }}
+>
+ 
+    <Upload
+      name="avatar"
+      listType="picture-card"
+      className="avatar-uploader"
+      showUploadList={false}
+      action="https://660d2bd96ddfa2943b33731c.mockapi.io/api/upload"
+      beforeUpload={beforeUpload}
+      onChange={handleChangeImage}
+      style={{width:'600px' , color:'red'}}
+    >
+      {imageUrl ? (
+        <img
+          src={imageUrl}
+          alt="avatar"
+          style={{
+            width: '70%',
+            height: 300,
+            objectFit: 'contain',
+          }}
+        />
+      ) : (
+        uploadButton
+      )}
+    </Upload>
+  
+</Flex>
+
       <PaymentType name='prof' value={imageUrl}>
-        
-      <CreatButton onClick={(e) => {handleChange2(e) , setFinished(true) }} style={{width:200 , marginRight:'auto'}} >Submit</CreatButton>
+      <CreatButton theme={theme} onClick={(e) => {handleChange2(e) , setFinished(true) }} style={{width: !isMobile ? 200 : "100%" , marginRight:'auto'}} >Submit</CreatButton>
+      <CardsContainer>
+
       <Cards src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTemtB8Egjx5IeEJ13kX2UcvUkDigPLaULtkA&s" />
       <Cards src="https://comparili.net/wp-content/uploads/2022/12/Badr-Banque-TAWFIR-Comparili-CB-jpg.webp" />
+      </CardsContainer>
       </PaymentType>
-    </Flex>
+        
             </PayContainer>
           </DisabledBackground>
           }
@@ -513,9 +689,9 @@ const Register = () => {
           </Agreement>
           <Agreement margin="10px 0">
             If you already have an account please{" "}
-            <Link to="/login">LOGIN !!</Link>
+            <Link to="/login" style={{color:main ,fontSize:14 , fontWeight:500}}>LOGIN !!</Link>
           </Agreement>
-          <CreatButton onClick={handleSubmit}>CREATE</CreatButton>
+          <CreatButton theme={theme} onClick={(e) => {handleSubmit(e) , setPending(true)}} disabled={pending ? true : false}>{!pending ? 'CREATE' : <LoadingOutlined />}</CreatButton>
         </Form>
       </Wrapper>
     </Container>
@@ -526,33 +702,3 @@ export default Register;
 
 
 
-/* 
-
-import React, { useState } from 'react';
-import { LoadingOutlined, PlusOutlined } from '@ant-design/icons';
-import { Flex, message, Upload } from 'antd';
-const getBase64 = (img, callback) => {
-  const reader = new FileReader();
-  reader.addEventListener('load', () => callback(reader.result));
-  reader.readAsDataURL(img);
-};
-const beforeUpload = (file) => {
-  const isJpgOrPng = file.type === 'image/jpeg' || file.type === 'image/png';
-  if (!isJpgOrPng) {
-    message.error('You can only upload JPG/PNG file!');
-  }
-  const isLt2M = file.size / 1024 / 1024 < 2;
-  if (!isLt2M) {
-    message.error('Image must smaller than 2MB!');
-  }
-  return isJpgOrPng && isLt2M;
-};
-const App = () => {
- 
-  
-  return (
-    
-  );
-};
-export default App;
-*/

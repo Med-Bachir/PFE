@@ -5,6 +5,8 @@ import DeleteIcon from "@mui/icons-material/Delete";
 import { Container } from "./Shipping";
 import { StaticContainer, StaticTitle } from "../Pages/Profiles/admin/AdminPf";
 import newRequest from "../../../utils/newRequest";
+import Loading from "../../../Components/Pending/Loading";
+import EmptyData from "../../../Components/Pending/EmptyData";
 
 
 
@@ -83,14 +85,20 @@ flex: 1;
 `;
 const MyOrder = () => {
   const [users, setUsers] = useState([]);
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     const getUsers = async () => {
       try {
         const res = await newRequest.get("/users");
         setUsers(res.data);
+        setLoading(true)
       } catch (err) {
         console.error("Error fetching users:", err);
+      } finally {
+        setTimeout(() => {
+setLoading(false)
+        } , [1000])
       }
     };
     getUsers();
@@ -125,7 +133,7 @@ const MyOrder = () => {
   
           <ColumnTag style={{ border: "none", flex: 1 }}>Action</ColumnTag>
         </Row>
-        {users.map((item) => (
+        {users && !loading ? users.map((item) => (
           <>
             <Row key={item.idUSER} type={"normal"}>
               <Column   style={{flex:1}}>
@@ -173,7 +181,7 @@ const MyOrder = () => {
             </Row>
             <Divider />
           </>
-        ))}
+        )) : loading ? <Loading />: <EmptyData />}
       </Table>
         </StaticContainer>
         </Container>

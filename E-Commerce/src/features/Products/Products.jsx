@@ -9,13 +9,14 @@ import Lottie from "lottie-react"
 import me from "../../assets/Lotties/Animation - 1716145973359.json"
 import newRequest from "../../utils/newRequest.js";
 import { useQuery, useQueryClient } from "@tanstack/react-query";// Styled components
+import { primaryTextColor } from "../../Colors.jsx";
 const Container = styled.div`
   width: 100%;
   height: auto;
   display: grid;
   gap: 20px;
   padding: 32px;
-  grid-template-columns: repeat(3, minmax(280px, 3fr)); /* Responsive grid */
+  grid-template-columns: repeat(3, 1fr); /* Responsive grid */
 
   & > * {
     width: 100%; /* Ensure grid items fill the column */
@@ -43,14 +44,12 @@ const LottieContainer = styled.div`
 
 const Message = styled.div`
   font-size: 1.2rem;
-  color: #555;
+  color: ${primaryTextColor};
   margin-top: 16px;
 `;
 
-const Products = () => {
+const Products = ({theme}) => {
   const { categoryName, subName, typeName } = useSelector((state) => state.caty);
-  const [allProducts, setAllProducts] = useState([]);
-  const queryClinet = useQueryClient();
 
   const getFilter = async () => {
     try {
@@ -106,6 +105,7 @@ const Products = () => {
             productprice={item.productprice}
             discount={item.discount}
             rate={item.rate}
+            theme={theme}
           />
         ))
       ) : (

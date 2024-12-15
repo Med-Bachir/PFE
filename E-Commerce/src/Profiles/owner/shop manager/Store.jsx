@@ -8,6 +8,8 @@ import DeleteIcon from "@mui/icons-material/Delete";
 import { Link } from 'react-router-dom';
 import Lottie from "lottie-react";
 import me from "../../../assets/Lotties/Animation - 1716145973359.json";
+import Loading from '../../../Components/Pending/Loading';
+import { colorAccentDark, colorAccentDarkTransparent, colorAccentLight, colorAccentMain, colorAccentMediumTransparent, colorAccentSoft, colorAccentSoftTransparent, colorBackgroundBlack, colorErrorDark, colorErrorSoft, colorPrimaryBlack, grayBackground, main, primaryTextColor, whiteTextColor } from '../../../Colors';
 
 
 const Container = styled.div`
@@ -15,27 +17,40 @@ const Container = styled.div`
   padding: 32px;
   display: flex;
   justify-content: space-evenly;
+  overflow: auto;
+  @media (max-width: 768px) {
+    flex-direction: column;
+    padding: 12px;
+  }
 `;
 
 const StoreProfile = styled.div`
   padding: 20px;
   border-radius: 12px;
-  background-color: white;
+  background-color: ${props => props.theme == "light" ? whiteTextColor : colorAccentSoftTransparent};
   height: 200px;
+  @media (max-width: 768px) {
+    height: auto;
+  }
 `;
 
 const Shop = styled.div`
   display: flex;
-  border-bottom: 1px solid #eee;
+  border-bottom: 1px solid ${props => props.theme == "light" ? grayBackground : colorAccentMediumTransparent};
+  color: ${props => props.theme == "light" ? primaryTextColor : whiteTextColor};
   padding: 0 0 8px;
   gap: 8px;
   align-items: center;
+  @media (max-width: 768px) {
+width: 100%;
+    gap: 0px;
+  }
 `;
 
 const Circle = styled.div`
   width: 80px;
   height: 80px;
-  border: 1.5px dashed #46A25D;
+  border: 1.5px dashed ${props => props.theme == "light" ? grayBackground : colorAccentMain};
   border-radius: 50%;
   padding: 8px;
 `;
@@ -45,6 +60,7 @@ const StorInfo = styled.div`
   flex-direction: column;
   justify-content: center;
   gap: 8px;
+  
 `;
 
 const Name = styled.span``;
@@ -55,6 +71,8 @@ const StaticContainer = styled.span`
   display: flex;
   padding: 8px 0;
   justify-content: space-between;
+  color: ${props => props.theme == "light" ? primaryTextColor : whiteTextColor};
+
 `;
 
 const Stats = styled.span`
@@ -63,6 +81,7 @@ const Stats = styled.span`
   flex: 1;
   padding: 0 12px;
   gap: 8px;
+  
 `;
 
 const Title = styled.span`
@@ -78,8 +97,8 @@ const Value = styled.span`
 const Status = styled.span`
   padding: 4px 20px;
   border-radius: 4px;
-  background-color: ${(props) => (props.status === 'Close' ? '#FFE6EC' : '#E0FAF6')};
-  color: ${(props) => (props.status === 'Close' ? '#FF003F' : '#65CFBD')};
+  background-color: ${(props) => (props.status === 'Close' ? props.theme == "light" ? '#FFE6EC' : colorErrorSoft : props.theme == "light" ? '#E0FAF6' : colorAccentMediumTransparent)};
+  color: ${(props) => (props.status === 'Close' ? "#FF003F" : props.theme == "light" ?  '#65CFBD' : colorAccentMain )};
 `;
 
 const LottieContainer = styled.div`
@@ -92,9 +111,24 @@ const LottieContainer = styled.div`
 
 const Store = () => {
   const user = useSelector((state) => state.user?.currentUser);
+  const theme = useSelector((state) => state.theme.mode);
   const [shops, setShops] = useState([]);
-  
+  const [loading , setLoading] = useState(false)
+    const [isMobile, setIsMobile] = useState(false);
+   
  
+   useEffect(() => {
+       const handleResize = () => {
+         setIsMobile(window.innerWidth <= 768);
+       };
+   
+       handleResize(); // Check initial window size
+       window.addEventListener('resize', handleResize);
+   
+       return () => {
+         window.removeEventListener('resize', handleResize);
+       };
+     }, []);
 
   useEffect(() => {
     const getShops = async () => {
@@ -103,8 +137,13 @@ const Store = () => {
         console.log(user?.idUSER)
         console.log("Fetched shops:", res.data); // Debug log
         setShops(res.data);
+        setLoading(true)
       } catch (err) {
         console.error("Error fetching users:", err);
+      }finally{
+        setTimeout(() => {
+          setLoading(false)
+        },[1000])
       }
     };
     getShops();
@@ -131,18 +170,18 @@ const Store = () => {
     }
   };
 
-  console.log(shops)
+  
   return (
     <Container>
-      {shops.length > 0 ? (
+      {shops != '' && ! loading ? (
         shops.map((shop) => (
-          <Link to={`/Shops/${shop.ShopID}`} style={{ width: '35%', height: '200px' }} key={shop.ShopID}>
-            <StoreProfile>
-              <Shop>
+          <Link to={`/Shops/${shop.ShopID}`} style={{ width: isMobile ? '100%' : '35%', height: isMobile ? 'auto' : '200px' }} key={shop.ShopID}>
+            <StoreProfile theme={theme}>
+              <Shop theme={theme}>
                 <Circle>
                   <Avatar src={shop.ShopImage} style={{ width: '100%', height: '100%' }} />
                 </Circle>
-                <StorInfo>
+                <StorInfo theme={theme}>
                   <Name>{shop.ShopName}</Name>
                   <Products>Total Products: {shop.TotalProducts}</Products>
                 </StorInfo>
@@ -150,19 +189,19 @@ const Store = () => {
                   <DeleteIcon sx={{ color: "#E92F4A" }} />
                 </IconButton>
               </Shop>
-              <StaticContainer>
+              <StaticContainer theme={theme}>
                 <Stats>
                   <Title>Orders:</Title>
                   <Value>{shop.TotalOrders}</Value>
                 </Stats>
-                <Stats style={{ alignItems: 'center', justifyContent: 'center', borderLeft: '1px dashed #eee' }}>
-                  <Status status={shop.ShopStatus}>{shop.ShopStatus}</Status>
+                <Stats style={{ alignItems: 'center', justifyContent: 'center', borderLeft: `1px dashed ${theme == "light" ? grayBackground : colorAccentMediumTransparent}` }}>
+                  <Status theme={theme} status={shop.ShopStatus}>{shop.ShopStatus}</Status>
                 </Stats>
               </StaticContainer>
             </StoreProfile>
           </Link>
         ))
-      ) : (
+      ) : loading ? <Loading /> : (
         <LottieContainer>
           <Lottie animationData={me} style={{ width: '40%' }} />
         </LottieContainer>

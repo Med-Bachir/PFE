@@ -38,12 +38,23 @@ import Inventory2TwoToneIcon from "@mui/icons-material/Inventory2TwoTone";
 import RemoveRedEyeTwoToneIcon from "@mui/icons-material/RemoveRedEyeTwoTone";
 
 import SettingsTwoTone from "@mui/icons-material/SettingsTwoTone";
-import PersonAdd from "@mui/icons-material/PersonAdd";
+
 import HourglassBottomTwoToneIcon from "@mui/icons-material/HourglassBottomTwoTone";
 import AccountTreeTwoToneIcon from "@mui/icons-material/AccountTreeTwoTone";
 import Lottie from "lottie-react";
 import me from "../../emptyNotification.json";
 import newRequest from "../../utils/newRequest";
+import AlertMessage from "../Alert";
+import {
+  colorBackgroundBlack,
+  colorPrimaryBlack,
+  grayBackground,
+  lightSoftMain,
+  primaryTextColor,
+  secondaryTextColor,
+  whiteTextColor,
+} from "../../Colors";
+import Switcher from "../switcher/ThemeSwitcher";
 
 const Container = styled.div`
   display: flex;
@@ -60,9 +71,10 @@ const DrawerHeader = styled.div`
   padding: ${(props) => (props.open ? `0 32px 0 0` : `0 32px 0 0px`)};
   align-items: center;
   right: 0;
-  background-color: transparent;
+  background-color: ${props => props.theme == "light" ? whiteTextColor : colorPrimaryBlack };
   box-shadow: rgba(0, 0, 0, 0.05) 0px 6px 24px 0px,
     rgba(0, 0, 0, 0.08) 0px 0px 0px 1px;
+ 
 `;
 
 const Left = styled.div`
@@ -71,15 +83,17 @@ const Left = styled.div`
   transition: 500ms;
   overflow: hidden;
   align-items: center;
+  @media (max-width: 768px) {
+  display: none;
+}
 `;
 
 const Logo = styled.img`
   width: 300px;
-  margin-left: ${props => props.open ? 0 : '-35px' } ;
+  margin-left: ${(props) => (props.open ? 0 : "-35px")};
   transition: 500ms ease-in-out;
+  filter: ${props => props.theme === "light" ? "brightness(1) invert(0)" : "brightness(0) invert(1)"};
 `;
-
-
 
 const Center = styled.div`
   flex: 5;
@@ -87,8 +101,11 @@ const Center = styled.div`
   display: flex;
   align-items: center;
   gap: 32px;
+  @media (max-width: 768px) {
+  gap: 4px;
+  padding: 12px;
+}
 `;
-
 
 const Right = styled.div`
   flex: 1;
@@ -102,6 +119,10 @@ const Information = styled.div`
   display: flex;
   flex-direction: column;
   align-items: start;
+  color: ${props => props.theme == "light" ? primaryTextColor : whiteTextColor};
+  @media (max-width: 768px) {
+  display: none;
+}
 `;
 
 const UserName = styled.span`
@@ -134,7 +155,7 @@ const DrawerSideBar = styled.div`
   overflow-x: hidden;
   background-color: transparent;
   overflow-y: scroll;
-
+ background-color:${props => props.theme == "light" ? whiteTextColor : colorPrimaryBlack};
   &::-webkit-scrollbar {
     width: 4px; /* width of the entire scrollbar */
   }
@@ -153,13 +174,25 @@ const DrawerSideBar = styled.div`
     /* creates padding around scroll thumb */
   }
   transition: 500ms ease-in-out;
+  @media (max-width: 768px) {
+    width: ${(props) =>
+    props.open ? `288px` : `60px`}; // Using template literals
+  contain: ${(props) => (props.open ? "paint" : "")};
+}
 `;
 
 const InfoComponents = styled.div`
-  background-color: #e2e2e253;
+  background-color: ${grayBackground};
   width: ${(props) =>
     props.open ? `calc(100vw - 288px)` : `calc(100vw - 80px)`};
   transition: 500ms;
+  background-color: ${(props) =>
+    props.theme == "light" ? grayBackground : colorBackgroundBlack};
+
+@media (max-width: 768px) {
+  width: ${(props) =>
+    props.open ? `calc(100vw - 288px)` : `calc(100vw - 60px)`};
+}
 `;
 
 const ProfileConainer = styled.div`
@@ -182,7 +215,7 @@ const OwnerName = styled.div`
 `;
 const Email = styled.div`
   font-size: 10px;
-  color: #727272da;
+  color: ${secondaryTextColor};
   display: flex;
   align-items: center;
   gap: 2px;
@@ -199,7 +232,7 @@ const Notifications = styled.div`
 
   border-radius: 4px;
   flex-direction: column;
-  background-color: #f0fcfa;
+  background-color: ${lightSoftMain};
   right: ${(props) => (props.open ? "0" : "-250px")};
   top: 20px;
 
@@ -232,6 +265,7 @@ const Title = styled.span`
 `;
 const Drawer = () => {
   const user = useSelector((state) => state.user?.currentUser);
+  const theme = useSelector((state) => state.theme?.mode);
 
   const navigate = useNavigate();
 
@@ -240,6 +274,9 @@ const Drawer = () => {
   const handleClick = () => {
     dispatch(OpenDrawer());
   };
+  const [message, setMessage] = useState("");
+  const [type, setType] = useState("");
+  const [openAlert, setOpen] = useState(false);
 
   // State to manage dropdowns
 
@@ -247,7 +284,7 @@ const Drawer = () => {
   const openProfile = Boolean(anchorEl);
   const [notifications, setNotifications] = useState([]);
   const [openN, setOpenN] = useState(false);
-  const [total , setTotal] = useState()
+  const [total, setTotal] = useState();
 
   useEffect(() => {
     const getNotifications = async () => {
@@ -265,7 +302,6 @@ const Drawer = () => {
           }
         }
         setNotifications(res.data);
-        
       } catch (err) {
         console.error("Error fetching notifications:", err);
       }
@@ -276,11 +312,12 @@ const Drawer = () => {
     const getTotal = async () => {
       try {
         let res = null;
-        
-          res = await newRequest.get(`/notification/total-notification/${user?.idUSER}`);
-       
-          
-          setTotal(res.data);
+
+        res = await newRequest.get(
+          `/notification/total-notification/${user?.idUSER}`
+        );
+
+        setTotal(res.data);
         // Dispatch action with the number of notifications
       } catch (err) {
         console.error("Error fetching notifications:", err);
@@ -315,20 +352,19 @@ const Drawer = () => {
     logout(dispatch);
     navigate("/login");
   };
-  console.log(total)
+  console.log(total);
 
   return (
-    <Container>
-      <DrawerHeader open={open}>
+    <Container theme={theme}>
+      <DrawerHeader open={open} theme={theme}>
         <Link to="/">
           <Left open={open}>
-            <Logo  open={open} src={logo} />
-      
+            <Logo open={open} src={logo} theme={theme} />
           </Left>
         </Link>
         <Divider orientation="vertical" />
         <Center>
-          <IconButton onClick={handleClick}>
+          <IconButton sx={{color:theme == "light" ? primaryTextColor : whiteTextColor , backgroundColor:theme == "light" ? "" : colorBackgroundBlack}} onClick={handleClick}>
             <MenuIcon />
           </IconButton>
           <Badge
@@ -336,10 +372,11 @@ const Drawer = () => {
             badgeContent={total == null ? 0 : total[0]?.Total}
             color="success"
           >
-            <IconButton onClick={OpenNotification}>
+            <IconButton sx={{color:theme == "light" ? primaryTextColor : whiteTextColor , backgroundColor:theme == "light" ? "" : colorBackgroundBlack}} onClick={OpenNotification}>
               <NotificationsActiveOutlinedIcon />
             </IconButton>
           </Badge>
+          <Switcher />
         </Center>
         <Divider orientation="vertical" />
         <IconButton
@@ -355,7 +392,7 @@ const Drawer = () => {
               src={user?.userimg == null ? "e" : user?.userimg}
               alt={user?.username}
             />
-            <Information>
+            <Information theme={theme}>
               <UserName>{user?.username}</UserName>
               <UserRole>{user?.userRole}</UserRole>
             </Information>
@@ -402,12 +439,25 @@ const Drawer = () => {
             </MenuItem>
           </Link>
 
-          <Link to={`create/${user?.idUSER}`}>
+          <div
+            onClick={() => {
+              if (user?.approved === 0) {
+                setMessage(
+                  "You are not Approved yet!! Wait for the admin's acceptance."
+                );
+                setOpen(true);
+                setType("error");
+              } else {
+                navigate(`create/${user?.idUSER}`);
+              }
+            }}
+            style={{ cursor: "pointer" }}
+          >
             <MenuItem onClick={handleClose}>
               <AddBusinessTwoToneIcon style={{ marginRight: 8 }} />
               Create Shop
             </MenuItem>
-          </Link>
+          </div>
 
           <Divider />
           <Link to={`settings/${user?.idUSER}`}>
@@ -432,7 +482,7 @@ const Drawer = () => {
         </Menu>
       </DrawerHeader>
       <InformationContainer>
-        <DrawerSideBar open={open}>
+        <DrawerSideBar theme={theme} open={open}>
           {user?.userRole == "seller" ? (
             <ProfileConainer>
               <Badge
@@ -613,12 +663,12 @@ const Drawer = () => {
           />
         </DrawerSideBar>
 
-        <InfoComponents open={open}>
-          <Notifications open={openN}>
-            <Title>Notifications :</Title>
+        <InfoComponents theme={theme} open={open}>
+          <Notifications theme={theme} open={openN}>
+            <Title theme={theme}>Notifications :</Title>
             {notifications.length != 0 ? (
               notifications.map((item) => (
-                <Text>
+                <Text theme={theme}>
                   <NotificationText>{item.text}</NotificationText>
                   <Action>
                     <Tooltip title="Mark as read" arrow>
@@ -639,6 +689,13 @@ const Drawer = () => {
               </LottieContainer>
             )}
           </Notifications>
+          <AlertMessage
+            open={openAlert}
+            setOpen={setOpen}
+            message={message}
+            type={type}
+          />
+
           <Outlet />
         </InfoComponents>
       </InformationContainer>

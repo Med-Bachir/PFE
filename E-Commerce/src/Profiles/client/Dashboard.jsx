@@ -13,27 +13,27 @@ import LockTwoToneIcon from "@mui/icons-material/LockTwoTone";
 import { useDispatch, useSelector } from "react-redux";
 import { logout } from "../../redux/apiCalls";
 import newRequest from "../../utils/newRequest";
+import { colorAccentDarkTransparent, colorAccentMoreTransparent, colorAccentSub, colorAccentTransparent, colorBackgroundBlack, colorBackgroundGray, colorPrimaryBlack, elementGrayBackground, grayBackground, lightMain, main, primaryTextColor, secondaryTextColor, transparentMain, whiteTextColor } from "../../Colors";
 
 const Container = styled.div`
  height: calc(100vh - 80px);
- 
 `;
 const OrderContainer = styled.div`
   height: calc(100vh - 80px);
 
-  contain: paint;
+  
 
-  background-color: #f3f3f3;
+  background-color: ${({theme}) => theme == "light" ? grayBackground : colorBackgroundGray};
   display: flex;
-  padding: 32px 32px 32px;
-
+  padding: 32px 32px 0px;
   gap: 32px;
-  contain: paint;
+  
   overflow-y: auto;
   @media (max-width: 768px) {
     display: flex;
     flex-direction: column;
-
+    height: auto;
+padding-bottom: 32px ;
   }
 `;
 
@@ -43,6 +43,7 @@ const Left = styled.div`
   display: flex;
   flex-direction: column;
   gap: 20px;
+
   @media (max-width: 768px) {
     width: 100%;
    
@@ -52,8 +53,9 @@ const Left = styled.div`
 `;
 
 const Total = styled.div`
-  padding: 32px 44px;
-  background-color: white;
+  padding: 20px;
+  background-color: ${({theme}) => theme == "light" ? whiteTextColor : colorPrimaryBlack};
+  color: ${({theme}) => theme == "light" ? primaryTextColor : elementGrayBackground};
   border-radius: 4px;
   display: flex;
   flex-direction: column;
@@ -64,7 +66,7 @@ const Text = styled.span`
 `;
 const Statics = styled.div`
   display: flex;
-  padding: 16px 0;
+  padding-top: 8px;
   border-top: 1px dashed #dbdbdb;
 `;
 const TotalOrder = styled.div`
@@ -83,7 +85,7 @@ const TotalOrder = styled.div`
 `;
 const Type = styled.span``;
 const Options = styled.div`
-  background-color: white;
+   background-color: ${({theme}) => theme == "light" ? whiteTextColor : colorPrimaryBlack};
   border-radius: 2px;
   display: flex;
   flex-direction: column;
@@ -96,6 +98,8 @@ const ProfileContainer = styled.div`
   flex-direction: column;
   align-items: center;
   gap: 12px;
+  color: ${({theme}) => theme == "light" ? primaryTextColor : elementGrayBackground};
+
 `;
 
 const ProfileInfoContainer = styled.div`
@@ -109,7 +113,7 @@ const Name = styled.span`
 `;
 const Email = styled.span`
   font-size: 12px;
-  color: #b5b5b5;
+  color: ${secondaryTextColor};
 `;
 
 const Option = styled.div`
@@ -122,26 +126,46 @@ const Button = styled.button`
   display: flex;
   align-items: center;
   gap: 8px;
-  color: #50ba6a;
+      background-color: ${props => props.theme == "light" ? "#f8f8f8 ": colorAccentDarkTransparent };
+      color: ${props => props.theme == "light" ? main : colorAccentSub};
+  &:hover {
+          background-color: ${props => props.theme == "light" ? "#e0e0e0":  colorBackgroundBlack};
+      transform: translateY(2px);
+    }
 `;
 
-const OptionLink = styled.span``;
+const OptionLink = styled.span`
+   color: ${({theme}) => theme == "light" ? primaryTextColor : elementGrayBackground};
+`;
 
 const Right = styled.div`
   width: 71%;
   display: flex;
   flex-direction: column;
-  height: calc(100vh - 80px);
+  height: calc(100vh - 130px);
+  overflow: auto;
   @media (max-width: 768px) {
     width: 100%;
    
 
+  }
+  &::-webkit-scrollbar {
+    width: 8px;
+  }
+  &::-webkit-scrollbar-track {
+    background-color: ${({theme}) => theme == "light" ? lightMain : colorAccentMoreTransparent};
+    border-radius: 8px;
+  }
+  &::-webkit-scrollbar-thumb {
+    background-color: rgba(147, 147, 147, 0.543);
+    border-radius: 20px;
   }
  
 `;
 
 const ClientPf = () => {
   const user = useSelector((state) => state.user?.currentUser);
+  const theme = useSelector((state) => state.theme.mode);
 
 const navigate = useNavigate()
   const dispatch = useDispatch()
@@ -171,15 +195,15 @@ const navigate = useNavigate()
       }, [user?.idUSER]);
      
   return (
-    <Container>
-      <OrderContainer>
-        <Left>
-          <Total>
+    <Container theme={theme}>
+      <OrderContainer theme={theme}>
+        <Left theme={theme}>
+          <Total theme={theme}>
             <Text>Orders</Text>
             <Statics>
               <TotalOrder>
                 {" "}
-                {orders.Waiting == null ? 0 : orders.Waiting } <Type>Wiating</Type>
+                {orders.Waiting == null ? 0 : orders.Waiting } <Type>Waiting</Type>
               </TotalOrder>
               <TotalOrder position="center">
                 {" "}
@@ -191,34 +215,34 @@ const navigate = useNavigate()
               </TotalOrder>
             </Statics>
           </Total>
-          <Options>
+          <Options theme={theme} >
             <Link to='/Client'>
-              <OptionLink>My Profile</OptionLink>
+              <OptionLink theme={theme}>My Profile</OptionLink>
             </Link>
             <Link to='wishlist'>
-              <OptionLink>My WishList</OptionLink>
+              <OptionLink theme={theme}>My WishList</OptionLink>
             </Link>
             <Link to='Orders'>
-              <OptionLink>My Orders</OptionLink>
+              <OptionLink theme={theme}>My Orders</OptionLink>
             </Link>
-            <Button style={{padding:0, color:'black',background:'transparent'}} onClick={handleLogOut}>
-              <OptionLink >Log Out</OptionLink>
+            <Button style={{padding:0, color:primaryTextColor ,background:'transparent'}} onClick={handleLogOut}>
+              <OptionLink theme={theme} >Log Out</OptionLink>
             </Button>
           </Options>
-          <Options>
-            <ProfileContainer>
+          <Options theme={theme}>
+            <ProfileContainer theme={theme}>
               <Avatar
                 src={user?.userimg == null ? "e" : user?.userimg }
                 alt={user?.username}
-                sx={{ width: 70, height: 70, bgcolor: "green" }}
+                sx={{ width: 70, height: 70, bgcolor: theme == "light" ?  main : colorAccentDarkTransparent }}
               />
-              <ProfileInfoContainer>
+              <ProfileInfoContainer theme={theme}>
                 <Name>{user?.username}</Name>
                 <Email>{user?.email}</Email>
               </ProfileInfoContainer>
             </ProfileContainer>
             <Option>
-              <Button>
+              <Button theme={theme}>
                 <LockTwoToneIcon />
                 Change Password
               </Button>
@@ -226,7 +250,7 @@ const navigate = useNavigate()
           </Options>
         </Left>
 
-        <Right>
+        <Right theme={theme}>
           <Outlet />
         </Right>
       </OrderContainer>

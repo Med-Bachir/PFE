@@ -8,6 +8,7 @@ import SentimentSatisfiedIcon from '@mui/icons-material/SentimentSatisfied';
 import SentimentSatisfiedAltIcon from '@mui/icons-material/SentimentSatisfiedAltOutlined';
 import SentimentVerySatisfiedIcon from '@mui/icons-material/SentimentVerySatisfied';
 import { Tooltip } from '@mui/material';
+import { colorElementBackgroundGray, grayBackground } from '../Colors';
 
 const StyledRating = styled(Rating)(({ theme }) => ({
   '& .MuiRating-iconEmpty .MuiSvgIcon-root': {
@@ -45,7 +46,7 @@ function IconContainer(props) {
 
 
 
-export default function RadioGroupRating({rate}) {
+export default function RadioGroupRating({rate , theme}) {
   return (
     <Tooltip arrow title={""}>
 
@@ -55,6 +56,7 @@ export default function RadioGroupRating({rate}) {
       IconContainerComponent={IconContainer}
       getLabelText={(rate) => customIcons[rate]?.label}
       highlightSelectedOnly
+sx={{bgcolor: theme == "light" ? '' : colorElementBackgroundGray , padding:'2px 4px' , borderRadius:4}}
       readOnly
       />
       </Tooltip>

@@ -7,6 +7,7 @@ import {
   Avatar,
   Badge,
   Button,
+  Fab,
   IconButton,
   Menu,
   MenuItem,
@@ -23,8 +24,13 @@ import newRequest from "../utils/newRequest";
 import RemoveRedEyeTwoToneIcon from "@mui/icons-material/RemoveRedEyeTwoTone";
 import { notifyTotal } from "../redux/notifications";
 import Cart from "../features/Cart/Cart";
+import { colorAccentDarkTransparent, colorAccentMediumTransparent, colorBackgroundBlack, colorPrimaryBlack, grayBackground, lightMain, main, primaryTextColor, softMain, whiteTextColor } from "../Colors";
+import ThemeSwitcher from "./switcher/ThemeSwitcher";
 
-const PagesContainer = styled.div``;
+const PagesContainer = styled.div`
+
+
+`;
 const HeaderContainer = styled.header`
   position: sticky;
   height: 80px;
@@ -34,15 +40,15 @@ const HeaderContainer = styled.header`
   box-shadow: rgba(0, 0, 0, 0.05) 0px 0px 0px 1px;
   align-items: center;
   padding: 0 20px;
-  background-color: white;
+  background-color: ${props => props.theme == "light" ? whiteTextColor : colorPrimaryBlack };
   z-index: 99;
   overflow: hidden;
-
   @media (max-width: 768px) {
     flex-direction: column;
     height: auto;
     padding: 0;
     padding-bottom: 20px;
+    
   }
 `;
 
@@ -60,6 +66,8 @@ export const Center = styled.div`
 const Logo = styled.img`
   width: 300px;
 
+  filter: ${props => props.theme === "light" ? "brightness(1) invert(0)" : "brightness(0) invert(1)"};
+
   @media (max-width: 768px) {
     width: 300px; /* Adjust logo size */
     margin-bottom: -20px;
@@ -71,6 +79,8 @@ export const Left = styled.div`
   align-items: center;
   display: flex;
   justify-content: flex-start;
+  color: ${props => props.theme == "light" ? primaryTextColor : whiteTextColor };
+
   @media (max-width: 768px) {
     justify-content: center;
   }
@@ -79,6 +89,7 @@ const Pages = styled.div`
 display: flex;
 align-items: center;
 gap: 16px;
+
 `
 export const Right = styled.div`
   flex: ${(props) =>
@@ -87,6 +98,7 @@ export const Right = styled.div`
   justify-content: end;
   align-items: center;
   gap: 20px;
+  color: ${props => props.theme == "light" ? primaryTextColor : whiteTextColor };
   @media (max-width: 768px) {
     flex-direction: column;
     gap: 10px;
@@ -104,7 +116,7 @@ const Notifications = styled.div`
 
   border-radius: 4px;
   flex-direction: column;
-  background-color: #f0fcfa;
+  background-color: ${softMain};
   right: ${(props) => (props.open ? "0" : "-250px")};
   top: 80px;
 
@@ -171,11 +183,14 @@ justify-content: flex-end;
 
 const Header = () => {
   const user = useSelector((state) => state.user?.currentUser);
+  const theme = useSelector((state) => state.theme.mode);
   const total = useSelector((state) => state.notify?.total);
   const Location = useLocation().pathname.split("/")[1];
   const [notifications, setNotifications] = useState([]);
   const [openN, setOpenN] = useState(false);
   const dispatch = useDispatch();
+
+ 
   useEffect(() => {
     const getNotifications = async () => {
       try {
@@ -239,12 +254,12 @@ const Header = () => {
 
   return (
     <>
-      <HeaderContainer>
+      <HeaderContainer theme={theme}>
        
         <>
           <Link to={"/"}>
-            <Left>
-              <Logo src={logo} />
+            <Left theme={theme}>
+              <Logo theme={theme} src={logo} />
               {user !== null ? (
               <Responsive>
                 <Badge 
@@ -293,16 +308,16 @@ const Header = () => {
             </Left>
           </Link>
           <Center></Center>
-          <Right user={user}>
+          <Right theme={theme} user={user}>
             <Pages>
 
-            <Link style={{ color: "black", fontWeight: 400 }} to="/Shops">
+            <Link style={{color:theme == "light" ? primaryTextColor : whiteTextColor , fontWeight: 400 }} to="/Shops">
               Shops
             </Link>
-            <Link style={{ color: "black", fontWeight: 400 }} to="/offer">
+            <Link style={{color:theme == "light" ? primaryTextColor : whiteTextColor , fontWeight: 400 }} to="/offer">
               Offer
             </Link>
-            <Link style={{ color: "black", fontWeight: 400 }} to="/contact">
+            <Link style={{color:theme == "light" ? primaryTextColor : whiteTextColor , fontWeight: 400 }} to="/contact">
               Contact
             </Link>
             <Button
@@ -311,7 +326,7 @@ const Header = () => {
               aria-haspopup="true"
               aria-expanded={open ? "true" : undefined}
               onClick={handleClick}
-              sx={{ color: "black" }}
+              style={{color:theme == "light" ? primaryTextColor : whiteTextColor , fontWeight: 400 }}
               >
               Pages <KeyboardArrowDownIcon />
             </Button>
@@ -323,34 +338,42 @@ const Header = () => {
               MenuListProps={{
                 "aria-labelledby": "basic-button",
               }}
+              sx={{".css-6hp17o-MuiList-root-MuiMenu-list" : {backgroundColor: theme == "light" ? whiteTextColor : colorBackgroundBlack}}}
               >
               <Link
                 to="/Orders"
-                style={{ textDecoration: "none", color: "inherit" }}
+                style={{ textDecoration: "none", color:theme == "light" ? primaryTextColor : whiteTextColor , fontWeight: 400 }}
                 >
                 <MenuItem onClick={handleClose}>My Orders</MenuItem>
               </Link>
+              <Link style={{color:theme == "light" ? primaryTextColor : whiteTextColor , fontWeight: 400 }}>
               <MenuItem onClick={handleClose}>About Us</MenuItem>
+              </Link>
             </Menu>
             <Badge badgeContent={total} color="success">
-              <IconButton onClick={OpenNotification}>
-                <NotificationsActiveOutlinedIcon />
+              <IconButton color="success" onClick={OpenNotification}>
+                <NotificationsActiveOutlinedIcon sx={{color: theme == 'light' ? primaryTextColor : whiteTextColor}} />
               </IconButton>
             </Badge>
                 </Pages>
             
             {user !== null ? (
               <ResponsivePC>
-                <Badge
-                  badgeContent={
-                    user?.userRole === "client" ? (
-                      <PersonIcon sx={{ fontSize: 14 }} />
-                    ) : (
-                      <StoreIcon sx={{ fontSize: 14 }} />
-                    )
-                  }
-                  color="success"
-                >
+               <Badge
+  badgeContent={
+    user?.userRole === "client" ? (
+      <PersonIcon sx={{ fontSize: 14 }} />
+    ) : (
+      <StoreIcon sx={{ fontSize: 14 }} />
+    )
+  }
+  sx={{
+    "& .MuiBadge-badge": {
+      backgroundColor: softMain, // Change the background color here
+      color: main, // Optional: Change the text color inside the badge
+    },
+  }}
+>
                   {user?.userRole !== "client" ? (
                     <Link to="/profile">
                       <Avatar
@@ -381,10 +404,10 @@ const Header = () => {
                   <Button
                     onClick={handleUpgrade}
                     sx={{
-                      background: "green",
-                      color: "white",
+                      bgcolor: theme == "light" ? main : colorAccentMediumTransparent,
+                      color: whiteTextColor,
                       "&:hover": {
-                        color: "green",
+                        color: main,
                       },
                       marginLeft: 3,
                     }}
@@ -398,11 +421,11 @@ const Header = () => {
                 <Link to="/register">
                   <Button
                     sx={{
-                      background: "green",
-                      color: "white",
+                      bgcolor: theme == "light" ? main : colorAccentMediumTransparent,
+                      color: whiteTextColor,
                       "&:hover": {
-                        color: "green",
-                      },
+                        color: main,
+                      }
                     }}
                   >
                     Join
@@ -413,10 +436,10 @@ const Header = () => {
           </Right>
         </>
       </HeaderContainer>
-      <PagesContainer>
+      <PagesContainer theme={theme}>
         <Outlet />
-        {Location == "checkout" ? "" : <Cart />}
-        <Notifications open={openN}>
+        {Location == "checkout" || Location == "Client"  ? "" : <Cart theme={theme} />}
+        <Notifications open={openN}> 
           <Title>Notifications :</Title>
           {notifications.length != 0 ? (
             notifications.map((item) => (
@@ -441,6 +464,10 @@ const Header = () => {
             </LottieContainer>
           )}
         </Notifications>
+        <Fab style={{position:'fixed' , bottom:32 , right : 32 , width:"fit-content" , borderRadius:50, padding:0 , backgroundColor: theme == 'light' ? whiteTextColor : colorAccentDarkTransparent}}>
+        <ThemeSwitcher />
+
+        </Fab>
       </PagesContainer>
     </>
   );

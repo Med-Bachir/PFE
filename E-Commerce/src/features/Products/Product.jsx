@@ -4,6 +4,7 @@ import { Link } from "react-router-dom";
 import { Skeleton } from "@mui/material";
 import { useEffect, useState } from "react";
 import RadioGroupRating from "../../Components/rating";
+import { primaryTextColor, whiteTextColor , secondaryTextColor , main, grayBackground, colorElementBackgroundGray, colorBackgroundGray, colorPrimaryBlack, colorAccentDarkTransparent, colorBackgroundBlack, colorAccentLight, colorAccentMedium, colorAccentMediumTransparent } from "../../Colors";
 
 const Container = styled.div`
   display: flex;
@@ -12,13 +13,15 @@ const Container = styled.div`
   padding: 20px;
   flex-direction: column;
   border-radius: 4px;
-  background-color: white;
+  background-color: ${props => props.theme == 'light' ? whiteTextColor : colorPrimaryBlack };
+  color: ${props => props.theme == 'light' ? primaryTextColor : whiteTextColor };
   cursor: pointer;
   transition: all 0.2s ease-in-out;
   &:hover {
-    box-shadow: rgba(0, 0, 0, 0.1) 0px 4px 6px -1px,
-      rgba(0, 0, 0, 0.06) 0px 2px 4px -1px;
+    box-shadow:${props => props.theme == 'light' ? 'rgba(0, 0, 0, 0.1) 0px 4px 6px -1px , rgba(0, 0, 0, 0.06) 0px 2px 4px -1px;': 'rgba(56, 56, 56, 0.1) 0px 4px 6px -1px , rgba(56, 56, 56, 0.06) 0px 2px 4px -1px;'};
   }
+  
+
 `;
 const ImageContainer = styled.div`
   flex: 1;
@@ -45,7 +48,8 @@ const InfoContainer = styled.div`
 `;
 const Title = styled.p`
 
-  color: #000000;
+color: ${props => props.theme == 'light' ? primaryTextColor : grayBackground };
+  
   font-size: 20px;
   margin: 20px 0;
   max-width: 350px;
@@ -68,7 +72,7 @@ const PriceContainer = styled.p`
 const Price = styled.p`
   font-size: 20px;
 
-  color: ${({ discount }) => (discount > 0 ? "grey " : "")};
+  color: ${({ discount , theme}) => (discount > 0 ? secondaryTextColor : theme == 'light' ? primaryTextColor : grayBackground)};
   font-size: ${({ discount }) => (discount > 0 ? "15px" : "")};
   text-decoration: ${({ discount }) =>
     discount > 0 ? "line-through" : "none"};
@@ -77,15 +81,15 @@ const Price = styled.p`
 const NewPrice = styled.p`
   font-size: 20px;
 
-  color: ${({ discount }) => (discount > 0 ? "" : "#000000")};
+  color: ${({ discount }) => (discount > 0 ? "" : primaryTextColor)};
 `;
 
 const Discount = styled.span`
   display: ${({ discount }) => (discount > 0 ? "inline-block" : "none")};
-  background-color: #009f7f;
+  background-color: ${props => props.theme == 'light' ? main : colorAccentMediumTransparent };
   padding: 5px 7px;
   border-radius: 4px;
-  color: white;
+  color: ${whiteTextColor};
   font-weight: 500;
   font-size: 14px;
   position: absolute;
@@ -94,18 +98,22 @@ const Discount = styled.span`
 `;
 
 const AddToCart = styled.span`
-  background-color: white;
+  background-color: ${props => props.theme == 'light' ? whiteTextColor : colorBackgroundBlack };
+
   padding: 5px 7px;
   display: flex;
   align-items: center;
   justify-content: center;
   border: 1px solid;
-  border-color: #8080803d;
+  border-color: ${props => props.theme == 'light' ? grayBackground : colorPrimaryBlack };
   border-radius: 5px;
+  color: ${props => props.theme == 'light' ? primaryTextColor : whiteTextColor };
+
   transition: all 0.2s ease-in-out;
   &:hover {
-    background-color: #009f7f;
-    color: white;
+    background-color: ${props => props.theme == 'light' ? main : colorAccentLight };
+
+    color: ${whiteTextColor};
   }
 `;
 
@@ -114,9 +122,9 @@ display: flex;
 align-items: center;
 justify-content: space-between;
 `
-const Rate = styled.div
 
-const Product = ({ id, productname, productprice, productimage, discount , rate }) => {
+
+const Product = ({ id, productname, productprice, productimage, discount , rate , theme}) => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -128,7 +136,7 @@ const Product = ({ id, productname, productprice, productimage, discount , rate 
   const discountedPrice = productprice * (1 - discount / 100);
 
   return (
-    <Container>
+    <Container theme={theme}>
       {loading ? (
         // Render skeleton when loading is true
         <>
@@ -174,7 +182,7 @@ const Product = ({ id, productname, productprice, productimage, discount , rate 
         <>
           <ImageContainer style={{ cursor: "pointer" }}>
             {discount > 0 && (
-              <Discount discount={discount}>{discount}%</Discount>
+              <Discount theme={theme}  discount={discount}>{discount}%</Discount>
             )}
             <Image src={productimage} />
           </ImageContainer>
@@ -182,20 +190,20 @@ const Product = ({ id, productname, productprice, productimage, discount , rate 
           <InfoContainer>
             <RateContainer>
 
-            <Title>{productname}</Title>
-            <RadioGroupRating rate={rate} />
+            <Title theme={theme}>{productname}</Title>
+            <RadioGroupRating theme={theme} rate={rate} />
             </RateContainer>
             
 
             <PriceContainer>
-              <Price discount={discount}>$ {productprice.toFixed(2)}</Price>
+              <Price theme={theme} discount={discount}>$ {productprice.toFixed(2)}</Price>
               {discount > 0 && (
                 <NewPrice discount={discount}>
                   {discountedPrice.toFixed(2)}$
                 </NewPrice>
               )}
               <Link to={`cardproduct/${id}`}>
-                <AddToCart>
+                <AddToCart theme={theme}>
                   <AddIcon />
                 </AddToCart>
               </Link>

@@ -7,6 +7,7 @@ import me from "../../assets/Lotties/Animation - 1716145973359.json"
 import Lottie from 'lottie-react'
 import { Link } from 'react-router-dom'
 import AlertMessage from '../../Components/Alert'
+import { colorBackgroundGray, colorPrimaryBlack, darkRed, elementGrayBackground, grayBackground, main, primaryTextColor, secondaryTextColor, whiteTextColor } from '../../Colors'
 
 
 
@@ -15,9 +16,11 @@ width: 100%;
 
 display: flex;
 flex-direction: column;
-background-color: white;
+  color: ${({theme}) => theme == "light" ? primaryTextColor : elementGrayBackground};
+  background-color: ${({theme}) => theme == "light" ? whiteTextColor : colorPrimaryBlack};
 padding: 24px 32px;
 gap: 32px;
+border-radius: 8px;
 
 contain: paint;
 overflow-y:auto;
@@ -54,10 +57,11 @@ align-items: center;
 
 `
 const ProductImage = styled.img`
-border: 1px solid #eee;
+border: 1px solid ${grayBackground};
 border-radius: 4px;
 width: 60px;
 height: 60px;
+object-fit: contain;
 `
 const Info = styled.div`
 display: flex;
@@ -67,12 +71,12 @@ flex-direction: column;
 const Name = styled.span``
 const Shops = styled.span`
 font-size: 14px;
-color: #a3a3a3;
+color: ${main};
 `
 const Rate = styled.div``
 const Price = styled.div``
 const Old = styled.span`
-color:#a3a3a3;
+color:${secondaryTextColor};
 font-size: 14px;
 `
 const Current = styled.span`
@@ -81,7 +85,7 @@ font-weight: 500;
 const ButtonGroup = styled.div``
 const Button = styled.button`
 background-color: transparent;
-color: ${props => props.work == 'add' ? 'green': 'red'};
+color: ${props => props.work == 'add' ? main: darkRed};
 padding: 0 0 0 16px;
 font-size: 14px;
 border-radius: 0;
@@ -96,6 +100,7 @@ flex-direction: column;
 
 const WishList = () => {
   const user = useSelector((state) => state.user?.currentUser);
+  const theme = useSelector((state) => state.theme.mode);
   const [message, setMessage] = useState("");
   const [type, setType] = useState("");
   const [open, setOpen] = useState(false);
@@ -143,15 +148,15 @@ const WishList = () => {
         }
       };
   return (
-    <Container>
+    <Container theme={theme}>
       <AlertMessage open={open} setOpen={setOpen} message={message} type={type} />
 
         <Title>My WishList</Title>
-        <List>
+        <List theme={theme}>
           {wishes != '' ? wishes.map((item) => (
 
 <>
-            <Product>
+            <Product theme={theme}>
                 <ProductImage src={item.productimage}/>
                 <Info>
                     <Name>{item.productname}</Name>
@@ -159,7 +164,7 @@ const WishList = () => {
                     <Rate></Rate>
                 </Info>
                 <Info style={{marginLeft:'auto' , alignItems:'end'}}>
-                    <Price><Current>${item.productprice - item.productprice * item.discount / 100},00 </Current><Old>${item.productprice},00</Old></Price>
+                    <Price theme={theme}><Current>${item.productprice - item.productprice * item.discount / 100},00 </Current><Old>${item.productprice},00</Old></Price>
                     <ButtonGroup>
                       <Link to={`/cardproduct/${item.idPRODUCT}`}>
                         <Button style={{paddingRight:16 }} work='add'>Add to cart</Button>

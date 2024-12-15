@@ -9,15 +9,16 @@ import AlertMessage from "../../Components/Alert";
 import newRequest from "../../utils/newRequest";
 import Cookies from 'js-cookie'; 
 import SaveAltTwoToneIcon from "@mui/icons-material/SaveAltTwoTone";
+import { colorAccentDarkTransparent, colorAccentLight, colorAccentMain, colorAccentMediumTransparent, colorAccentSub, colorBackgroundBlack, colorBackgroundGray, colorPrimaryBlack, grayBackground, lightMain, main, primaryTextColor, secondaryTextColor, whiteTextColor } from "../../Colors";
 
 const Container = styled.div`
   
   width: 100%;
  
- 
  position: relative;
   display: flex;
   flex-direction: column;
+  color: ${props => props.theme == "light" ? primaryTextColor : whiteTextColor};
 
   
 `;
@@ -41,9 +42,8 @@ justify-content:space-between;
 const SettingGroup = styled.div`
   padding: 32px;
   border-radius: 8px;
-  background-color: white;
-  
-  margin-bottom: 32px;
+  background-color: ${props => props.theme == "light" ? whiteTextColor  : colorPrimaryBlack};
+ 
   flex: 1;
   display: flex;
   flex-direction: column;
@@ -51,15 +51,13 @@ const SettingGroup = styled.div`
 const SettingTitle = styled.span`
   font-size: 20px;
   font-weight: 500;
-  
-
+ 
 `;
 const ImageSetting = styled.div`
   padding: 32px 0;
   display: flex;
   align-items: center;
   gap: 28px;
-
   @media (max-width: 768px) {
    flex-direction: column;
   }
@@ -69,7 +67,6 @@ const Options = styled.div`
   display: flex;
   flex-direction: column;
   gap: 12px;
-  
 `;
 
 const ButtonGroup = styled.div`
@@ -80,23 +77,22 @@ const ButtonGroup = styled.div`
   }
 `;
 const MyButton = styled.button`
-  background-color: ${(props) => (props.type == "delete" ? "transparent" : "")};
-  border: ${(props) => (props.type == "delete" ? "1.5px solid" : "")};
-  color: green;
+  background-color: ${(props) => (props.type == "delete" ? "transparent" : props.theme == "light" ? "" : colorAccentDarkTransparent)};
+   border: ${(props) => (props.type == "delete" ? "1.5px solid" : "")};
+   color: ${props => props.theme == "light" ? main : colorAccentSub};
   font-size: 14px;
   
 `;
 
 const Required = styled.span`
   font-size: 12px;
-  color: #9f9f9f;
+  color: ${secondaryTextColor};
   font-weight: 300;
   display: -webkit-box;
   -webkit-line-clamp: 2; /* Limit to two lines */
   -webkit-box-orient: vertical; /* Required for line clamping */
   overflow: hidden; /* Hide overflow */
   text-overflow: ellipsis; /* Add ellipsis at the end of the second line */
-  
   @media (max-width: 768px) {
     /* Add media query for mobile */
     -webkit-line-clamp: 2; 
@@ -118,15 +114,18 @@ const Label = styled.span``;
 const Input = styled.input`
   padding: 12px;
   border-radius: 4px;
-  border: 1px solid #e0e0e0;
+  border: 1px solid ${props => props.theme == "light" ? "#e0e0e0" : colorBackgroundGray } ;
   font-size: 16px;
+  background-color: ${props => props.theme == "light" ? "" : props.edit ? colorAccentLight : colorAccentDarkTransparent};
+  cursor: ${props => props.edit ? 'text': 'not-allowed' };
+  color: ${props => props.theme == "light" ? colorPrimaryBlack : whiteTextColor };
 `;
 const HiddenInput = styled.input`
   display: none;
 `;
 const UploadButton = styled.label`
-  background-color: #f8f8f8;
-  color: green;
+    background-color: ${props => props.theme == "light" ? "#f8f8f8 ": colorAccentDarkTransparent };
+    color: ${props => props.theme == "light" ? main : colorAccentSub};
   font-size: 14px;
   padding: 10px 20px;
   border-radius: 4px;
@@ -136,13 +135,15 @@ const UploadButton = styled.label`
   justify-content: center;
 
   &:hover {
-    background-color: #e0e0e0;
+        background-color: ${props => props.theme == "light" ? "#e0e0e0":  colorBackgroundBlack};
+    transform: translateY(2px);
   }
   transition: 200ms;
 `;
 
 const ClientProfile = () => {
   const user = useSelector((state) => state.user?.currentUser);
+  const theme = useSelector((state) => state.theme.mode);
   const [newUser, setNewUser] = React.useState(user || {
     firstname:'',
 lastname:"",
@@ -256,21 +257,21 @@ email:""
   
   
   return (
-    <Container>
+    <Container theme={theme}>
       <AlertMessage open={open} setOpen={setOpen} message={message} type={type} />
       
-      <SettingGroup>
+      <SettingGroup theme={theme} style={{marginBottom:32}}>
        <Top>
         <SettingTitle>Profile Details</SettingTitle>
-        <IconButton onClick={() => setEdit(!edit)}><EditTwoTone/></IconButton>
+        <IconButton  onClick={() => setEdit(!edit)}><EditTwoTone color="secondary"/></IconButton>
        </Top>
         <ImageSetting>
-          <Avatar sx={{ width: 80, height: 80 ,bgcolor:'#eeeeee89' }}  src={user?.userimg == null ? 'e' : user?.userimg} alt={user?.username} />
+          <Avatar sx={{ width: 80, height: 80, bgcolor: theme == "light" ? "#eeeeee89" : colorAccentDarkTransparent }}  src={user?.userimg == null ? 'e' : user?.userimg} alt={user?.username} />
           <Options>
             <ButtonGroup>
             <HiddenInput type="file" id="file-upload" name="userimg" onChange={handleChange} />
-              <UploadButton htmlFor="file-upload">Upload Profile Image</UploadButton>
-              <MyButton type="delete">Delete</MyButton>
+              <UploadButton theme={theme} htmlFor="file-upload">Upload Profile Image</UploadButton>
+              <MyButton theme={theme} type="delete">Delete</MyButton>
             </ButtonGroup>
             <Required>
               *Image size should be at least 320px big,and less then 500kb .
@@ -278,20 +279,20 @@ email:""
             </Required>
           </Options>
         </ImageSetting>
-        <ProfileInfo>
+        <ProfileInfo >
           {data.map((item) => (
             <Information>
               <Label>{item.Label}</Label>
               
-              <Input  name={item.name} placeholder={edit ? '' : item.value} value={edit ? item.value : item.value} onChange={handleChange} disabled={edit ? false : true}  />
+              <Input theme={theme}  name={item.name} placeholder={edit ? '' : item.value} value={edit ? item.value : item.value} onChange={handleChange} disabled={edit ? false : true}  />
 
             </Information>
           ))}
         </ProfileInfo>
         <Button
-            color="success"
+            
             variant="contained"
-            sx={{width : 200}}
+            sx={{ width: 200 , color: theme == "light" ? whiteTextColor : colorAccentMain , bgcolor: theme == "light" ? main : colorAccentMediumTransparent , "&:hover" : {bgcolor: theme == "light" ? lightMain  : colorAccentDarkTransparent , color : theme == "light" ? main  : ""}  }}
             startIcon={<SaveAltTwoToneIcon />}
             onClick={handleSubmit}
           >
@@ -302,15 +303,15 @@ email:""
       
       <SettingContainer>
 
-      <SettingGroup style={{gap:16}} >
+      <SettingGroup theme={theme} style={{gap:16}} >
         <SettingTitle >Change Password</SettingTitle>
         <Required>Change Password Only If You Feel Unsafe</Required>
-        <MyButton style={{padding:'12px 0 '}}>Change Your Password</MyButton>
+        <MyButton theme={theme} style={{padding:'12px 0 '}}>Change Your Password</MyButton>
       </SettingGroup>
-      <SettingGroup style={{gap:16}}>
+      <SettingGroup theme={theme} style={{gap:16}}>
       <SettingTitle >Delete Account</SettingTitle>
         <Required>If You Deleted You Account It Will Not Restore</Required>
-        <MyButton type="delete" style={{padding:'12px 0 '}}>Delete Account</MyButton>
+        <MyButton theme={theme} type="delete" style={{padding:'12px 0 '}}>Delete Account</MyButton>
       </SettingGroup>
       </SettingContainer>
       

@@ -24,6 +24,7 @@ import { useEffect, useRef, useState } from "react";
 import { Input, Tag, theme } from "antd";
 import newRequest from "../../../utils/newRequest";
 import { useSelector } from "react-redux";
+import { darkRed, grayBackground, main, whiteTextColor } from "../../../Colors";
 
 const Container = styled.div`
   height: calc(100vh - 80px);
@@ -61,12 +62,12 @@ const Title = styled.span`
 
 const Desc = styled.span`
   font-size: 13px;
-  color: #989898;
+  color: ${grayBackground};
 `;
 
 const Right = styled.div`
   flex: 2;
-  background-color: white;
+  background-color: ${whiteTextColor};
   padding: 32px;
   border-radius: 4px;
 `;
@@ -79,7 +80,7 @@ const Required = styled.span`
 const Span = styled.span`
   font-size: 16px;
   font-weight: 600;
-  color: #46a25d;
+  color: ${main};
 `;
 
 const InputContainer = styled.div`
@@ -408,9 +409,9 @@ const AddProduct = () => {
       type="button"
     >
       {loading ? (
-        <LoadingOutlined style={{ fontSize: 50, color: "#46A25D" }} />
+        <LoadingOutlined style={{ fontSize: 50, color: main }} />
       ) : (
-        <CloudUploadTwoTone style={{ color: "#50BA6A", fontSize: 50 }} />
+        <CloudUploadTwoTone style={{ color: main, fontSize: 50 }} />
       )}
       <div
         style={{
@@ -461,7 +462,7 @@ const AddProduct = () => {
         <>
           <InputContainer>
             <Label>
-              Name <Span style={{ color: "red" }}>*</Span>
+              Name <Span style={{ color: darkRed }}>*</Span>
             </Label>
             <InputText
               name="productname"
@@ -1124,7 +1125,8 @@ const AddProduct = () => {
 
       <Tooltip title="Send Request">
         <Fab
-          color="success"
+        color="success"
+          sx={{bgcolor:main}}
           style={{ position: "absolute", bottom: 96, right: 32 }}
           aria-label="add"
           onClick={handleSubmit}

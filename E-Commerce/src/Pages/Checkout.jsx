@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import styled from "styled-components";
-import { gradientBackground, hovredText, whiteTextColor } from "../Colors";
+import { colorAccentDark, colorAccentDarkTransparent, colorAccentLight, colorAccentMain, colorAccentMedium, colorAccentMediumTransparent, colorAccentMoreTransparent, colorAccentSoft, colorAccentSoftTransparent, colorAccentSub, colorAccentSubDark, colorBackgroundBlack, colorBackgroundGray, elementGrayBackground, gradientBackground, hovredText, lightMain, lightMedMain, lightSoftMain, main, medMain, primaryTextColor, secondText, softMain, softMainTransparent, transparentMain, whiteTextColor } from "../Colors";
 import {
   Avatar,
   Divider,
@@ -19,11 +19,19 @@ import AlertMessage from "../Components/Alert";
 import EmptyData from "../Components/Pending/EmptyData";
 import { useNavigate } from "react-router-dom";
 
+import { createTheme, ThemeProvider } from "@mui/material/styles";
+
+
+
+
 const Container = styled.div`
   height: auto;
   display: flex;
   height: calc(100vh - 80px);
   overflow-y: auto;
+  background-color: ${props => props.theme == "light" ? whiteTextColor : colorBackgroundGray};
+  color: ${props => props.theme == "light" ? primaryTextColor : elementGrayBackground};
+
   @media (max-width: 768px) {
     flex-direction: column;
   }
@@ -31,7 +39,7 @@ const Container = styled.div`
 
 const Left = styled.div`
   flex: 3;
-  background-color: white;
+  
   display: flex;
   flex-direction: column;
   @media (max-width: 768px) {
@@ -53,6 +61,7 @@ const InputContainer = styled.div`
   display: flex;
   flex-direction: column;
   padding: 0 32px;
+ 
   gap: 20px;
   @media (max-width: 768px) {
     padding: 0 16px;
@@ -72,7 +81,7 @@ const ItemContainerTitles = styled.div`
   display: flex;
   align-items: center;
   padding: 20px 0 20px 32px;
-  background-color: ${gradientBackground};
+  background-color: ${props => props.theme == "light" ? medMain : colorAccentMedium};
   @media (max-width: 768px) {
     padding: 10px 0 10px 16px;
   }
@@ -81,6 +90,7 @@ const ItemContainerTitles = styled.div`
 const Products = styled.div`
   display: flex;
   flex-direction: column;
+  background-color: ${props => props.theme == "light" ? softMainTransparent : colorAccentSoftTransparent};
 
   @media (max-width: 768px) {
     overflow: auto;
@@ -132,7 +142,8 @@ const Right = styled.div`
   flex-direction: column;
   padding: 32px 32px;
 
-  background-color: #f9f9f9;
+  background-color: ${props => props.theme == "light" ? transparentMain : colorAccentDarkTransparent};
+
   top: 0;
   position: sticky;
   overflow: hidden;
@@ -163,7 +174,7 @@ const OrderDetail = styled.div`
 const Info = styled.div``;
 
 const Button = styled.button`
-  background-color: ${gradientBackground};
+  background-color: ${props => props.theme == "light" ? main : colorAccentMedium};
   color: ${whiteTextColor};
 `;
 //const Container = styled.div``
@@ -172,6 +183,7 @@ const Button = styled.button`
 
 const CheckOut = () => {
   const user = useSelector((state) => state.user.currentUser);
+  const theme = useSelector((state) => state.theme.mode);
   const [cart, setCart] = useState();
   const [message, setMessage] = useState("");
   const [type, setType] = useState("");
@@ -316,8 +328,33 @@ console.log(err)
     
   }, []);
 
+ 
+
+  const customTextField = {
+    minWidth:'40%', borderRadius:1 , bgcolor:theme == "light" ? whiteTextColor : colorAccentMoreTransparent ,  ".css-1t8l2tu-MuiInputBase-input-MuiOutlinedInput-input":{color: theme == "light" ? primaryTextColor : elementGrayBackground},
+                "& .MuiOutlinedInput-root": {
+                  
+                  "&:hover fieldset": {
+                    borderColor: theme == "light" ? lightMain : colorAccentSoft, // Hover border color
+                  },
+                  "&.Mui-focused fieldset": {
+                    borderColor: theme == "light" ? main : colorAccentMedium, // Focused border color
+                  },
+                },
+                "& .MuiInputLabel-root": {
+                  color: secondText, // Default label color
+                },
+                "& .MuiInputLabel-root.Mui-focused": {
+                  color: theme == "light" ? main : colorAccentMedium, // Focused label color
+                },
+                "& .MuiInputLabel-root.Mui-error": {
+                  color: "orange", // Error label color
+                },
+              
+  };
+
   return (
-    <Container>
+    <Container theme={theme}>
       <AlertMessage
         open={open}
         setOpen={setOpen}
@@ -325,14 +362,15 @@ console.log(err)
         type={type}
       />
 
-      <Left>
+      <Left theme={theme}>
         <LeftTitle>Pales To Order</LeftTitle>
         <InputContainer>
           <Label>
             State <Required>*</Required>
           </Label>
+
           <TextField
-            sx={{ minWidth: "40%" }}
+ sx={customTextField}
             size="large"
             id="outlined-basic"
             label="State"
@@ -344,7 +382,7 @@ console.log(err)
             City <Required>*</Required>
           </Label>
           <TextField
-            sx={{ minWidth: "40%" }}
+sx={customTextField}
             size="large"
             id="outlined-basic"
             label="City"
@@ -356,7 +394,7 @@ console.log(err)
             Postal Code <Required>*</Required>
           </Label>
           <TextField
-            sx={{ minWidth: "40%" }}
+sx={customTextField}
             size="large"
             id="outlined-basic"
             label="Postal Code"
@@ -364,15 +402,17 @@ console.log(err)
             variant="outlined"
             onChange={handleChange}
             type="number"
+            color="success"
           />
-          <Label>
+          <Label >
             Phone Number <Required>*</Required>
           </Label>
           <TextField
-            sx={{ minWidth: "40%" }}
+        sx={customTextField}
             size="large"
             id="outlined-basic"
             label="Phone Number"
+           
             name="phonenumber"
             variant="outlined"
             onChange={handleChange}
@@ -381,7 +421,9 @@ console.log(err)
           <Label>
             Shipping Type<Required>*</Required>
           </Label>
-          <FormControl sx={{ minWidth: "40%" }}>
+          <FormControl
+             sx={customTextField}
+             >
             <InputLabel id="demo-simple-select-helper-label">
               Shipping Type
             </InputLabel>
@@ -392,19 +434,20 @@ console.log(err)
               value={typeOrder}
               label="Shipping Type"
               onChange={(e) => [handleChange(e), handleType(e)]}
+              sx={{color:theme == "light" ? primaryTextColor : whiteTextColor}}
             >
               <MenuItem value={"To Home"}>Deliver To Home</MenuItem>
               <MenuItem value={"To Postal"}>Deliver To The Postal</MenuItem>
             </Select>
-            <FormHelperText>
+            <FormHelperText sx={{bgcolor:'transparent' , color:secondText}}>
               Please ensure that if you choose deliver to home you will pay more
             </FormHelperText>
           </FormControl>
         </InputContainer>
 
         <LeftTitle>Products </LeftTitle>
-        <Products>
-          <ItemContainerTitles>
+        <Products theme={theme}>
+          <ItemContainerTitles theme={theme}>
             <Title type="product">Pale</Title>
             <Title>Color</Title>
             <Title>Size</Title>
@@ -447,7 +490,7 @@ console.log(err)
           )}
         </Products>
       </Left>
-      <Right>
+      <Right theme={theme}>
         <Order>
           <OrderDetail>
             <Label>Estimated Time</Label> <Info>1-2 Days</Info>
@@ -465,7 +508,7 @@ console.log(err)
           <OrderDetail>
             <Label>Total</Label> <Info>$ {cart?.totalPrice}</Info>
           </OrderDetail>
-          <Button onClick={handleSubmit}>Order Now</Button>
+          <Button theme={theme} onClick={handleSubmit}>Order Now</Button>
         </Order>
       </Right>
     </Container>

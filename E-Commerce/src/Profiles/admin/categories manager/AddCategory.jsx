@@ -21,9 +21,10 @@ import {
 } from "@mui/material";
 import { useEffect, useRef, useState } from "react";
 
-import { Input, Tag, theme } from "antd";
+
 import newRequest from "../../../utils/newRequest";
 import { useSelector } from "react-redux";
+import { colorAccentDark, colorAccentDarkTransparent, colorAccentLight, colorAccentMain, colorAccentMedium, colorAccentMediumTransparent, colorBackgroundBlack, colorBackgroundGray, colorPrimaryBlack, grayBackground, main, primaryTextColor, secondaryTextColor, whiteTextColor } from "../../../Colors";
 
 const Container = styled.div`
   height: calc(100vh - 80px);
@@ -37,13 +38,17 @@ const Container = styled.div`
 const FormContainer = styled.div`
   display: flex;
   justify-content: space-between;
-  border-top: 1px dashed #bebebe;
+  border-top: 1px dashed  ${props => props.theme == "light" ? "#bebebe" : "#454545"};
+
   padding: 32px 0;
   gap: 32px;
+  color: ${props => props.theme == "light" ? primaryTextColor : whiteTextColor};
+  
 `;
 
 const FormTitle = styled.h3`
   font-weight: 500;
+  color: ${props => props.theme == "light" ? primaryTextColor : whiteTextColor};
 `;
 
 const Left = styled.div`
@@ -61,14 +66,16 @@ const Title = styled.span`
 
 const Desc = styled.span`
   font-size: 13px;
-  color: #989898;
+  color: ${secondaryTextColor};
 `;
 
 const Right = styled.div`
   flex: 2;
-  background-color: white;
   padding: 32px;
   border-radius: 4px;
+  background-color: ${props => props.theme == "light" ? whiteTextColor : colorPrimaryBlack};
+  color: ${props => props.theme == "light" ? primaryTextColor : whiteTextColor};
+
 `;
 
 const Required = styled.span`
@@ -79,7 +86,7 @@ const Required = styled.span`
 const Span = styled.span`
   font-size: 16px;
   font-weight: 600;
-  color: #46a25d;
+  color: ${props => props.theme == "light" ? main : colorAccentMain};
 `;
 
 const InputContainer = styled.div`
@@ -95,10 +102,13 @@ const InputText = styled.input`
   padding: 14px 16px;
   outline: none;
   border-radius: 4px;
-  border: 1px solid #d4d4d4;
+  border: 1px solid ${props => props.theme == "light" ? grayBackground : colorBackgroundGray};
+  background-color: ${props => props.theme == "light" ? whiteTextColor : colorAccentDarkTransparent};
+  color: ${props => props.theme == "light" ? primaryTextColor : whiteTextColor};
+
 
   &:focus {
-    border: 1px solid #46a25d;
+    border: 1px solid ${props => props.theme == "light" ? main : colorAccentLight};
   }
 `;
 
@@ -124,7 +134,7 @@ const beforeUpload = (file) => {
 };
 
 const AddCategory = () => {
- 
+ const theme = useSelector(state => state.theme.mode)
 
   const [loading, setLoading] = useState(false);
 
@@ -260,23 +270,23 @@ console.log(type)
   const uploadButton = (
     <button
       style={{
-        border: 0,
-        background: "none",
+        width:'100%',
+        background: theme == "light" ? "none" : colorAccentDarkTransparent,
       }}
       type="button"
     >
       {loading ? (
-        <LoadingOutlined style={{ fontSize: 50, color: "#46A25D" }} />
+        <LoadingOutlined style={{ fontSize: 50, color: theme == "light" ? main : colorAccentMain}} />
       ) : (
-        <CloudUploadTwoTone style={{ color: "#50BA6A", fontSize: 50 }} />
+        <CloudUploadTwoTone style={{ color: theme == "light" ? main : colorAccentMain, fontSize: 50 }} />
       )}
       <div
         style={{
           marginTop: 8,
         }}
       >
-        <Required>
-          <Span>Upload an Icon</Span> Or drag and drop. png,jpg
+        <Required style={{color: theme == "light" ? "" : secondaryTextColor}}>
+          <Span theme={theme}>Upload an Icon</Span> Or drag and drop. png,jpg
         </Required>
       </div>
     </button>
@@ -317,17 +327,18 @@ console.log(type)
       desc: <>Add some basic information about your Category here</>,
       body: (
         <>
-          <InputContainer>
+          <InputContainer theme={theme}>
             <Label>
               Name <Span style={{ color: "red" }}>*</Span>
             </Label>
-            <InputText
+            <InputText theme={theme}
               name="categoryname"
               onChange={(e) => handleChangeField(e, "cat")}
             ></InputText>
           </InputContainer>
           <Button
-            color="success"
+            
+            sx={{bgcolor:theme == "light" ? main : colorAccentMedium , "&:hover" : {backgroundColor:colorAccentDark}}}
             variant="contained"
             startIcon={<SaveAltTwoToneIcon />}
             onClick={(e) => handleSubmitField(e , 'cat')}
@@ -371,23 +382,24 @@ console.log(type)
       desc: <>Add some basic information about your Sub Category here</>,
       body: (
         <>
-          <InputContainer>
+          <InputContainer theme={theme}>
             <Label>
               Name <Span style={{ color: "red" }}>*</Span>
             </Label>
-            <InputText
+            <InputText theme={theme}
               name="subname"
               onChange={(e) => handleChangeField(e, "sub")}
             ></InputText>
           </InputContainer>
 
-          <InputContainer>
+          <InputContainer theme={theme}>
             <Label>Category</Label>
-            <FormControl sx={{ width: "100%" }}>
-              <InputLabel id="demo-simple-select-helper-label">
+            <FormControl sx={{ width: "100%","& > *" :{bgcolor:theme == "light" ? whiteTextColor : colorAccentDarkTransparent } }}>
+              <InputLabel sx={{color:theme == "light" ? primaryTextColor : whiteTextColor}} id="demo-simple-select-helper-label">
                 Categories
               </InputLabel>
               <Select
+              sx={{color : theme == "light" ?  primaryTextColor : whiteTextColor }}
                 labelId="demo-simple-select-helper-label"
                 id="demo-simple-select-helper"
                 name="idCat"
@@ -401,11 +413,12 @@ console.log(type)
                   </MenuItem>
                 ))}
               </Select>
-              <FormHelperText>Please Select The Main Category</FormHelperText>
+              <FormHelperText style={{backgroundColor:'transparent' ,color:secondaryTextColor } }>Please Select The Main Category</FormHelperText>
             </FormControl>
           </InputContainer>
           <Button
             color="success"
+            sx={{bgcolor:theme == "light" ? main : colorAccentMedium , "&:hover" : {backgroundColor:colorAccentDark}}}
             variant="contained"
             startIcon={<SaveAltTwoToneIcon />}
             onClick={(e) => handleSubmitField(e , 'sub')}
@@ -453,15 +466,15 @@ console.log(type)
             <Label>
               Name <Span style={{ color: "red" }}>*</Span>
             </Label>
-            <InputText
+            <InputText theme={theme}
               name="typename"
               onChange={(e) => handleChangeField(e, "type")}
             ></InputText>
           </InputContainer>
           <InputContainer>
             <Label>Category</Label>
-            <FormControl sx={{ width: "100%" }}>
-              <InputLabel id="demo-simple-select-helper-label">
+            <FormControl sx={{ width: "100%","& > *" :{bgcolor:theme == "light" ? whiteTextColor : colorAccentDarkTransparent } }}>
+              <InputLabel sx={{color:theme == "light" ? primaryTextColor : whiteTextColor}} id="demo-simple-select-helper-label">
                 Categories
               </InputLabel>
               <Select
@@ -478,13 +491,13 @@ console.log(type)
                   </MenuItem>
                 ))}
               </Select>
-              <FormHelperText>Please Select The Main Category</FormHelperText>
+              <FormHelperText style={{backgroundColor:'transparent' , color:secondaryTextColor }}>Please Select The Main Category</FormHelperText>
             </FormControl>
           </InputContainer>
           <InputContainer>
             <Label>Sub Category</Label>
-            <FormControl sx={{ width: "100%" }}>
-              <InputLabel id="demo-simple-select-helper-label">
+            <FormControl sx={{ width: "100%","& > *" :{bgcolor:theme == "light" ? whiteTextColor : colorAccentDarkTransparent } }}>
+              <InputLabel sx={{color:theme == "light" ? primaryTextColor : whiteTextColor}} id="demo-simple-select-helper-label">
                 Sub Categories
               </InputLabel>
               <Select
@@ -499,13 +512,14 @@ console.log(type)
                   <MenuItem value={sub?.id}>{sub.name}</MenuItem>
                 ))}
               </Select>
-              <FormHelperText>
+              <FormHelperText style={{backgroundColor:'transparent' , color:secondaryTextColor }}>
                 Please Select Your Product Sub Category
               </FormHelperText>
             </FormControl>
           </InputContainer>
           <Button
             color="success"
+            sx={{bgcolor:theme == "light" ? main : colorAccentMedium , "&:hover" : {backgroundColor:colorAccentDark}}}
             variant="contained"
             startIcon={<SaveAltTwoToneIcon />}
             onClick={(e) => handleSubmitField(e , 'type')}
@@ -519,14 +533,14 @@ console.log(type)
 
   return (
     <Container>
-      <FormTitle>Add Product</FormTitle>
+      <FormTitle theme={theme}>Add Product</FormTitle>
       {form.map((item) => (
-        <FormContainer key={item.title}>
+        <FormContainer theme={theme} key={item.title}>
           <Left>
             <Title>{item.title}</Title>
             <Desc>{item.desc}</Desc>
           </Left>
-          <Right>{item.body}</Right>
+          <Right theme={theme}>{item.body}</Right>
         </FormContainer>
       ))}
     </Container>

@@ -11,17 +11,37 @@ import me from "../../../assets/Lotties/Animation - 1716145973359.json"
 
 
 
-import { StaticContainer, StaticTitle } from "../Dashboard";
+
 import newRequest from "../../../utils/newRequest";
 
 import DoneIcon from '@mui/icons-material/Done';
 import { useNavigate } from "react-router-dom";
 import AlertMessage from "../../../Components/Alert";
+import Loading from "../../../Components/Pending/Loading";
+
+import { colorAccentDark, colorAccentDarkTransparent, colorAccentLight, colorAccentMain, colorAccentMediumTransparent, colorAccentSoft, colorAccentSoftTransparent, colorAccentTransparent, colorBackgroundBlack, colorErrorDark, colorErrorSoft, colorPrimaryBlack, colorWarningDark, colorWarningSoft, darkOrange, darkRed, grayBackground, lightSoftMain, main, primaryTextColor, softOrange, softRed, whiteTextColor } from "../../../Colors";
+import { useSelector } from "react-redux";
 
 
 const Container = styled.div`
-padding: 0 32px;
+padding: 20px 32px;
 overflow-y: auto;
+display: flex;
+flex-direction: column;
+gap: 20px;
+`
+
+
+const StaticContainer = styled.div`
+background-color: ${props => props.theme == "light" ? whiteTextColor : colorPrimaryBlack};
+border-radius:8px;
+
+`
+const StaticTitle = styled.span`
+margin: 20px 0;
+padding-left: 20px;
+border-left: 4px solid ${props => props.theme == "light" ? main : colorAccentMain};
+color: ${props => props.theme == "light" ? primaryTextColor : whiteTextColor};
 `
 
 const Search = styled.div`
@@ -30,8 +50,8 @@ display: flex;
 justify-content: space-between;
 height: 40px;
 border-radius: 4px;
-border: 1px solid #eee;
-background-color:#0e0037;
+border: 1px solid ${props => props.theme == "light" ? grayBackground : colorBackgroundBlack};
+background-color:${props => props.theme == "light" ? whiteTextColor : colorPrimaryBlack};
 
 `
 const Input = styled.input`
@@ -40,6 +60,10 @@ outline: none;
 width: 90%;
 padding: 0 16px;
 font-size: 16px;
+
+background-color:${props => props.theme == "light" ? whiteTextColor : colorAccentDarkTransparent};
+color:${props => props.theme == "light" ?primaryTextColor : whiteTextColor};
+
 `
   
 
@@ -49,22 +73,55 @@ const Table = styled.table`
   flex-direction: column;
   justify-content: space-between;
   contain: paint;
+  height: calc(100vh - 230px);
+  position: relative;
+  overflow: auto;
+  z-index:99;
+  &::-webkit-scrollbar {
+    width: 6px; 
+    height:6px/* width of the entire scrollbar */
+  }
+  &::-webkit-scrollbar-track {
+    background: transparent; /* color of the tracking area */
+  }
+  &::-webkit-scrollbar-thumb {
+    background-color: rgba(147, 147, 147, 0.7); /* color of the scroll thumb */
+    border-radius: 20px; /* roundness of the scroll thumb */
+    /* creates padding around scroll thumb */
+  }
+  &::-webkit-scrollbar-thumb:hover {
+    background-color: rgba(147, 147, 147, 1); /* color of the scroll thumb */
+    width: 8px;
+    border-radius: 20px; /* roundness of the scroll thumb */
+    /* creates padding around scroll thumb */
+  }
+  
 `;
 const Row = styled.tr`
   display: flex;
   justify-content: space-between;
   height: 50px;
   align-items: center;
-  background-color: ${(props) =>
-  props.type === "tag" ? `#b5fff076` : `#fffffffa`};
+  position: ${(props) =>
+  props.type === "tag" ? "sticky" : ""};
+  z-index: ${(props) =>
+  props.type === "tag" ? 2 : 1};
   padding: ${(props) =>
-  props.type === "tag" ? `0` : `32px 0`};
- 
+  props.type === "tag" ? `24px 0` : `32px 0`};
+  width:100%;
+  top:0;
+    background-color: ${(props) =>
+  props.type === "tag" ? props.theme == "light" ? main : colorAccentDark : props.theme == "light" ? whiteTextColor : colorAccentDarkTransparent};
+  
+  @media (max-width: 768px) {
+  min-width: 200vh;
+}
+
   
 `;
 const ColumnTag = styled.td`
   flex: 2;
-  color: #0e0037;
+  color: ${whiteTextColor};
   text-align: center;
   font-weight: 300;
   border-right: 1px solid #cfcfcf;
@@ -74,13 +131,15 @@ const Column = styled.th`
   display: flex;
   flex-direction: column;
   align-items: start;
-  color: #0e0037;
+  color: ${(props) =>
+  props.theme == "light" ? colorPrimaryBlack : whiteTextColor};
   font-weight: 300;
   padding: 0 8px;
   text-align: left;
 `;
 const ColumnInfo = styled.th`
-  color: #000000;
+  color: ${(props) =>
+  props.theme == "light" ? colorPrimaryBlack : whiteTextColor};
   font-weight: 300;
   width: 80px;
   padding: 4px 12px;
@@ -89,16 +148,16 @@ const ColumnInfo = styled.th`
   text-align: center;
   background-color: ${(props) =>
     props.status === "Open"
-      ? "#E0FAF6"
-      : props.status === "Close"
-      ? "#FFE6EC"
-      : "#FFF2E6"};
+      ? props.theme == "light" ? lightSoftMain : colorAccentSoftTransparent :
+       props.status === "Close" 
+      ? props.theme == "light" ? softRed : colorErrorSoft
+      : props.theme == "light" ? softOrange : colorWarningSoft};
   color: ${(props) =>
     props.status === "Open"
-      ? "#65CFBD"
+      ? props.theme == "light" ? main : colorAccentMain
       : props.status === "Close"
-      ? "#FF003F"
-      : "#FF7F00"};
+      ? props.theme == "light" ? darkRed :colorErrorDark
+      : props.theme == "light" ? darkOrange : colorWarningDark};
 `;
 const LottieContainer = styled.div`
 display: flex;
@@ -107,20 +166,27 @@ justify-content: center;
 `;
 
 const ShopeList = () => {
+  const theme = useSelector(state => state.theme.mode)
   const [message, setMessage] = useState("");
   const [type, setType] = useState("");
   const [open, setOpen] = useState(false);
+  const [loading, setLoading] = useState(false);
   const ColumnsTag = ['Image' , 'Shop Name' , 'Products' , 'Order' ,'Owner Name' ,'Status'];
 
 const navigate = useNavigate();
-  const [shops, setShops] = useState([]);
+  const [shops, setShops] = useState(null);
 
   const getShops = async () => {
     try {
       const res = await newRequest.get("/shop/shops-admin");
       setShops(res.data);
+      setLoading(true)
     } catch (err) {
       console.error("Error fetching users:", err);
+    } finally{
+      setTimeout(() => {
+setLoading(false)
+      }, [1000])
     }
   };
   useEffect(() => {
@@ -194,16 +260,16 @@ navigate(`/Shops/${id}`);
     <Container>
       <AlertMessage open={open} setOpen={setOpen} message={message} type={type} />
 
-      <StaticContainer style={{padding:'0 32px 0 0', display:'flex',alignItems:'center' , flexDirection:'row' , justifyContent:'space-between'}}>
-        <StaticTitle>Active Shops </StaticTitle>
-        <Search><IconButton sx={{width:"10%"}}><PersonSearchIcon style={{color:"white"}} /></IconButton><Input placeholder="Enter Shop Name" /></Search>
+      <StaticContainer theme={theme} style={{padding:'0 32px 0 0', display:'flex',alignItems:'center' , flexDirection:'row' , justifyContent:'space-between'}}>
+        <StaticTitle theme={theme}>Active Shops </StaticTitle>
+        <Search theme={theme} ><IconButton sx={{backgroundColor : theme == "light" ? main : colorAccentDark ,width:"10%" , height:"100%", borderRadius:'4px 0 0 4px'}}><PersonSearchIcon style={{color:whiteTextColor}} /></IconButton><Input theme={theme} placeholder="Enter Shop Name" /></Search>
         
       </StaticContainer>
 
-    <StaticContainer style={{padding:'0',contain:'paint'}}>
+    <StaticContainer theme={theme} style={{padding:'0',contain:'paint'}}>
 
-    <Table>
-      <Row type={"tag"}>
+    <Table theme={theme}>
+      <Row theme={theme} type={"tag"}>
         {ColumnsTag.map((item) => (
 
 
@@ -213,30 +279,23 @@ navigate(`/Shops/${id}`);
         ))}
         <ColumnTag style={{ border: "none", flex: 1}}>Action</ColumnTag>
       </Row>
-      {shops.length == 0 
-      ? 
-      (
-
-        <LottieContainer>
-          <Lottie  animationData={me} style={{ width:"40%"}} /> 
-          </LottieContainer> 
-      )
-      :
-      (
-        shops.map((item) => (
+      {shops != "" && !loading ? 
+      
+      
+      
+        shops?.map((item) => (
         <>
-        <Row key={item.ShopID} type={"normal"}>
-        <Column style={{ flex: 1 , display:'flex' , alignItems:'center' }}>
-        <Avatar src={item.ShopImage}  sx={{ width: 55, height: 55 , borderRadius:'4px' , border:'1px solid #EEE' , objectFit:'contain'}} />
+        <Row theme={theme} key={item.ShopID} type={"normal"}>
+        <Column theme={theme} style={{ flex: 1 , display:'flex' , alignItems:'center' }}>
+        <Avatar src={item.ShopImage}  sx={{ width: 50, height: 50 , borderRadius:'4px' , border:`1px solid ${theme == "light" ? grayBackground : colorBackgroundBlack }` , objectFit:'contain'}} />
         </Column>
-        <Column>
+        <Column theme={theme}>
         <ColumnInfo
         style={{
           backgroundColor: "transparent",
           width: "100%",
          
-          color: "#0e0037",
-          
+          color: theme == "light" ? primaryTextColor : whiteTextColor,
           flex: 2 ,
           textAlign:'start',
           padding:'0 0 0 27%',
@@ -247,11 +306,11 @@ navigate(`/Shops/${id}`);
         {item.ShopName}
         </ColumnInfo>
         </Column>
-        <Column  style={{alignItems: "center" , flex: 1 }}>{item.TotalProducts}</Column>
-        <Column  style={{alignItems: "center" , flex: 1 }}>{item.TotalOrders}</Column>
-        <Column style={{ flex: 2 , alignItems: "center" }}>{item.OwnerName}</Column>
-        <Column style={{ alignItems: "center" ,flex:2  }}>
-        <ColumnInfo status={item.ShopStatus}>{item.ShopStatus}</ColumnInfo>
+        <Column theme={theme} style={{alignItems: "center" , flex: 1 }}>{item.TotalProducts}</Column>
+        <Column theme={theme}  style={{alignItems: "center" , flex: 1 }}>{item.TotalOrders}</Column>
+        <Column theme={theme} style={{ flex: 2 , alignItems: "center" }}>{item.OwnerName}</Column>
+        <Column theme={theme} style={{ alignItems: "center" ,flex:2  }}>
+        <ColumnInfo theme={theme} status={item.ShopStatus}>{item.ShopStatus}</ColumnInfo>
         </Column>
         
         <Column style={{  flex: 1 }} key={item.ShopId}>
@@ -264,30 +323,32 @@ navigate(`/Shops/${id}`);
         }}
         >
         
-        <>
+        <div>
         <IconButton onClick={() => handlClick(item.ShopID,item.ShopStatus)}>
         {item.ShopStatus == 'Open' 
         ?
-        <VisibilityTwoToneIcon sx={{ color: "#007FFF" }} />
-        : <DoneIcon sx={{ color: "#007FFF" }} />}
+        <VisibilityTwoToneIcon sx={{ color: main }} />
+        : <DoneIcon sx={{ color: main }} />}
         </IconButton>
         <IconButton onClick={() => handleDelete(item.ShopID , item.ShopStatus)}>
         {item.ShopStatus == 'Open' 
         ?
-        <DeleteIcon sx={{ color: "#E92F4A" }} />
+        <DeleteIcon sx={{ color: darkRed }} />
         
-        : <CloseIcon sx={{ color: "#E92F4A" }} />}
+        : <CloseIcon sx={{ color: darkRed }} />}
         
         </IconButton>
-        </>
+        </div>
         
         </ColumnInfo>
         </Column>
         </Row>
-        <Divider />
+        <Divider sx={{backgroundColor: theme == "light" ? grayBackground : colorBackgroundBlack}} />
         </>
       
-      )))}
+      )) : loading ? <Loading /> : <LottieContainer style={{backgroundColor: theme == "light" ? whiteTextColor : colorBackgroundBlack}}>
+      <Lottie  animationData={me} style={{ width:"40%"}} /> 
+      </LottieContainer> }
     </Table>
       </StaticContainer>
       </Container>

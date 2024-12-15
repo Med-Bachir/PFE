@@ -33,7 +33,7 @@ import OrderPage from './Pages/OrderPage';
 import CreatShop from './Profiles/owner/shop manager/CreatShop';
 import Header from './Components/Header';
 import AddProduct from './Profiles/owner/product manager/AddProduct';
-import { useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import OwnersList from './Profiles/admin/user manager/ownerList';
 import Checkout from './Pages/Checkout';
 import ClientPf from './Profiles/client/Dashboard';
@@ -43,10 +43,11 @@ import Compare from './Pages/Compare';
 import Home from './Pages/Home';
 import CardProduct from './features/Products/CardProduct';
 import ContactUs from './Pages/ContactUs';
-import MyOrder from './Profiles/client/Orders';
+import MyOrder from './Profiles/owner/order manager/Orders';
 import Stock from './Profiles/owner/product manager/Stock';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import AddCategory from './Profiles/admin/categories manager/AddCategory';
+import { useEffect } from 'react';
 
 
 
@@ -229,10 +230,13 @@ function App() {
 
   
   
+ 
   return (
     <QueryClientProvider client={queryClient}>
 
+
     <RouterProvider router={user?.userRole == 'admin' || user?.userRole == 'seller' ? Adminrouter : Clientrouter} />
+
     </QueryClientProvider>
   )
 }

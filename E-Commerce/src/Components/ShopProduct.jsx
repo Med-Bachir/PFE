@@ -2,6 +2,7 @@ import React from 'react'
 import { Link } from 'react-router-dom'
 import styled from 'styled-components'
 import RadioGroupRating from './rating'
+import { colorPrimaryBlack, primaryTextColor, whiteTextColor } from '../Colors'
 
 
 
@@ -11,7 +12,8 @@ import RadioGroupRating from './rating'
 const Product = styled.div`
 
 margin-bottom:16px;
-background-color: white;
+    background-color: ${props => props.theme == "light" ? whiteTextColor : colorPrimaryBlack};
+    color: ${props => props.theme == "light" ? primaryTextColor : whiteTextColor};
 display: flex;
 flex-direction: column;
 align-items: center;
@@ -22,13 +24,13 @@ min-height: 400px;
 
 `
 const ProductImage = styled.img`
-height: 350px;
+height: 300px;
 width: 100%;
 object-fit: contain;
 
 `
 const Name = styled.span`
-margin-top: auto;
+margin-top: 20px;
 font-size: 15px;
 font-weight: 500;
 `
@@ -76,9 +78,9 @@ flex-direction: column;
 gap: 8px;
 `
 
-const ShopProduct = ({name , price , discount , id , image , rate}) => {
+const ShopProduct = ({name , price , discount , id , image , rate , theme}) => {
   return (
-    <Product>
+    <Product theme={theme}>
         {discount == 0 ? '' : <Discount>{discount}%</Discount>}
     <ProductImage src={image} />
     <RateContainer>
