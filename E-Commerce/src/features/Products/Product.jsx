@@ -201,7 +201,8 @@ const Product = ({
     }, 1000);
   }, []);
 
-  const discountedPrice = productprice * (1 - discount / 100);
+  const price = Number(productprice) || 0;
+  const discountedPrice = price * (1 - Number(discount || 0) / 100);
 
   return (
     <Container theme={theme}>
@@ -254,7 +255,7 @@ const Product = ({
 
             <PriceContainer>
               <Price theme={theme} discount={discount}>
-                $ {productprice.toFixed(2)}
+                $ {price.toFixed(2)}
               </Price>
               {discount > 0 && (
                 <NewPrice discount={discount}>
