@@ -682,10 +682,8 @@ const AdminPf = () => {
       <StaticContainer theme={theme}
         style={{
           backgroundColor: "transparent",
-          flexDirection: "row",
           gap: 32,
-          flexDirection: !isMobile ? "row" : "column"  
-          
+          flexDirection: !isMobile ? "row" : "column"
         }}
       >
         <PopularContainer theme={theme}>
@@ -812,9 +810,8 @@ const AdminPf = () => {
       <StaticContainer
         style={{
           backgroundColor: "transparent",
-          flexDirection: "row",
           gap: 32,
-          flexDirection: !isMobile ? "row" : "column" 
+          flexDirection: !isMobile ? "row" : "column"
         }}
       >
         <PopularContainer theme={theme}>

@@ -693,7 +693,6 @@ const OwnerPf = () => {
       <StaticContainer
         style={{
           backgroundColor: "transparent",
-          flexDirection: "row",
           gap: 32,
           flexDirection: !isMobile ? "row" : "column",
         }}
