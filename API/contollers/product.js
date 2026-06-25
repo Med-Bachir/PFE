@@ -1,7 +1,5 @@
 const {
   verifyTokenAndSeller,
-  verifyToken,
-  verifyTokenAndAuthorization,
   verifyTokenAndAdmin,
   verifyTokenAndAuthorizationA_S,
 } = require("./verifytoken");
@@ -13,13 +11,12 @@ const Fuse = require("fuse.js");
 const { v2: cloudinary } = require("cloudinary");
 const { v4: uuidv4 } = require("uuid");
 
-// Cloudinary Configuration
+// Environment variables configuration
 cloudinary.config({
-  cloud_name: "dr95wrssj",
-  api_key: "419664968851868",
-  api_secret: "61D8e5oyWfCQLWBohKa-9t7HxZg",
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET,
 });
-
 //ADD PRODUCT TO THE SHOP
 router.post(
   "/add-product/:shopId",
@@ -132,17 +129,7 @@ router.put("/update/:id", verifyTokenAndAuthorizationA_S, async (req, res) => {
         resolve(result);
       });
     });
-    console.log("Update Query Parameters:", {
-      productname,
-      productprice,
-      discount,
-      attributes,
-      productimage: uploadResult.secure_url,
-      id_Category,
-      id_SubCategory,
-      id_Type,
-      id
-    });
+  
 
     // Update the product quantity in stock
     await new Promise((resolve, reject) => {
@@ -461,7 +448,7 @@ router.get("/:categoryName/:sub", async (req, res) => {
       FROM PRODUCT p
       JOIN CATEGORIES c ON p.id_Category = c.id
       JOIN SUBCATEGORIES s ON p.id_SubCategory = s.id
-      WHERE c.name = ? AND s.name = ? + '\n'
+      WHERE c.name = ? AND s.name = ?
     `;
 
     connection.query(
@@ -494,7 +481,7 @@ router.get("/:categoryName/:sub/:type", async (req, res) => {
       JOIN CATEGORIES c ON p.id_Category = c.id
       JOIN SUBCATEGORIES s ON p.id_SubCategory = s.id
       JOIN TYPES t ON p.id_Type = t.id
-      WHERE c.name = ? AND s.name = ? + '\n' AND t.name = ?
+      WHERE c.name = ? AND s.name = ? AND t.name = ?
     `;
 
     connection.query(

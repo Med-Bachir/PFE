@@ -8,21 +8,6 @@ router.post('/checkout/:userId', async (req, res) => {
   const userId = req.params.userId;
   const { state, postalcode, city , phonenumber , type } = req.body.orderDetails;
   
-
-  
-
-  // Validate required fields in request
- 
-
-  console.log(req.body)
-  console.log(state)
-  /*const { shippingname, shippingimg, shippingprice, availability } = shippingDetails;
-    // Expecting phone in the main request body
-
-  if (!state || !postal_code || !city || !phonenumber || !shippingname || !shippingimg || !shippingprice || !availability) {
-    return res.status(400).json({ error: "Incomplete address, phone, or shipping details." });
-  }
-*/
   const cartQuery = `
     SELECT c.id_Product, c.attributes, c.quantity, p.productprice
     FROM CART c , product p
@@ -152,7 +137,7 @@ router.post('/checkout/:userId', async (req, res) => {
 router.put("/client/update-order-stats/:id", verifyTokenAndAuthorizationA_S, async (req, res) => {
   const orderId = req.params.id;
   const { status, currentplace, userId } = req.body; // Ensure userId is included in the request body
-
+console.log(req.body)
   try {
     const updateOrderStatusQuery = `
       UPDATE \`order\`
@@ -192,37 +177,48 @@ router.put("/client/update-order-stats/:id", verifyTokenAndAuthorizationA_S, asy
 
 router.put("/seller/update-orderitem-stats/:id", verifyTokenAndAuthorizationA_S, async (req, res) => {
   const orderId = req.params.id; // ID of the order being updated
-  const { status, currentplace, userId , owner } = req.body; // Ensure userId is included in the request body
+  const { status, currentplace, userId, owner } = req.body; // Ensure userId is included in the request body
+
+  console.log(req.body);
 
   try {
-    // Step 1: Update the specific order item
+    // Step 1: Update the specific order item for the seller
     const updateOrderItemQuery = `
       UPDATE orderitem
       SET status = ?, currentplace = ?
-      WHERE id_Order = ? AND id_Product IN (SELECT s.id_Product from stock s , shop sh WHERE sh.id_Owner = ? AND s.id_Shop = sh.idSHOP);
+      WHERE id_Order = ? 
+        AND id_Product IN (
+          SELECT s.id_Product 
+          FROM stock s 
+          JOIN shop sh ON sh.idSHOP = s.id_Shop 
+          WHERE sh.id_Owner = ?
+        );
     `;
 
-    connection.query(updateOrderItemQuery, [status, currentplace, orderId , owner], (err, results) => {
+    connection.query(updateOrderItemQuery, [status, currentplace, orderId, owner], (err, results) => {
       if (err) {
         console.error("Error updating order item status:", err);
         return res.status(500).json({ error: "Failed to update order item status." });
       }
 
-      // Step 2: Retrieve all statuses for the order's order items
+      // Step 2: Retrieve all order items with their statuses and current places for the order
       const getOrderItemsQuery = `
-        SELECT status FROM orderitem WHERE id_Order = ?;
+        SELECT status, currentplace 
+        FROM orderitem 
+        WHERE id_Order = ?;
       `;
 
       connection.query(getOrderItemsQuery, [orderId], (err, rows) => {
         if (err) {
-          console.error("Error retrieving order item statuses:", err);
-          return res.status(500).json({ error: "Failed to retrieve order item statuses." });
+          console.error("Error retrieving order item statuses and places:", err);
+          return res.status(500).json({ error: "Failed to retrieve order item statuses and places." });
         }
 
-        // Extract all statuses
+        // Extract all statuses and current places
         const statuses = rows.map(row => row.status);
+        const places = rows.map(row => row.currentplace);
 
-        // Step 3: Determine the new order status
+        // Step 3: Determine the new overall order status
         let newOrderStatus;
         if (statuses.every(s => s === "Waiting")) {
           newOrderStatus = "Waiting";
@@ -231,30 +227,46 @@ router.put("/seller/update-orderitem-stats/:id", verifyTokenAndAuthorizationA_S,
         } else if (statuses.every(s => s === "Arrived")) {
           newOrderStatus = "Arrived";
         } else {
-          // Mixed statuses: "waiting" and "on way"
+          // Mixed statuses (e.g., some "Waiting", some "On Way"): you may define your logic here.
           newOrderStatus = "On Way";
         }
 
-        // Step 4: Update the order's status
+        // Step 4: Determine the overall current place
+        let overallCurrentPlace;
+        if (places.every(place => place === places[0])) {
+          // All order items share the same current place
+          overallCurrentPlace = places[0];
+        } else {
+          // Mixed current places.
+          // Example logic: use a predefined progression to determine which place is furthest along.
+          const progressionOrder = ["Seller Warehouse", "In Transit", "Local Hub", "Final Destination"];
+          overallCurrentPlace = places.reduce((prev, curr) => {
+            // If a place is not found in your progression, you can decide on a default behavior.
+            const prevIndex = progressionOrder.indexOf(prev);
+            const currIndex = progressionOrder.indexOf(curr);
+            return (currIndex > prevIndex ? curr : prev);
+          }, places[0]);
+        }
+
+        // Step 5: Update the overall order record with both status and current place
         const updateOrderStatusQuery = `
           UPDATE ecommerce.order
-          SET progress = ?
+          SET progress = ?, currentplace = ?
           WHERE idORDER = ?;
         `;
 
-        connection.query(updateOrderStatusQuery, [newOrderStatus, orderId], (err, results) => {
+        connection.query(updateOrderStatusQuery, [newOrderStatus, overallCurrentPlace, orderId], (err, results) => {
           if (err) {
-            console.error("Error updating order status:", err);
-            return res.status(500).json({ error: "Failed to update order status." });
+            console.error("Error updating order status and current place:", err);
+            return res.status(500).json({ error: "Failed to update order." });
           }
 
-          // Step 5: Insert a notification for the user
+          // Step 6: Insert a notification for the user about the update
           const insertNotificationQuery = `
             INSERT INTO notification (text, type, reciver)
             VALUES (?, ?, ?);
           `;
-
-          const notificationText = `Your order #${orderId} status has been updated to "${newOrderStatus}".`;
+          const notificationText = `Your order #${orderId} has been updated to status "${newOrderStatus}" and is now at "${overallCurrentPlace}".`;
           const notificationType = "order_update";
 
           connection.query(insertNotificationQuery, [notificationText, notificationType, userId], (err, results) => {
@@ -264,8 +276,9 @@ router.put("/seller/update-orderitem-stats/:id", verifyTokenAndAuthorizationA_S,
             }
 
             res.status(200).json({ 
-              message: "Order item status updated, order status updated, and notification sent successfully.",
-              orderStatus: newOrderStatus
+              message: "Order item updated, overall order updated, and notification sent successfully.",
+              orderStatus: newOrderStatus,
+              orderPlace: overallCurrentPlace
             });
           });
         });
@@ -278,6 +291,7 @@ router.put("/seller/update-orderitem-stats/:id", verifyTokenAndAuthorizationA_S,
 });
 
 
+
 // Route to get order stats for a client
 router.get('/client/:clientId/order-stats', verifyToken, async (req, res) => {
   const clientId = req.params.clientId;
@@ -285,7 +299,7 @@ router.get('/client/:clientId/order-stats', verifyToken, async (req, res) => {
   try {
     const getOrderStatsQuery = `
     SELECT 
-    o.idORDER,
+    DISTINCT o.idORDER,
     o.id_User,
     o.progress AS orderStatus,
     DATE_FORMAT(o.createdAt, '%Y-%m-%d') AS dateOrder,
@@ -339,8 +353,8 @@ GROUP BY o.idORDER
               priceShipping: row.priceShipping,
               place:row.place,
               city:row.city,
-              type:row.type,
-              products: []
+              type:row.type
+              
             };
           }
           
@@ -367,21 +381,32 @@ router.get('/client/:clientId/orderitem-stats', verifyToken, async (req, res) =>
 
   try {
     const getOrderStatsQuery = `
-        SELECT DISTINCT
-   
-    
-    p.idPRODUCT, p.productname, p.productdesc, p.productprice, p.productimage, 
-    oi.qte,oi.attributes , p.discount , oi.status,
-    (oi.qte * (p.productprice - p.productprice * p.discount / 100) ) AS totalPrice
+       SELECT 
+    p.idPRODUCT, 
+    p.productname, 
+    p.productdesc, 
+    p.productprice, 
+    p.productimage, 
+    oi.qte,
+    SUM(oi.qte) AS totalQuantity,
+    p.discount,
+    -- If all statuses are the same, you can use MIN or MAX, 
+    -- or you can concatenate if they might differ.
+    MIN(oi.status) AS status,
+    -- Here, we concatenate distinct places. Adjust this logic as needed.
+    GROUP_CONCAT(DISTINCT o.currentplace SEPARATOR ', ') AS places,
+    SUM(oi.qte * (p.productprice - p.productprice * p.discount / 100)) AS totalPrice
 FROM 
     ecommerce.ORDER o
 JOIN 
-    ORDERITEM oi ON  oi.id_Order = ?
+    ORDERITEM oi ON oi.id_Order = ?
 JOIN 
     PRODUCT p ON oi.id_Product = p.idPRODUCT
-
 WHERE 
-    o.id_User = ?;
+    o.id_User = ?
+GROUP BY 
+    p.idPRODUCT, p.productname, p.productdesc, p.productprice, p.productimage, p.discount , oi.qte;
+
     `;
 
     connection.query(getOrderStatsQuery, [order,clientId ], (err, results) => {

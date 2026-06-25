@@ -1,3 +1,11 @@
+// Node removed the deprecated Buffer.SlowBuffer; jsonwebtoken's transitive
+// dependency buffer-equal-constant-time still touches SlowBuffer.prototype at
+// load time and crashes without this.
+const bufferModule = require("buffer");
+if (!bufferModule.SlowBuffer) {
+  bufferModule.SlowBuffer = bufferModule.Buffer;
+}
+
 const express = require("express");
 const dotenv = require("dotenv"); 
 const bodyParser = require('body-parser'); // Import body-parser
@@ -18,7 +26,7 @@ const statsroute = require("./contollers/stats");
 const notificationroute = require("./contollers/notification");
 const fileUploadRouter = require('./contollers/upload');
 
-const mysql = require('mysql');
+const mysql = require('mysql2');
 const connection = require('./db');
 const cors = require("cors");
 const cookieParser = require('cookie-parser');

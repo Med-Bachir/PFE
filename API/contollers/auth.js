@@ -1,140 +1,167 @@
 const router = require("express").Router();
-const User = require("../Models/User");
-const CryptoJS = require("crypto-js");
+const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const createError = require('http-errors');
-const connection = require('../db');
 const { query } = require("../utils/promiseQuery.js");
 const { v2: cloudinary } = require("cloudinary");
 const { v4: uuidv4 } = require("uuid");
+const { body, validationResult } = require('express-validator');
 
-
-// Cloudinary Configuration
+// Environment variables configuration
 cloudinary.config({
-  cloud_name: "dr95wrssj",
-  api_key: "419664968851868",
-  api_secret: "61D8e5oyWfCQLWBohKa-9t7HxZg",
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET,
 });
 
-router.post('/register', async (req, res, next) => {
-  try {
-    // Declare uploadResult
-    let uploadResult;
+// Rate limiting middleware (install express-rate-limit)
+const rateLimit = require('express-rate-limit');
+const apiLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 100
+});
 
-    if (req.body.userRole === 'seller') {
-      // Upload to Cloudinary if userRole is 'seller'
-      const uniquePublicId = `Product_${uuidv4()}`;
-      uploadResult = await cloudinary.uploader.upload(req.body.prof, {
-        public_id: uniquePublicId,
-      });
-    } else {
-      // Use the provided value if not a seller
-      uploadResult = { secure_url: req.body.prof };
+// Input validation middleware
+const validateRegister = [
+  body('email').isEmail().normalizeEmail(),
+  body('password').isLength({ min: 8 }),
+  body('userRole').isIn(['seller', 'buyer' , 'client' ])
+];
+
+// Enhanced registration with security measures
+router.post('/register', apiLimiter, validateRegister, async (req, res, next) => {
+  try {
+    // Validate inputs
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ errors: errors.array() });
     }
 
-    // CHECK EXISTING USER
-    const checkUserQuery = "SELECT * FROM USER WHERE lastname = ? OR email = ?";
-    connection.query(checkUserQuery, [req.body.lastname, req.body.email], (err, data) => {
-      if (err) return next(err);
-      if (data.length) return next(createError(409, "User already exists"));
+    // Check existing user using prepared statement
+    const [existingUser] = await query(
+      "SELECT idUSER FROM USER WHERE email = ? LIMIT 1",
+      [req.body.email]
+    );
 
-      // Hash the password (placeholder, replace with bcrypt for security)
-      const hashedPassword = req.body.password;
+    if (existingUser) {
+      return next(createError(409, "User already exists"));
+    }
 
-      // Prepare the INSERT query
-      const insertUserQuery = `
-        INSERT INTO USER(
-          firstname, lastname, username, password, email, userRole, createdAt, userimg, subscription, prof
-        ) 
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`;
+    // Hash password with bcrypt
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(req.body.password, salt);
 
-      const currentDate = new Date().toISOString().slice(0, 19).replace('T', ' ');
+    // Handle image upload
+    let profileUrl = req.body.prof;
+    if (req.body.userRole === 'seller') {
+      const uniquePublicId = `Product_${uuidv4()}`;
+      const uploadResult = await cloudinary.uploader.upload(req.body.prof, {
+        public_id: uniquePublicId,
+        folder: 'user_profiles'
+      });
+      profileUrl = uploadResult.secure_url;
+    }
 
-      connection.query(
-        insertUserQuery,
-        [
-          req.body.firstname,
-          req.body.lastname,
-          req.body.username,
-          hashedPassword,
-          req.body.email,
-          req.body.userRole,
-          currentDate,
-          req.body.userimg,
-          req.body.subscription,
-          uploadResult.secure_url, // Use the secure URL or provided prof
-        ],
-        (err) => {
-          if (err) return next(err);
+    // Insert user with transaction
+    const insertResult = await query(
+      `INSERT INTO USER SET
+        firstname = ?,
+        lastname = ?,
+        username = ?,
+        password = ?,
+        email = ?,
+        userRole = ?,
+        createdAt = NOW(),
+        userimg = ?,
+        subscription = ?,
+        prof = ?`,
+      [
+        req.body.firstname,
+        req.body.lastname,
+        req.body.username,
+        hashedPassword,
+        req.body.email,
+        req.body.userRole,
+        req.body.userimg,
+        req.body.subscription,
+        profileUrl
+      ]
+    );
 
-          // Retrieve the newly created user's ID
-          const selectUserIdQuery = "SELECT idUSER FROM USER WHERE email = ?";
-          connection.query(selectUserIdQuery, [req.body.email], (err, data) => {
-            if (err) return next(err);
-            return res.status(201).json(data[0]);
-          });
-        }
-      );
+    // Return sanitized response
+    res.status(201).json({
+      id: insertResult.insertId,
+      email: req.body.email,
+      userRole: req.body.userRole
     });
+
   } catch (err) {
     next(err);
   }
 });
- 
 
-//LOGIN
-
-router.post('/login', async (req, res) => {
+// Secure login implementation
+router.post('/login', apiLimiter, async (req, res, next) => {
   try {
-      const sql = "SELECT * FROM user WHERE username = ?";
-      const values = [req.body.username];
-      const users = await query(sql, values);
+    // Input validation
+    if (!req.body.username || !req.body.password) {
+      return res.status(400).json("Missing credentials");
+    }
 
-      if (users.length === 0) {
-          return res.status(402).json("Wrong User Name");
-      }
+    // Find user with prepared statement
+    const [user] = await query(
+      "SELECT * FROM user WHERE username = ? LIMIT 1",
+      [req.body.username]
+    );
 
-      const user = users[0];
-      const hashedPassword = user.password; // Assuming the password is stored in the database in plaintext
-      const inputPassword = req.body.password;
+    if (!user) {
+      return res.status(401).json("Invalid credentials");
+    }
 
-      if (hashedPassword !== inputPassword) {
-          return res.status(401).json("Wrong Password");
-      }
+    // Verify password
+    const validPassword = await bcrypt.compare(req.body.password, user.password);
+    if (!validPassword) {
+      return res.status(401).json("Invalid credentials");
+    }
 
-      // Add logging before jwt.sign() function call
-      console.log("Generating JWT token...");
+    // Generate JWT
+    const accessToken = jwt.sign(
+      {
+        idUSER: user.idUSER,
+        userRole: user.userRole
+      },
+      process.env.JWT_ACCESSTOKEN,
+      { expiresIn: '3d' }
+    );
+    
 
-      // Generate a JWT token
-      const accessToken = jwt.sign(
-          { idUSER: user.idUSER, userRole: user.userRole },
-          process.env.JWT_ACCESSTOKEN,
-          { expiresIn: "3d" }
-      );
-      res.cookie("accessToken", accessToken, {
-        httpOnly: true,
-        maxAge: 7 * 24 * 60 * 60 * 1000
-      });
+    // Set secure cookie
+    res.cookie("accessToken", accessToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'strict',
+      maxAge: 7 * 24 * 60 * 60 * 1000 // 1 hour
+    });
 
-      
-      const { password, ...others } = user;
-      res.status(200).json({ accessToken, ...others }); // Send back the token and user data
+    // Return sanitized user data
+    const { password, ...safeUserData } = user;
+    res.status(200).json(safeUserData);
+
   } catch (err) {
-      res.status(400).json(err);
+    next(createError(500, "Authentication failed"));
   }
 });
 
-//LOGOUT
-
+// Secure logout
 router.post('/logout', (req, res) => {
   res
-    .cookie("accessToken", "", {
+    .clearCookie("accessToken", {
       httpOnly: true,
-      secure: true,
-      sameSite: "none",
-      expires: new Date(1),
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'strict'
     })
     .status(200)
-    .send("User has been logged out!");
+    .json({ message: "Successfully logged out" });
 });
+
 module.exports = router;
