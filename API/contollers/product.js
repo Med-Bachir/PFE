@@ -104,18 +104,44 @@ router.post(
 
 router.put("/update/:id", verifyTokenAndAuthorizationA_S, async (req, res) => {
   const { id } = req.params; // Extract id from params
-  const { price, discount, quantity } = req.body;
+  const { productname, productprice, discount, quantity, productimage, attributes, id_Category, id_SubCategory, id_Type } = req.body;
 
-  const updateQuery = "UPDATE PRODUCTS SET productprice = ?, discount = ? WHERE idPRODUCT = ?";
+  const updateQuery = "UPDATE PRODUCT SET productname = ? , productprice = ?, discount = ? , attributes = ? , productimage = ? ,id_Category = ? , id_SubCategory = ? , id_Type = ? WHERE idPRODUCT = ?";
   const updateQuantity = "UPDATE STOCK SET qte = ? WHERE id_Product = ?";
 
   try {
-    // Update the product price and discount
+    let uploadResult;
+
+    // If the product image is a base64 string, it's new and needs to be uploaded
+    if (productimage && !productimage.includes('cloudinary.com')) {
+      // Generate a unique public ID for the image
+      const uniquePublicId = `Product_${uuidv4()}`;
+      // Upload to Cloudinary
+      uploadResult = await cloudinary.uploader.upload(productimage, {
+        public_id: uniquePublicId,
+      });
+    } else {
+      // If the image is already hosted on Cloudinary, use the existing URL
+      uploadResult = { secure_url: productimage };
+    }
+
+    // Update the product details in the database
     await new Promise((resolve, reject) => {
-      connection.query(updateQuery, [price, discount, id], (err, result) => {
+      connection.query(updateQuery, [productname, productprice, discount, attributes, uploadResult.secure_url, id_Category, id_SubCategory, id_Type, id], (err, result) => {
         if (err) return reject(err);
         resolve(result);
       });
+    });
+    console.log("Update Query Parameters:", {
+      productname,
+      productprice,
+      discount,
+      attributes,
+      productimage: uploadResult.secure_url,
+      id_Category,
+      id_SubCategory,
+      id_Type,
+      id
     });
 
     // Update the product quantity in stock
@@ -128,11 +154,13 @@ router.put("/update/:id", verifyTokenAndAuthorizationA_S, async (req, res) => {
 
     // Respond with success
     res.status(200).json("Product Updated Successfully");
+
   } catch (error) {
     // Handle errors
     res.status(404).json({ message: error.message || "Product Not Found" });
   }
 });
+
 
 
 router.get("/all-products", verifyTokenAndAdmin, async (req, res) => {
@@ -147,7 +175,7 @@ router.get("/all-products", verifyTokenAndAdmin, async (req, res) => {
             p.productimage,
             p.discount,
             s.shopimage ,
-            c.categoryname AS categoryName,
+            c.name AS categoryName,
             s.idSHOP AS isshop,
             AVG(r.rate) AS avgRate
         FROM 
@@ -157,11 +185,11 @@ router.get("/all-products", verifyTokenAndAdmin, async (req, res) => {
         JOIN 
             SHOP s ON st.id_Shop = s.idSHOP
         JOIN 
-            CATEGORIES c ON p.id_Category = c.idCATEGORIES
+            CATEGORIES c ON p.id_Category = c.id
         LEFT JOIN 
             REVIEWS r ON p.idPRODUCT = r.id_Product
         GROUP BY 
-            p.idPRODUCT, p.productname, p.productprice, p.id_Category, s.shopimage, c.categoryname ,p.productimage , s.idSHOP , p.discount ;
+            p.idPRODUCT, p.productname, p.productprice, p.id_Category, s.shopimage, c.name ,p.productimage , s.idSHOP , p.discount ;
       `;
 
     connection.query(getAllProductsQuery, (err, products) => {
@@ -234,7 +262,7 @@ router.get(
           p.id_Type,
           p.attributes,
                  s.qte AS quantity,
-                 c.categoryname AS categoryName,
+                 c.name AS categoryName,
                  sh.shopname AS shopName,
                  su.name as subname ,
                  t.name as typename ,
@@ -242,7 +270,7 @@ router.get(
           FROM PRODUCT p
           JOIN STOCK s ON p.idPRODUCT = s.id_Product
           JOIN shop sh ON sh.idSHOP = s.id_Shop
-          JOIN CATEGORIES c ON p.id_Category = c.idCATEGORIES
+          JOIN CATEGORIES c ON p.id_Category = c.id
           JOIN types t ON p.id_Type = t.id
           JOIN SUBCATEGORIES su ON p.id_SubCategory = su.id
            LEFT JOIN 
@@ -252,7 +280,7 @@ router.get(
            p.productname ,
           p.productimage ,
           p.productprice ,
-          p.discount , c.categoryname , sh.shopname , su.name , t.name  , s.qte ,p.attributes  , p.id_Category,p.id_SubCategory, p.id_Type ;
+          p.discount , c.name , sh.shopname , su.name , t.name  , s.qte ,p.attributes  , p.id_Category,p.id_SubCategory, p.id_Type ;
       `;
       const getProductsValues = [sellerId];
 
@@ -330,7 +358,7 @@ router.get("/product/:productId", async (req, res) => {
 
     // Query to fetch the product by its ID
     const getProductQuery =
-      "SELECT p.* ,sh.idSHOP, sh.shopname ,c.categoryname , s.name as subname, t.name as typename FROM PRODUCT p ,shop sh  ,stock st, categories c , subcategories s , types t WHERE idPRODUCT = ? and p.id_Category = c.idCATEGORIES and s.id = p.id_SubCategory and t.id = p.id_Type and st.id_Product = p.idPRODUCT and st.id_Shop = sh.idSHOP ";
+      "SELECT p.* ,sh.idSHOP, sh.shopname ,c.name , s.name as subname, t.name as typename FROM PRODUCT p ,shop sh  ,stock st, categories c , subcategories s , types t WHERE idPRODUCT = ? and p.id_Category = c.id and s.id = p.id_SubCategory and t.id = p.id_Type and st.id_Product = p.idPRODUCT and st.id_Shop = sh.idSHOP ";
     const getProductValues = [productId];
 
     connection.query(getProductQuery, getProductValues, (err, product) => {
@@ -399,8 +427,8 @@ router.get("/:categoryName", async (req, res) => {
     const getProductsByCategoryQuery = `
           SELECT p.* 
           FROM PRODUCT p
-          JOIN CATEGORIES c ON p.id_Category = c.idCATEGORIES
-          WHERE c.categoryname = ?
+          JOIN CATEGORIES c ON p.id_Category = c.id
+          WHERE c.name = ?
       `;
     const getProductsByCategoryValues = [categoryName];
 
@@ -431,9 +459,9 @@ router.get("/:categoryName/:sub", async (req, res) => {
     const getProductsByCategoryQuery = `
       SELECT p.* 
       FROM PRODUCT p
-      JOIN CATEGORIES c ON p.id_Category = c.idCATEGORIES
+      JOIN CATEGORIES c ON p.id_Category = c.id
       JOIN SUBCATEGORIES s ON p.id_SubCategory = s.id
-      WHERE c.categoryname = ? AND s.name = ? + '\n'
+      WHERE c.name = ? AND s.name = ? + '\n'
     `;
 
     connection.query(
@@ -463,10 +491,10 @@ router.get("/:categoryName/:sub/:type", async (req, res) => {
     const getProductsByCategoryQuery = `
       SELECT p.* 
       FROM PRODUCT p
-      JOIN CATEGORIES c ON p.id_Category = c.idCATEGORIES
+      JOIN CATEGORIES c ON p.id_Category = c.id
       JOIN SUBCATEGORIES s ON p.id_SubCategory = s.id
       JOIN TYPES t ON p.id_Type = t.id
-      WHERE c.categoryname = ? AND s.name = ? + '\n' AND t.name = ?
+      WHERE c.name = ? AND s.name = ? + '\n' AND t.name = ?
     `;
 
     connection.query(
@@ -515,7 +543,7 @@ router.get("/similar-products/:productId", (req, res) => {
             p.productimage,
             p.productcolor,
             p.productsize,
-            c.categoryname,
+            c.name,
             c.categoryimage,
             s.id_Shop,
             s.qte
@@ -524,7 +552,7 @@ router.get("/similar-products/:productId", (req, res) => {
         INNER JOIN 
             STOCK s ON p.idPRODUCT = s.id_Product
         INNER JOIN 
-            CATEGORIES c ON p.id_Category = c.idCATEGORIES
+            CATEGORIES c ON p.id_Category = c.id
         WHERE
             p.idPRODUCT = ?;
     `;
@@ -554,7 +582,7 @@ router.get("/similar-products/:productId", (req, res) => {
                 p.productimage,
                 p.productcolor,
                 p.productsize,
-                c.categoryname,
+                c.name,
                 c.categoryimage,
                 s.id_Shop,
                 s.qte
@@ -563,7 +591,7 @@ router.get("/similar-products/:productId", (req, res) => {
             INNER JOIN 
                 STOCK s ON p.idPRODUCT = s.id_Product
             INNER JOIN 
-                CATEGORIES c ON p.id_Category = c.idCATEGORIES
+                CATEGORIES c ON p.id_Category = c.id
             WHERE
                 p.idPRODUCT != ?;
         `;

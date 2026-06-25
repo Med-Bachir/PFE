@@ -48,7 +48,7 @@ function IconContainer(props) {
 
 export default function RadioGroupRating({rate , theme}) {
   return (
-    <Tooltip arrow title={""}>
+    <Tooltip  arrow title={""}>
 
     <StyledRating
       name="highlight-selected-only"
@@ -56,7 +56,7 @@ export default function RadioGroupRating({rate , theme}) {
       IconContainerComponent={IconContainer}
       getLabelText={(rate) => customIcons[rate]?.label}
       highlightSelectedOnly
-sx={{bgcolor: theme == "light" ? '' : colorElementBackgroundGray , padding:'2px 4px' , borderRadius:4}}
+sx={{ mt:'-20px',  bgcolor: theme == "light" ? '' : colorElementBackgroundGray , padding:'2px 4px' , borderRadius:4}}
       readOnly
       />
       </Tooltip>

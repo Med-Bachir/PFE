@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom'
 import styled from 'styled-components'
 import RadioGroupRating from './rating'
 import { colorPrimaryBlack, primaryTextColor, whiteTextColor } from '../Colors'
+import LazyAvatar from './Pending/LazyAvatar'
 
 
 
@@ -82,7 +83,9 @@ const ShopProduct = ({name , price , discount , id , image , rate , theme}) => {
   return (
     <Product theme={theme}>
         {discount == 0 ? '' : <Discount>{discount}%</Discount>}
-    <ProductImage src={image} />
+    
+    <LazyAvatar src={image} sx={{ width:'100%', height:300  , borderRadius:0 , objectFit:'fill' , bgcolor:'transparent'}} />
+
     <RateContainer>
     <Name>{name}</Name>
     <RadioGroupRating rate={rate}/>

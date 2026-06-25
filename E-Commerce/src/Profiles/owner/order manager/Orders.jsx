@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from "react";
 import styled from "styled-components";
-import { colorAccentDark, colorAccentDarkTransparent, colorAccentLight, colorAccentMain, colorAccentMedium, colorAccentMediumTransparent, colorAccentSoft, colorAccentSoftTransparent, colorAccentSub, colorAccentSubDark, colorAccentTransparent, colorErrorDark, colorErrorSoft, colorHighlightDarkYellow, colorHighlightSoftYellow, colorPrimaryBlack, colorWarningDark, colorWarningSoft, darkOrange, darkYellow, gradientBackground, grayBackground, lightSoftMain, main, primaryTextColor, softOrange, softRed, softYellow, subColumnMain, whiteTextColor } from "../../../Colors";
+import { colorAccentDark, colorAccentDarkTransparent, colorAccentLight, colorAccentMain, colorAccentMedium, colorAccentMediumTransparent, colorAccentSoft, colorAccentSoftTransparent, colorAccentSub, colorAccentSubDark, colorAccentTransparent, colorElementBackgroundGray, colorErrorDark, colorErrorSoft, colorHighlightDarkYellow, colorHighlightSoftYellow, colorPrimaryBlack, colorWarningDark, colorWarningSoft, darkOrange, darkYellow, elementGrayBackground, gradientBackground, grayBackground, lightMain, lightSoftMain, main, primaryTextColor, secondText, softOrange, softRed, softYellow, subColumnMain, whiteTextColor } from "../../../Colors";
 import newRequest from "../../../utils/newRequest";
-import { Avatar, Divider, FormControl, FormControlLabel, IconButton, InputLabel, MenuItem, Select, Switch, Tooltip } from "@mui/material";
+import { Avatar, Divider, FormControl, FormControlLabel, FormLabel, IconButton, InputLabel, MenuItem, Radio, RadioGroup, Select, Switch, Tooltip } from "@mui/material";
 import EditTwoToneIcon from "@mui/icons-material/EditTwoTone";
 import DeleteTwoToneIcon from "@mui/icons-material/DeleteTwoTone";
 import MoreHorizTwoToneIcon from "@mui/icons-material/MoreHorizTwoTone";
@@ -13,6 +13,7 @@ import me from "../../../assets/Lotties/Animation - 1716145973359.json"
 import { useSelector } from "react-redux";
 import EmptyData from "../../../Components/Pending/EmptyData";
 import Loading from "../../../Components/Pending/Loading";
+import LazyAvatar from "../../../Components/Pending/LazyAvatar";
 const Container = styled.div`
  
   padding: 32px;
@@ -183,6 +184,8 @@ const rowTag = [
 
 const rowTagProduct = ["Product", "Color", "Size","Status","Current Place" ,"Quantity", "Price" , "Actions"];
 
+
+
 const Orders = () => {
   const user = useSelector((state) => state.user?.currentUser);
   const theme = useSelector((state) => state.theme.mode);
@@ -203,6 +206,11 @@ const Orders = () => {
     Arrived: false,
   });
 
+  const [rows , setRows] = useState([]);
+
+
+
+  
   const getOrders = async () => {
     try {
       let endpoint = `/orders/client/orders/${user?.idUSER}`;
@@ -212,31 +220,42 @@ const Orders = () => {
       }
       const res = await newRequest.get(endpoint);
       setOrders(res.data);
+      setRows(res.data)
       setLoading(true)
     } catch (err) {
       console.error("Error fetching orders:", err);
     } finally {
       setTimeout(() => {
-
+        
         setLoading(false)
       }, [1000])
-      }
+    }
   };
   
-  useEffect(() => {
- 
-    getOrders();
-  }, [state]);
-
   
-
+  
+  const requestSearch = (searchedVal) => {
+    
+    const filteredRows = orders?.filter((row) => {
+      return (row.status?.toLowerCase()).includes(searchedVal == "All" ? "" : searchedVal?.toLowerCase());
+    });
+    setRows(filteredRows);
+  };
+  
   const handleToggleOrderDetails = (orderId) => {
     setSelectedOrderId(selectedOrderId === orderId ? null : orderId);
   };
+  
+  useEffect(() => {
+    
+    getOrders();
+    requestSearch("All")
 
+  },[]);
   const handleChange = (event) => {
     setState((prev) => ({ ...prev, [event.target.name]: event.target.checked }));
   };
+  
 
   const handleUpdate = async (index, type, id, userId , owner) => {
     if (type === "submit") {
@@ -274,23 +293,64 @@ const Orders = () => {
     }
   };
 
+  
+const customTextField = {
+  minWidth: 80, width: "80%"  , bgcolor:theme == "light" ? whiteTextColor : colorAccentMediumTransparent , borderRadius:1,
+  
+
+                "& .MuiOutlinedInput-root": {
+                  
+                  "&:hover fieldset": {
+                    borderColor: theme == "light" ? lightMain : colorAccentSoft, // Hover border color
+                  },
+                  "&.Mui-focused fieldset": {
+                    borderColor: theme == "light" ? main : colorAccentMedium, // Focused border color
+                  },
+                },
+                "& .MuiInputLabel-root": {
+                  color: secondText, // Default label color
+                },
+                "& .MuiInputLabel-root.Mui-focused": {
+                  color: theme == "light" ? main : colorAccentMain, // Focused label color
+                },
+                "& .MuiInputLabel-root.Mui-error": {
+                  color: "orange", // Error label color
+                },
+            ".css-1n4twyu-MuiInputBase-input-MuiOutlinedInput-input" : { color : theme == "light" ? primaryTextColor : elementGrayBackground}
+              
+  };
   return (
     <Container>
       <AlertMessage open={open} setOpen={setOpen} message={message} type={type} />
       <FilterContainer theme={theme}>
         <Title>Filter Orders</Title>
         <FilterList>
-          {["Waiting", "On Way", "Arrived"].map((status) => (
-            <FormControlLabel
-              key={status}
-              value={status}
-              control={<Switch color="success" sx={{".css-1yjjitx-MuiSwitch-track": {backgroundColor: theme == "light" ? softRed : colorErrorDark } , ".css-1xvpzln-MuiButtonBase-root-MuiSwitch-switchBase.Mui-checked" : {color:colorAccentMain} , ".css-1xvpzln-MuiButtonBase-root-MuiSwitch-switchBase.Mui-checked+.MuiSwitch-track " :{backgroundColor: colorAccentTransparent}}} />}
-              label={status}
-              labelPlacement="start"
-              name={status}
-              onChange={handleChange}
-            />
-          ))}
+            <FormControl
+              sx={{width:"100%" }}
+            >
+            <RadioGroup
+              aria-labelledby="demo-radio-buttons-group-label"
+              defaultValue="All"
+              name="radio-buttons-group"
+              row
+              sx={{display:'flex' , justifyContent:'space-between' }}
+              >
+              {[ "All" , "Waiting", "On Way", "Arrived" ].map((status) => (
+                
+              <FormControlLabel value={status} onChange={() => requestSearch(status)} control={<Radio   sx={{
+                color:main ,
+                
+                '&.Mui-checked': {
+                  color: main,
+                 
+                },
+              }} />} label={status} />
+
+                
+            ))}
+            </RadioGroup>
+          </FormControl>
+           
         </FilterList>
       </FilterContainer>
       <ListContainer theme={theme}>
@@ -302,14 +362,14 @@ const Orders = () => {
           ))}
         </Tags>
         {orders && !loading && orders.length > 0 ? (
-          orders.map((order, index) => (
+          (rows == [] ? orders : rows).map((order, index) => (
             <div theme={theme} key={index}>
               <Order theme={theme}>
                 <Informations type="ID">#{order?.orderId}</Informations>
                 <Informations>0{order?.phone}</Informations>
                 <Informations >
                 {edited === index ? (
-                    <FormControl  sx={{ minWidth: 80, width: "80%"  , bgcolor:theme == "light" ? whiteTextColor : colorAccentMediumTransparent , borderRadius:1 }} size="small">
+                    <FormControl  sx={customTextField} size="small">
                       <InputLabel sx={{color : theme == "light" ?  primaryTextColor : whiteTextColor}} >Places</InputLabel>
                       <Select
                       sx={{color : theme == "light" ?  primaryTextColor : whiteTextColor }}
@@ -332,7 +392,7 @@ const Orders = () => {
                 </Informations>
                 <Informations>
                 {edited === index ? (
-                      <FormControl  sx={{ minWidth: 80, width: "80%"  , bgcolor:theme == "light" ? whiteTextColor : colorAccentMediumTransparent , borderRadius:1 }}  size="small">
+                      <FormControl  sx={customTextField}  size="small">
                       <InputLabel sx={{color : theme == "light" ?  primaryTextColor : whiteTextColor}}>Status</InputLabel>
                       <Select
                       sx={{color : theme == "light" ?  primaryTextColor : whiteTextColor }}
@@ -397,10 +457,10 @@ const Orders = () => {
                 {order?.products.map((product, index) => (
                   <Details theme={theme} key={index}>
                     <Detail type="Product">
-                      <Avatar
-                        src={product.image}
-                        sx={{ borderRadius: 2, width: 50, height: 50, mr: 4 }}
-                      />
+                    <LazyAvatar
+  src={product.image}
+  sx={{ borderRadius: 2, width: 50, height: 50, mr: 4 , backgroundColor:'transparent' , border : '1px solid' , borderColor : theme === "light" ? elementGrayBackground : colorElementBackgroundGray}}
+/>
                       {product.name}
                     </Detail>
                     <Detail>
@@ -416,7 +476,7 @@ const Orders = () => {
                     <Detail>
 
                      
-                    <Status status={product?.status}>{product?.status}</Status>
+                    <Status theme={theme} status={product?.status}>{product?.status}</Status>
                   
                   </Detail>
                   <Detail>

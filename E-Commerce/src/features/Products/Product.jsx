@@ -4,11 +4,13 @@ import { Link } from "react-router-dom";
 import { Skeleton } from "@mui/material";
 import { useEffect, useState } from "react";
 import RadioGroupRating from "../../Components/rating";
-import { primaryTextColor, whiteTextColor , secondaryTextColor , main, grayBackground, colorElementBackgroundGray, colorBackgroundGray, colorPrimaryBlack, colorAccentDarkTransparent, colorBackgroundBlack, colorAccentLight, colorAccentMedium, colorAccentMediumTransparent } from "../../Colors";
+import LazyAvatar from "../../Components/Pending/LazyAvatar";
+import { primaryTextColor, whiteTextColor , secondaryTextColor , main, grayBackground, colorElementBackgroundGray, colorBackgroundGray, colorPrimaryBlack, colorAccentDarkTransparent, colorBackgroundBlack, colorAccentLight, colorAccentMedium, colorAccentMediumTransparent, elementGrayBackground, colorAccentMain } from "../../Colors";
 
 const Container = styled.div`
   display: flex;
-  width: 100%;
+  width: calc(33.33% - 15px);
+  min-width: 200px ;
   max-height: 500px;
   padding: 20px;
   flex-direction: column;
@@ -21,21 +23,40 @@ const Container = styled.div`
     box-shadow:${props => props.theme == 'light' ? 'rgba(0, 0, 0, 0.1) 0px 4px 6px -1px , rgba(0, 0, 0, 0.06) 0px 2px 4px -1px;': 'rgba(56, 56, 56, 0.1) 0px 4px 6px -1px , rgba(56, 56, 56, 0.06) 0px 2px 4px -1px;'};
   }
   
+  @media (max-width: 1000px) {
+
+width: calc(50% - 15px);
+  min-width: 200px ;
+    height: 45vh;
+  }
+  @media (max-width: 445px) {
+    width: calc(50% - 7px);
+    height: 40vh;
+  min-width: 150px;
+  padding:12px;
+  }
+  @media (max-width: 320px) {
+    width: calc(50% - 12px);
+    height: 40vh;
+  min-width: 100px;
+  padding:12px;
+  }
 
 `;
 const ImageContainer = styled.div`
   flex: 1;
   display: flex;
   justify-content: center;
+  align-items: center;
   position: relative;
   contain: paint;
+  @media (max-width: 600px) {
+height: 60%;
+  
+  }
 `
-const Image = styled.img`
-height: 300px;
-width: 100%;
-  object-fit: contain;
 
-`;
+
 
 const InfoContainer = styled.div`
   flex: 1;
@@ -53,12 +74,21 @@ color: ${props => props.theme == 'light' ? primaryTextColor : grayBackground };
   font-size: 20px;
   margin: 20px 0;
   max-width: 350px;
-  contain: paint;
+  
   
 
   white-space: nowrap;        /* Prevents text from wrapping to a new line */
   overflow: hidden;           /* Hides overflowed text */
-  text-overflow: ellipsis;    /* Adds ellipsis (...) to indicate overflow */
+  text-overflow: ellipsis;
+   /* Adds ellipsis (...) to indicate overflow */
+   @media (max-width: 600px) {
+
+font-size:16px;
+} 
+@media (max-width: 445px) {
+   font-size: 16px;
+   margin:12px 0 20px;
+  }
 `;
 
 const PriceContainer = styled.p`
@@ -66,7 +96,7 @@ const PriceContainer = styled.p`
   justify-content: space-between;
   align-items: center;
   margin-top: auto;
-  
+
 `;
 
 const Price = styled.p`
@@ -76,25 +106,48 @@ const Price = styled.p`
   font-size: ${({ discount }) => (discount > 0 ? "15px" : "")};
   text-decoration: ${({ discount }) =>
     discount > 0 ? "line-through" : "none"};
+     @media (max-width: 600px) {
+font-size: 14px;
+} 
+@media (max-width: 425px) {
+font-size: 10px;
+} 
+@media (max-width: 320px) {
+    font-size: 8px;
+  }
 `;
 
 const NewPrice = styled.p`
   font-size: 20px;
+  @media (max-width: 600px) {
+
+font-size: 16px;
+} 
+@media (max-width: 425px) {
+
+font-size: 14px;
+} 
+@media (max-width: 320px) {
+    font-size: 10px;
+  }
 
   color: ${({ discount }) => (discount > 0 ? "" : primaryTextColor)};
 `;
 
 const Discount = styled.span`
   display: ${({ discount }) => (discount > 0 ? "inline-block" : "none")};
-  background-color: ${props => props.theme == 'light' ? main : colorAccentMediumTransparent };
+  background-color: ${props => props.theme == 'light' ? main : colorAccentMedium };
   padding: 5px 7px;
   border-radius: 4px;
+  width: 50px;
+  text-align: center;
   color: ${whiteTextColor};
   font-weight: 500;
   font-size: 14px;
   position: absolute;
   right: 0;
   top: 0;
+  z-index: 99;
 `;
 
 const AddToCart = styled.span`
@@ -121,6 +174,9 @@ const RateContainer = styled.div`
 display: flex;
 align-items: center;
 justify-content: space-between;
+@media (max-width: 600px) {
+  flex-direction: column;
+} 
 `
 
 
@@ -184,14 +240,18 @@ const Product = ({ id, productname, productprice, productimage, discount , rate 
             {discount > 0 && (
               <Discount theme={theme}  discount={discount}>{discount}%</Discount>
             )}
-            <Image src={productimage} />
+               <LazyAvatar
+  src={productimage}
+  sx={{ objectFit:'contain',borderRadius: 2, width: "100%", height:' 300px' , bgcolor:'transparent'}}
+/>
+           
           </ImageContainer>
 
           <InfoContainer>
             <RateContainer>
 
             <Title theme={theme}>{productname}</Title>
-            <RadioGroupRating theme={theme} rate={rate} />
+            <RadioGroupRating theme={theme} rate={rate}  />
             </RateContainer>
             
 

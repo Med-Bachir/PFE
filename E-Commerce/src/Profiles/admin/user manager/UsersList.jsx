@@ -1,4 +1,4 @@
-import { Avatar, Divider, IconButton } from "@mui/material";
+import { Avatar, Box, Divider, IconButton, Pagination } from "@mui/material";
 import React, { useEffect, useState } from "react";
 import styled from "styled-components";
 import DeleteIcon from "@mui/icons-material/Delete";
@@ -8,8 +8,10 @@ import newRequest from "../../../utils/newRequest";
 import AlertMessage from "../../../Components/Alert";
 import Loading from "../../../Components/Pending/Loading";
 import EmptyData from "../../../Components/Pending/EmptyData";
-import { colorAccentDark, colorAccentDarkTransparent, colorAccentLight, colorAccentMain, colorAccentMedium, colorAccentMediumTransparent, colorAccentSoft, colorAccentSub, colorAccentSubDark, colorAccentTransparent, colorPrimaryBlack, darkRed, lightMain, main, primaryTextColor, whiteTextColor } from "../../../Colors";
+import { colorAccentDark, colorAccentDarkTransparent, colorAccentLight, colorAccentMain, colorAccentMedium, colorAccentMediumTransparent, colorAccentSoft, colorAccentSub, colorAccentSubDark, colorAccentTransparent, colorBackgroundBlack, colorPrimaryBlack, darkRed, grayBackground, lightMain, main, primaryTextColor, whiteTextColor } from "../../../Colors";
 import { useSelector } from "react-redux";
+import PersonSearchIcon from '@mui/icons-material/PersonSearch';
+import SearchComponent from "../../../features/Search";
 
 
 
@@ -140,6 +142,28 @@ const Text = styled.span`
 flex: 1;
 
 `;
+const Search = styled.div`
+width: 50%;
+display: flex;
+justify-content: space-between;
+height: 40px;
+border-radius: 4px;
+border: 1px solid ${props => props.theme == "light" ? grayBackground : colorBackgroundBlack};
+background-color:${props => props.theme == "light" ? whiteTextColor : colorPrimaryBlack};
+
+`
+const Input = styled.input`
+border: none;
+outline: none;
+width: 90%;
+padding: 0 16px;
+font-size: 16px;
+
+background-color:${props => props.theme == "light" ? whiteTextColor : colorAccentDarkTransparent};
+color:${props => props.theme == "light" ?primaryTextColor : whiteTextColor};
+
+`
+  
 const UsersList = () => {
   const theme = useSelector(state => state.theme.mode)
   const [users, setUsers] = useState([]);
@@ -147,12 +171,14 @@ const UsersList = () => {
   const [type, setType] = useState("");
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
-
+const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 10; // Number of shops per page
 
   const getUsers = async () => {
     try {
       const res = await newRequest.get("/users");
       setUsers(res.data);
+      setFilteredRows(res.data)
       setLoading(true)
     } catch (err) {
       console.error("Error fetching users:", err);
@@ -184,13 +210,33 @@ const UsersList = () => {
       console.error("Error deleting user:", error.response?.data?.error || error.message);
     }
   };
+
+
+   const [filteredRows, setFilteredRows] = useState([]);
+  
+  
+    const handleSearchResults = (rows) => {
+      setFilteredRows(rows); // Update filtered rows in parent
+      setCurrentPage(1)
+    };
+
+    const paginatedRows = filteredRows.slice(
+      (currentPage - 1) * itemsPerPage,
+      currentPage * itemsPerPage
+    );
+  
+    const handlePageChange = (event, value) => {
+      setCurrentPage(value);
+    };
+  
   return (
     <Container>
       <AlertMessage open={open} setOpen={setOpen} message={message} type={type} />
 
-    <StaticContainer theme={theme} >
-  <StaticTitle theme={theme}>All Users</StaticTitle>
-    </StaticContainer>
+      <StaticContainer theme={theme} style={{padding:'20px 20px 20px 0', display:'flex',alignItems:'center' , flexDirection:'row' , justifyContent:'space-between'}}>
+<SearchComponent data={users} onSearch={handleSearchResults} type={'Users'} />
+        
+      </StaticContainer>
   
   
 
@@ -205,8 +251,8 @@ const UsersList = () => {
   
           <ColumnTag style={{ border: "none", flex: 1 }}>Action</ColumnTag>
         </Row>
-        {users !="" && !loading ?
-        users.map((item) => (
+        {paginatedRows.length > 0 && !loading ? 
+          paginatedRows.map((item) => (
           <>
           <Row theme={theme} key={item.idUSER} type={"normal"}>
           <Column   style={{flex:1}}>
@@ -225,7 +271,8 @@ const UsersList = () => {
                 </ColumnInfo>
               </Column>
               
-              <Column><Avatar src={item.userimg == null ? 'e' : item.userimg} alt={item.username} sx={{bgcolor:theme == "light" ? main : colorAccentTransparent}} />{item.username}</Column>
+              <Column>
+              <Avatar src={item.userimg == null ? 'e' : item.userimg} alt={item.username} sx={{bgcolor:theme == "light" ? main : colorAccentTransparent}} />{item.username}</Column>
               <Column style={{ textAlign:'left' }}><Text>{item.email}</Text></Column>
               <Column style={{alignItems: "center" ,flex:1}}>
                 {" "}
@@ -261,6 +308,24 @@ const UsersList = () => {
         <EmptyData />
       }
       </Table>
+      <Box sx={{display:'flex' , alignContent:'center' , justifyContent:'center' , mt:2}}>
+
+<Pagination
+  count={Math.ceil((filteredRows?.length > 0 ? filteredRows?.length : users?.length) / itemsPerPage)}
+  page={currentPage}
+  onChange={handlePageChange}
+  sx={{
+    ".css-yuzg60-MuiButtonBase-root-MuiPaginationItem-root": {
+      backgroundColor: theme === 'light' ? lightMain : colorAccentDarkTransparent,
+      color: theme === "light" ? main : colorAccentMain
+    },
+    ".css-yuzg60-MuiButtonBase-root-MuiPaginationItem-root.Mui-selected" : {
+      backgroundColor: theme === 'light' ? main : colorAccentMain,
+      color: whiteTextColor 
+    }
+  }}
+  />
+  </Box>
         </Container>
   )
 }

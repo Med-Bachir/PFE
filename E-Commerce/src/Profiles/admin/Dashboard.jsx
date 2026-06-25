@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 
 import styled from "styled-components";
 
-import { Divider, Rating } from "@mui/material";
+import { Avatar, Divider, Rating } from "@mui/material";
 import ItemContainer from "../../Components/ItemContainer";
 import LineChart from "../../Components/charts/LineChart";
 import { useSelector } from "react-redux";
@@ -14,7 +14,9 @@ import me from "../../assets/Lotties/Animation - 1716145973359.json";
 import BarChart from "../../Components/charts/BarChart";
 import Lottie from "lottie-react";
 import Loading from "../../Components/Pending/Loading";
-import { colorAccentMain, colorAccentMediumTransparent, colorAccentSoftTransparent, colorBackgroundBlack, colorPrimaryBlack, grayBackground, lightMain, lightSoftMain, main, medMain, primaryTextColor, secondaryTextColor, secondText, transparentMain, whiteTextColor } from "../../Colors";
+import { colorAccentMain, colorAccentMediumTransparent, colorAccentSoftTransparent, colorBackgroundBlack, colorErrorDark, colorErrorSoft, colorHighlightDarkYellow, colorPrimaryBlack, colorWarningDark, darkMain, darkOrange, darkRed, darkYellow, grayBackground, lightMain, lightSoftMain, main, medMain, primaryTextColor, secondaryTextColor, secondText, softMain, softRed, transparentMain, whiteTextColor } from "../../Colors";
+import DoughnutChart from "../../Components/charts/DoughnutChart";
+import LazyAvatar from "../../Components/Pending/LazyAvatar";
 
 
 
@@ -237,12 +239,7 @@ const ListItemConatiner = styled.div`
 }
 `;
 const ItemImage = styled.img`
-  border: 1px solid ${props => props.theme == "light" ? grayBackground : colorBackgroundBlack};
-  padding: 8px;
-  width: 48px;
-  height: 48px;
-  object-fit: contain;
-  border-radius: 8px;
+ 
 `;
 const ItemDesc = styled.div`
   flex: 7;
@@ -342,28 +339,45 @@ const AdminPf = () => {
       try {
         const res = await newRequest.get("/stats/stats");
         const stats = res.data;
+
         const labels = stats.map((stat) => `${stat.month}`);
-        const data = stats.map((stat) =>
-          stat.total == 0 ? stat.total : stat.total - 1
-        );
+        const clientData = stats.map((stat) => stat.totalClients);
+        const ownerData = stats.map((stat) => stat.totalSellers);
 
         setUserData({
           labels,
           datasets: [
             {
               label: "New Users",
-              data,
-              backgroundColor: "#00e1b4b4",
+              data: clientData,
+              borderColor: theme == "light" ? main : colorAccentMain,
+              backgroundColor: theme == "light" ? `${main}6e` : `${colorAccentMain}6e`,
+              borderRadius: 5,
+              borderWidth:2
+            },
+            {
+              label: "New Owners",
+              data: ownerData,
+              borderColor: theme == "light" ? darkRed : colorErrorDark,
+              backgroundColor: theme == "light" ? softRed : colorErrorSoft,
+              borderRadius: 5,
+              borderWidth:2
             },
           ],
         });
       } catch (err) {
         console.error("Failed to fetch statistics", err);
+      } finally {
+        setLoading(false);
       }
     };
+
+ 
+  
     const fetchIncomeStats = async () => {
       try {
         const res = await newRequest.get(`/seller/seller/${user?.idUSER}/monthly-revenue`);
+        const resTaxes = await newRequest.get(`/stats/monthly-revenue`);
         const topRatedRes = await newRequest.get("/stats/top-rated-products");
         const topSold = await newRequest.get("/stats/top-sold-products-admin");
         const allStats = await newRequest.get("/stats/all-stats");
@@ -379,19 +393,33 @@ const AdminPf = () => {
         setLoading(true);
         setProdS(topSold.data);
         setProd(topRatedRes.data);
-
+       
         const stats = res.data;
+        const taxesStats = resTaxes.data;
 
         const labels = stats.map((stat) => `${stat.month}`);
-        const data = stats.map((stat) => stat.monthlyRevenue);
+        const incomData = stats.map((stat) => stat.monthlyRevenue);
+        const taxesData = taxesStats.map((stat) => stat.monthlyRevenue);
 
         setIncomData({
           labels,
           datasets: [
             {
-              label: "Incom",
-              data,
-              backgroundColor: "#00e1b4b4",
+              label: "Orders Incom",
+              data : incomData,
+              backgroundColor: theme === "light" ? `${main}6e` : `${colorAccentMain}6e` ,
+              fill: true ,
+              tension: 0.3,
+              order:2
+            },
+            {
+              label: "Tax Incom",
+              data : taxesData,
+              borderColor: theme === "light" ? `${darkRed}` : `${colorErrorDark}` ,
+              backgroundColor: theme === "light" ? `${darkRed}6e` : `${colorErrorDark}9b` ,
+              fill: true ,
+              tension: 0.3,
+              order:1
             },
           ],
         });
@@ -416,9 +444,33 @@ const AdminPf = () => {
     fetchIncomeStats();
    
   }, []);
-
- 
-
+  const orderStats = {
+    labels: ["Total Orders","Waiting Orders", "On Way Orders", "Arrived Orders"], // Inner circle labels
+    datasets: [
+      {
+        
+        data: [stats.totalOrdersFromOwner ,0 ,0 ,0], // Total orders only
+        backgroundColor:  theme === "light" ? [ "#b20dbb6e",`${darkOrange}6e`, `${darkYellow}6e`, `${main}6e`] : [ "#5e05636e",`${colorWarningDark}6e`, `${colorHighlightDarkYellow}6e`, `${colorAccentMain}6e`], // Single color for the total orders
+        borderColor:  theme === "light" ? [ "#b20dbb",`${darkOrange}`, `${darkYellow}`, `${main}`] : [ "#5e0563",`${colorWarningDark}`, `${colorHighlightDarkYellow}`, `${colorAccentMain}`], // Single color for the total orders
+        hoverBackgroundColor:theme === "light" ? [ "#b20dbb",`${darkOrange}`, `${darkYellow}`, `${main}`] : [ "#5e0563",`${colorWarningDark}`, `${colorHighlightDarkYellow}`, `${colorAccentMain}`], // Hover color
+         // Leave space for the inner circle
+        // Full size for the outer circle
+      },
+      {
+      
+        data: [0,stats.WaitingOrders, stats.OnWayOrders, stats.ArrivedOrders], // Waiting, On Way, Arrived
+        borderColor:  theme === "light" ? ["#b20dbb",`${darkOrange}`, `${darkYellow}`, `${main}`] : ["#5e0563",`${colorWarningDark}`, `${colorHighlightDarkYellow}`, `${colorAccentMain}`], // Single color for the total orders
+        backgroundColor: theme === "light" ? ["#b20dbb6e",`${darkOrange}6e`, `${darkYellow}6e`, `${main}6e`] : ["#5e05636e",`${colorWarningDark}6e`, `${colorHighlightDarkYellow}6e`, `${colorAccentMain}6e`], // Different colors for each category
+        hoverBackgroundColor:theme === "light" ? ["#b20dbb",`${darkOrange}`, `${darkYellow}`, `${main}`] : ["#5e0563",`${colorWarningDark}`, `${colorHighlightDarkYellow}`, `${colorAccentMain}`], // Hover colors
+         // Smaller size for the inner circle
+         // Ensures it stays inside the outer circle
+         radius: "90%", 
+      },
+    ],
+  };
+  
+  
+  
   const handleClick = (buttonName) => {
     setActiveButton(buttonName);
   };
@@ -459,48 +511,7 @@ const AdminPf = () => {
       </StaticContainer>
 
       <StaticContainer theme={theme}>
-        <StaticButContainer>
-          <StaticTitle theme={theme}>Incom</StaticTitle>
-          <ButtonGroup theme={theme}>
-            <Button
-              onClick={() => handleClick("Today")}
-              style={{
-                color: activeButton === "Today" ? theme == "light" ? main : colorAccentMain : theme == "light" ? primaryTextColor : whiteTextColor,
-                backgroundColor: activeButton === "Today" ? theme == 'light' ? lightSoftMain : colorAccentSoftTransparent : "",
-              }}
-            >
-              Today
-            </Button>
-            <Button
-              onClick={() => handleClick("Weakly")}
-              style={{
-                color: activeButton === "Weakly" ? theme == "light" ? main : colorAccentMain : theme == "light" ? primaryTextColor : whiteTextColor,
-                backgroundColor: activeButton === "Weakly" ? theme == 'light' ? lightSoftMain : colorAccentSoftTransparent : "",
-              }}
-            >
-              Weekly
-            </Button>
-            <Button
-              onClick={() => handleClick("Monthly")}
-              style={{
-                color: activeButton === "Monthly" ? theme == "light" ? main : colorAccentMain : theme == "light" ? primaryTextColor : whiteTextColor,
-                backgroundColor: activeButton === "Monthly" ? theme == 'light' ? lightSoftMain : colorAccentSoftTransparent : "",
-              }}
-            >
-              Monthly
-            </Button>
-            <Button
-              onClick={() => handleClick("Yearly")}
-              style={{
-                color: activeButton === "Yearly" ? theme == "light" ? main : colorAccentMain : theme == "light" ? primaryTextColor : whiteTextColor,
-                backgroundColor: activeButton === "Yearly" ? theme == 'light' ? lightSoftMain : colorAccentSoftTransparent : "",
-              }}
-            >
-              Yearly
-            </Button>
-          </ButtonGroup>
-        </StaticButContainer>
-
+      <StaticTitle>Incoms</StaticTitle>
         <Statics theme={theme}>
           <ItemContainer
             color="red"
@@ -550,7 +561,7 @@ const AdminPf = () => {
 
       <StaticContainer theme={theme}>
         <StaticButContainer>
-          <StaticTitle theme={theme}>Incom</StaticTitle>
+          <StaticTitle theme={theme}>Orders</StaticTitle>
           <ButtonGroup theme={theme}>
             <Button
               onClick={() => handleClick("Today")}
@@ -624,23 +635,28 @@ const AdminPf = () => {
           />
         </Statics>
       </StaticContainer>
+<Charts >
 
-      <StaticContainer theme={theme} style={{ paddingBottom: 0 }}>
+      <StaticContainer theme={theme} style={{margin: isMobile ? 0 : "16px 0" , paddingBottom: 0 ,width: isMobile ? '100%' : "70%"  }}>
         <StaticButContainer>
           <StaticTitle theme={theme}>RECENT SHOPS REQUEST</StaticTitle>
           <ItemIcon
-            style={{ backgroundColor: "transparent", width: 80 }}
+            style={{ backgroundColor: "transparent", width: 80 , display: isMobile ? 'none' : ""  }}
             src="../shop.png"
-          />
+            />
         </StaticButContainer>
         <ShopRequest shop={shop} loading={loading} />
       </StaticContainer>
+      <StaticContainer theme={theme} style={{margin: isMobile ? 0 : "16px 0",width: isMobile ? '100%' : "30%" }}>
+      <DoughnutChart chartData={orderStats} loading={loading} />
+      </StaticContainer>
+            </Charts>
       <Charts>
-        <StaticContainer theme={theme} style={{ width: !isMobile ? "50%" : "100%"  }}>
+        <StaticContainer theme={theme} style={{ margin:0 ,width: !isMobile ? "50%" : "100%" }}>
           <StaticTitle theme={theme}>Users</StaticTitle>
           <BarChart chartData={userData} loading={loading} />
         </StaticContainer>
-        <StaticContainer theme={theme} style={{ width: !isMobile ? "50%" : "100%"  }}>
+        <StaticContainer theme={theme} style={{ margin:0 ,width: !isMobile ? "50%" : "100%"   }}>
           <StaticTitle theme={theme}>INCOM HISTORY</StaticTitle>
           <LineChart chartData={incomData} loading={loading} />
         </StaticContainer>
@@ -662,12 +678,18 @@ const AdminPf = () => {
               prod.map((item) => (
                 <Product open={open} index={index}>
                   <ProductImage theme={theme} open={open}>
-                    <img
-                    img={item.productimage}
-                      
-                      src={item.productimage}
-                      
-                      />
+                    
+                  <LazyAvatar 
+  src={item?.productimage}
+  sx={{
+    bgcolor: theme === "light" ? whiteTextColor: colorPrimaryBlack ,
+    borderRadius: '8px',
+    padding:'4px',
+    width: '100%' ,
+    height: 300,
+    objectFit:'contain'
+     }}
+/>
                       </ProductImage>
                     <ProductInfo>
                       <Title>
@@ -720,7 +742,19 @@ const AdminPf = () => {
             {prodS != '' && !loading ? (
               prodS.map((item) => (
                 <ListItemConatiner theme={theme} key={item?.idPRODUCT}>
-                  <ItemImage theme={theme} src={item?.productimage} />
+                        <LazyAvatar 
+  src={item?.productimage}
+  sx={{
+    bgcolor: theme === "light" ? whiteTextColor: colorPrimaryBlack ,
+    borderRadius: '8px',
+    border: `1px solid ${theme == "light" ? grayBackground : colorBackgroundBlack}`,
+    padding:'4px',
+    width: '48px' ,
+    height: 48,
+    objectFit: 'contain',
+     }}
+/>
+
                   <ItemDesc>
                     <ItemName>{item?.productname}</ItemName>
                     <ItemType>{item?.type}</ItemType>
@@ -745,7 +779,7 @@ const AdminPf = () => {
       </StaticContainer>
       <div
         style={{
-          fontSize: 32,
+          fontSize: isMobile ? 24 : 32,
           display: "flex",
           flexDirection: "column",
           gap: 20,
@@ -770,11 +804,18 @@ const AdminPf = () => {
               myprod.map((item) => (
                 <Product open={open} index={myIndex}>
                   <ProductImage theme={theme} open={open}>
-                    <img
-                      
-                      src={item.productimage}
-                   
-                      />
+                  <LazyAvatar 
+  src={item?.productimage}
+  sx={{
+    bgcolor: theme === "light" ? whiteTextColor: colorPrimaryBlack ,
+    borderRadius: '8px',
+
+    padding:'4px',
+    width: '100%' ,
+    height: '100%',
+    objectFit: 'contain',
+     }}
+/>
                       </ProductImage>
                     <ProductInfo>
                       <Title>
@@ -830,7 +871,18 @@ const AdminPf = () => {
             {myProdS != "" && !loading ? (
               myProdS.map((item) => (
                 <ListItemConatiner  theme={theme} key={item.idPRODUCT}>
-                  <ItemImage theme={theme} src={item.productimage} />
+                                     <LazyAvatar 
+  src={item?.productimage}
+  sx={{
+    bgcolor: theme === "light" ? whiteTextColor: colorPrimaryBlack ,
+    borderRadius: '8px',
+    border: `1px solid ${theme == "light" ? grayBackground : colorBackgroundBlack}`,
+    padding:'4px',
+    width: 48 ,
+    height: 48,
+    objectFit: 'contain',
+     }}
+/>
                   <ItemDesc>
                     <ItemName>{item.productname}</ItemName>
                     <ItemType>Solds : {item.totalSold}</ItemType>

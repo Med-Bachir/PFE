@@ -36,6 +36,7 @@ function LineChart({ chartData }) {
         tension: 0.4,
         borderColor: 'rgba(75, 192, 192, 1)',
         borderWidth: 2,
+        backgroundColor : 'red'
       },
       point: {
         radius: 0,

@@ -4,6 +4,7 @@ const { query } = require("../utils/promiseQuery.js");
 const router = require("express").Router();
 
 const { v2: cloudinary } = require('cloudinary');
+const { v4: uuidv4 } = require("uuid");
 
 
 // Cloudinary Configuration
@@ -17,23 +18,23 @@ cloudinary.config({
 // CREATE a new category
 router.post("/add-cat", verifyTokenAndAdmin, async (req, res) => {
     try {
-        const { categoryname, image } = req.body;
-
+        const { name, image } = req.body;
+        const uniquePublicId = `Category_${uuidv4()}`;
         // Upload the image to Cloudinary
         const uploadResult = await cloudinary.uploader.upload(image, {
-            public_id: 'Cat',
+            public_id: uniquePublicId,
         });
         
 
         // Store the uploaded URL in the database
         const result = await query(
-            "INSERT INTO CATEGORIES (categoryname, categoryimage) VALUES (?, ?)",
-            [categoryname, uploadResult.secure_url]
+            "INSERT INTO CATEGORIES (name, categoryimage) VALUES (?, ?)",
+            [name, uploadResult.secure_url]
         );
 
         res.status(200).json({
             idCATEGORIES: result.insertId,
-            categoryname,
+            name,
             image: uploadResult.secure_url
         });
     } catch (error) {
@@ -46,10 +47,10 @@ router.post("/add-cat", verifyTokenAndAdmin, async (req, res) => {
 router.post("/add-sub", verifyTokenAndAdmin, async (req, res) => {
     try {
         const { idCat, subname, image } = req.body;
-
+        const uniquePublicId = `Subcategory_${uuidv4()}`;
         // Upload the image to Cloudinary
         const uploadResult = await cloudinary.uploader.upload(image, {
-            public_id: 'Cat',
+            public_id: uniquePublicId,
         });
 
         // Store the uploaded URL in the database
@@ -74,10 +75,10 @@ router.post("/add-sub", verifyTokenAndAdmin, async (req, res) => {
 router.post("/add-type", verifyTokenAndAdmin, async (req, res) => {
     try {
         const { idSub, typename, image } = req.body;
-
+        const uniquePublicId = `Type_${uuidv4()}`;
         // Upload the image to Cloudinary
         const uploadResult = await cloudinary.uploader.upload(image, {
-            public_id: 'Taj',
+            public_id: uniquePublicId,
         });
 
         // Store the uploaded URL in the database
@@ -106,7 +107,7 @@ router.delete("/delete-cat/:id", verifyTokenAndAdmin, async (req, res) => {
         const { id } = req.params;
   
         // First, delete the related entries in the STOCK table
-        const deleteCatQuery = "DELETE FROM Categories WHERE id_CATEGORIES = ?";
+        const deleteCatQuery = "DELETE FROM Categories WHERE id = ?";
         const deleteCatValues = [id];
 
         connection.query(deleteCatQuery, deleteCatValues, (err, stockResult) => {
@@ -178,14 +179,14 @@ router.get("/getallcat", async (req, res) => {
     try {
         const getAllCategoriesQuery = `
     SELECT 
-    c.idCATEGORIES,
-    c.categoryname,
+    c.id,
+    c.name AS name,
     c.categoryimage AS icon,
 
     -- Total products in the category (all products linked to this category)
     (SELECT COUNT(*) 
      FROM PRODUCT p 
-     WHERE p.id_Category = c.idCATEGORIES) AS categoryProductCount,
+     WHERE p.id_Category = c.id) AS categoryProductCount,
 
     s.id AS subcategoryId,
     s.name AS subname,
@@ -209,19 +210,19 @@ router.get("/getallcat", async (req, res) => {
 FROM 
     CATEGORIES c
 LEFT JOIN 
-    SUBCATEGORIES s ON c.idCATEGORIES = s.category_id 
+    SUBCATEGORIES s ON c.id = s.category_id 
 LEFT JOIN 
     TYPES t ON t.id_Sub = s.id
 LEFT JOIN 
     PRODUCT p ON p.id_Type = t.id
 
 GROUP BY 
-    c.idCATEGORIES, c.categoryname, c.categoryimage,
+    c.id, c.name, c.categoryimage,
     s.id, s.name, s.image,
     t.id, t.name, t.image
 
 ORDER BY 
-    c.categoryname, s.name, t.name;
+    c.name, s.name, t.name;
         `;
 
         connection.query(getAllCategoriesQuery, (err, results) => {
@@ -234,9 +235,9 @@ ORDER BY
 
             results.forEach(row => {
                 // Initialize category if not present
-                if (!categoriesMap[row.categoryname]) {
-                    categoriesMap[row.categoryname] = {
-                        id: row.idCATEGORIES,
+                if (!categoriesMap[row.name]) {
+                    categoriesMap[row.name] = {
+                        id: row.id,
                         icon: row.icon,
                         productCount: row.categoryProductCount,
                         subcategories: {}
@@ -244,8 +245,8 @@ ORDER BY
                 }
 
                 // Initialize subcategory if not present
-                if (!categoriesMap[row.categoryname].subcategories[row.subname]) {
-                    categoriesMap[row.categoryname].subcategories[row.subname] = {
+                if (!categoriesMap[row.name].subcategories[row.subname]) {
+                    categoriesMap[row.name].subcategories[row.subname] = {
                         id: row.subcategoryId,
                         subIcon: row.subIcon,
                         productCount: row.subcategoryProductCount,
@@ -254,7 +255,7 @@ ORDER BY
                 }
 
                 // Push type into the subcategory
-                categoriesMap[row.categoryname].subcategories[row.subname].types.push({
+                categoriesMap[row.name].subcategories[row.subname].types.push({
                     id: row.typeId,
                     name: row.typename,
                     icon: row.typeIcon,
@@ -265,7 +266,7 @@ ORDER BY
             // Convert to array format
             const categoriesArray = Object.keys(categoriesMap).map(categoryName => ({
                 id: categoriesMap[categoryName].id,
-                categoryname: categoryName,
+                name: categoryName,
                 icon: categoriesMap[categoryName].icon,
                 productCount: categoriesMap[categoryName].productCount,
                 subcategories: Object.keys(categoriesMap[categoryName].subcategories).map(subname => ({
@@ -294,7 +295,7 @@ router.get("/cat", async (req, res) => {
   
         // Query to fetch products by category name
         const getCategories = `
-            SELECT idCATEGORIES,categoryname 
+            SELECT id,name 
             FROM CATEGORIES
         `;
 
@@ -382,7 +383,7 @@ router.get("/sub/:id", async (req, res) => {
 router.delete("/:id", verifyTokenAndAdmin, async (req, res) => {
     try {
         const { id } = req.params;
-        await query("DELETE FROM CATEGORIES WHERE idCATEGORIES = ?", [id]);
+        await query("DELETE FROM CATEGORIES WHERE id = ?", [id]);
         res.status(200).json({ message: "Category deleted successfully" });
     } catch (error) {
         console.error("Error deleting category:", error);

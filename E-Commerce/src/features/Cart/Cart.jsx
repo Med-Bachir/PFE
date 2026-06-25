@@ -12,6 +12,7 @@ import { Link } from 'react-router-dom';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import EmptyData from '../../Components/Pending/EmptyData';
 import { colorAccentDarkTransparent, colorAccentLight, colorAccentMain, colorAccentMedium, colorAccentTransparent, colorBackgroundBlack, colorElementBackgroundGray, colorPrimaryBlack, elementGrayBackground, grayBackground, main, primaryTextColor, secondaryTextColor, whiteTextColor } from '../../Colors';
+import LazyAvatar from '../../Components/Pending/LazyAvatar';
 
 
 
@@ -212,17 +213,7 @@ const Update = styled.div`
 }
 `;
 
-const Image = styled.img`
-  height: 70px;
-  width: 70px;
-  object-fit: contain;
-  margin-right: 20px;
-  @media (max-width: 768px) {
-  width: 50px;
-  height: 50px;
-  margin-right: 8px;
-}
-`;
+
 const Information = styled.div`
   color: ${props => props.theme == "light" ? primaryTextColor : elementGrayBackground};
 
@@ -231,7 +222,7 @@ const Information = styled.div`
   height: auto;
   width: fit-content;
   justify-content: space-between;
-  gap: 12px;
+  gap: px;
   @media (max-width: 768px) {
  
  font-size: 12px;
@@ -250,13 +241,16 @@ const Price = styled.div`
   @media (max-width: 768px) {
   gap: 4px;
 }
+
 `;
 const Attributes = styled.div`
   color: ${props => props.theme == "light" ? primaryTextColor : elementGrayBackground};
 
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
-  gap: 20px;
+  column-gap: 20px;
+  row-gap: 8px;
   @media (max-width: 768px) {
  gap: 4px;
  flex-direction: column;
@@ -266,6 +260,7 @@ const Attributes = styled.div`
 `;
 const Attribute = styled.span`
 display: flex;
+flex-wrap: wrap;
 align-items: center;
 gap: 8px;
 @media (max-width: 768px) {
@@ -421,19 +416,43 @@ const Cart = ({theme}) => {
                 </IconButton>
               </Update>
 
-              <Image src={item.image} />
+              
+              <LazyAvatar src={item.image} sx={{
+  height: '70px',
+  width: '70px',
+  objectFit: "contain",
+  marginRight: '20px',
+  bgcolor:'transparent' ,
+  borderRadius:4,
+  '@media (max-width: 768px)' :{
+  width: '50px',
+  height: '50px',
+  marginRight: "8px"
+}
+
+              }} />
               <Information theme={theme}>
                 <Name>{item.name}</Name>
                 <Price> {item.discount == 0 ? '' : <p style={{fontSize:14 , color:secondaryTextColor , textDecoration: 'line-through'}} >${item.price} </p>}  ${(item.price - item.price * (item.discount / 100 )).toFixed(2) }
                 
                 <Attributes theme={theme}>
-                  {item.attributes?.color ? 
-                  <Attribute>color : <Color color={item.attributes?.color} />  </Attribute>
-                  : ''}
-                  {item.attributes?.size ? 
-                  <Attribute>size : {item.attributes?.size}</Attribute>
-                  : ''}
-                </Attributes>
+  {item.attributes &&
+    Object.entries(item.attributes).map(([key, value]) => {
+      if (key === "color" || key === "colors") {
+        return (
+          <Attribute key={key}>
+            {key} : <Color color={value} />
+          </Attribute>
+        );
+      }
+
+      return (
+        <Attribute key={key}>
+          {key} : {value}
+        </Attribute>
+      );
+    })}
+</Attributes>
                 </Price>
                 <Quantity>1 * {item.quantity}pc</Quantity>
               </Information>

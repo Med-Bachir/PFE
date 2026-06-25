@@ -1,10 +1,9 @@
-import { Avatar, Divider, IconButton } from "@mui/material";
+import { Avatar, Box, Divider, IconButton, Pagination } from "@mui/material";
 import React, { useEffect, useState } from "react";
 import styled from "styled-components";
 import DeleteIcon from "@mui/icons-material/Delete";
 import VisibilityTwoToneIcon from "@mui/icons-material/VisibilityTwoTone";
 import CloseIcon from '@mui/icons-material/Close';
-import PersonSearchIcon from '@mui/icons-material/PersonSearch';
 import Lottie from "lottie-react"
 import me from "../../../assets/Lotties/Animation - 1716145973359.json"
 
@@ -19,8 +18,10 @@ import { useNavigate } from "react-router-dom";
 import AlertMessage from "../../../Components/Alert";
 import Loading from "../../../Components/Pending/Loading";
 
-import { colorAccentDark, colorAccentDarkTransparent, colorAccentLight, colorAccentMain, colorAccentMediumTransparent, colorAccentSoft, colorAccentSoftTransparent, colorAccentTransparent, colorBackgroundBlack, colorErrorDark, colorErrorSoft, colorPrimaryBlack, colorWarningDark, colorWarningSoft, darkOrange, darkRed, grayBackground, lightSoftMain, main, primaryTextColor, softOrange, softRed, whiteTextColor } from "../../../Colors";
+import { colorAccentDark, colorAccentDarkTransparent, colorAccentLight, colorAccentMain, colorAccentMediumTransparent, colorAccentSoft, colorAccentSoftTransparent, colorAccentTransparent, colorBackgroundBlack, colorErrorDark, colorErrorSoft, colorPrimaryBlack, colorWarningDark, colorWarningSoft, darkOrange, darkRed, grayBackground, lightMain, lightSoftMain, main, primaryTextColor, softOrange, softRed, whiteTextColor } from "../../../Colors";
 import { useSelector } from "react-redux";
+import SearchComponent from "../../../features/Search";
+import LazyAvatar from "../../../Components/Pending/LazyAvatar";
 
 
 const Container = styled.div`
@@ -37,43 +38,14 @@ background-color: ${props => props.theme == "light" ? whiteTextColor : colorPrim
 border-radius:8px;
 
 `
-const StaticTitle = styled.span`
-margin: 20px 0;
-padding-left: 20px;
-border-left: 4px solid ${props => props.theme == "light" ? main : colorAccentMain};
-color: ${props => props.theme == "light" ? primaryTextColor : whiteTextColor};
-`
-
-const Search = styled.div`
-width: 50%;
-display: flex;
-justify-content: space-between;
-height: 40px;
-border-radius: 4px;
-border: 1px solid ${props => props.theme == "light" ? grayBackground : colorBackgroundBlack};
-background-color:${props => props.theme == "light" ? whiteTextColor : colorPrimaryBlack};
-
-`
-const Input = styled.input`
-border: none;
-outline: none;
-width: 90%;
-padding: 0 16px;
-font-size: 16px;
-
-background-color:${props => props.theme == "light" ? whiteTextColor : colorAccentDarkTransparent};
-color:${props => props.theme == "light" ?primaryTextColor : whiteTextColor};
-
-`
-  
 
 
 const Table = styled.table`
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
+
   contain: paint;
-  height: calc(100vh - 230px);
+  height: calc(100vh - 300px);
   position: relative;
   overflow: auto;
   z-index:99;
@@ -171,6 +143,9 @@ const ShopeList = () => {
   const [type, setType] = useState("");
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [filteredRows, setFilteredRows] = useState([]);
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 10; // Number of shops per page
   const ColumnsTag = ['Image' , 'Shop Name' , 'Products' , 'Order' ,'Owner Name' ,'Status'];
 
 const navigate = useNavigate();
@@ -180,6 +155,7 @@ const navigate = useNavigate();
     try {
       const res = await newRequest.get("/shop/shops-admin");
       setShops(res.data);
+      setFilteredRows(res.data)
       setLoading(true)
     } catch (err) {
       console.error("Error fetching users:", err);
@@ -255,103 +231,132 @@ navigate(`/Shops/${id}`);
     
 
   }
+  const handleSearchResults = (rows) => {
+    setFilteredRows(rows); // Update filtered rows in parent
+  };
+  const handlePageChange = (event, value) => {
+    setCurrentPage(value);
+  };
+ 
+  // Calculate the displayed shops for the current page
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const endIndex = startIndex + itemsPerPage;
+  const displayedShops = (filteredRows?.length > 0 ? filteredRows : shops)?.slice(startIndex, endIndex);
 
   return (
     <Container>
       <AlertMessage open={open} setOpen={setOpen} message={message} type={type} />
-
-      <StaticContainer theme={theme} style={{padding:'0 32px 0 0', display:'flex',alignItems:'center' , flexDirection:'row' , justifyContent:'space-between'}}>
-        <StaticTitle theme={theme}>Active Shops </StaticTitle>
-        <Search theme={theme} ><IconButton sx={{backgroundColor : theme == "light" ? main : colorAccentDark ,width:"10%" , height:"100%", borderRadius:'4px 0 0 4px'}}><PersonSearchIcon style={{color:whiteTextColor}} /></IconButton><Input theme={theme} placeholder="Enter Shop Name" /></Search>
-        
+      <StaticContainer theme={theme} style={{
+        padding: '20px 20px 20px 0',
+        display: 'flex',
+        alignItems: 'center',
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        borderRadius: 8
+      }}>
+        <SearchComponent data={shops} onSearch={handleSearchResults} type={'Shops'} />
       </StaticContainer>
-
-    <StaticContainer theme={theme} style={{padding:'0',contain:'paint'}}>
-
-    <Table theme={theme}>
-      <Row theme={theme} type={"tag"}>
-        {ColumnsTag.map((item) => (
-
-
-          <ColumnTag style={{flex : `${item == 'Image' || item == 'Products' || item == 'Order'? '1' : '2'}`}}>{item}</ColumnTag>
-        
-
-        ))}
-        <ColumnTag style={{ border: "none", flex: 1}}>Action</ColumnTag>
-      </Row>
-      {shops != "" && !loading ? 
-      
-      
-      
-        shops?.map((item) => (
-        <>
-        <Row theme={theme} key={item.ShopID} type={"normal"}>
-        <Column theme={theme} style={{ flex: 1 , display:'flex' , alignItems:'center' }}>
-        <Avatar src={item.ShopImage}  sx={{ width: 50, height: 50 , borderRadius:'4px' , border:`1px solid ${theme == "light" ? grayBackground : colorBackgroundBlack }` , objectFit:'contain'}} />
-        </Column>
-        <Column theme={theme}>
-        <ColumnInfo
-        style={{
-          backgroundColor: "transparent",
-          width: "100%",
-         
-          color: theme == "light" ? primaryTextColor : whiteTextColor,
-          flex: 2 ,
-          textAlign:'start',
-          padding:'0 0 0 27%',
-          fontSize:16
-          
-        }}
-        >
-        {item.ShopName}
-        </ColumnInfo>
-        </Column>
-        <Column theme={theme} style={{alignItems: "center" , flex: 1 }}>{item.TotalProducts}</Column>
-        <Column theme={theme}  style={{alignItems: "center" , flex: 1 }}>{item.TotalOrders}</Column>
-        <Column theme={theme} style={{ flex: 2 , alignItems: "center" }}>{item.OwnerName}</Column>
-        <Column theme={theme} style={{ alignItems: "center" ,flex:2  }}>
-        <ColumnInfo theme={theme} status={item.ShopStatus}>{item.ShopStatus}</ColumnInfo>
-        </Column>
-        
-        <Column style={{  flex: 1 }} key={item.ShopId}>
-        <ColumnInfo
-        style={{
-          display: "flex",
-          backgroundColor: "transparent",
-          width: "100%",
-          justifyContent: "center",
-        }}
-        >
-        
-        <div>
-        <IconButton onClick={() => handlClick(item.ShopID,item.ShopStatus)}>
-        {item.ShopStatus == 'Open' 
-        ?
-        <VisibilityTwoToneIcon sx={{ color: main }} />
-        : <DoneIcon sx={{ color: main }} />}
-        </IconButton>
-        <IconButton onClick={() => handleDelete(item.ShopID , item.ShopStatus)}>
-        {item.ShopStatus == 'Open' 
-        ?
-        <DeleteIcon sx={{ color: darkRed }} />
-        
-        : <CloseIcon sx={{ color: darkRed }} />}
-        
-        </IconButton>
-        </div>
-        
-        </ColumnInfo>
-        </Column>
-        </Row>
-        <Divider sx={{backgroundColor: theme == "light" ? grayBackground : colorBackgroundBlack}} />
-        </>
-      
-      )) : loading ? <Loading /> : <LottieContainer style={{backgroundColor: theme == "light" ? whiteTextColor : colorBackgroundBlack}}>
-      <Lottie  animationData={me} style={{ width:"40%"}} /> 
-      </LottieContainer> }
-    </Table>
+      <StaticContainer theme={theme} style={{ padding: '0' }}>
+        <Table theme={theme}>
+          <Row theme={theme} type={"tag"}>
+            {ColumnsTag.map((item) => (
+              <ColumnTag key={item} style={{
+                flex: item === 'Image' || item === 'Products' || item === 'Order' ? '1' : '2'
+              }}>
+                {item}
+              </ColumnTag>
+            ))}
+            <ColumnTag style={{ border: "none", flex: 1 }}>Action</ColumnTag>
+          </Row>
+          {displayedShops?.length > 0 && !loading ? displayedShops.map((item) => (
+            <React.Fragment key={item.ShopID}>
+              <Row theme={theme} type={"normal"}>
+                <Column theme={theme} style={{ flex: 1, display: 'flex', alignItems: 'center' }}>
+                  
+                  <LazyAvatar
+                   src={item.ShopImage}
+                    sx={{
+                    width: 50, height: 50, borderRadius: '4px',
+                    border: `1px solid ${theme === "light" ? grayBackground : colorBackgroundBlack}`,
+                    objectFit: 'contain',
+                    bgcolor:'transparent'
+                  }}
+                  />
+                </Column>
+                <Column theme={theme}>
+                  <ColumnInfo
+                    style={{
+                      backgroundColor: "transparent",
+                      width: "100%",
+                      color: theme === "light" ? primaryTextColor : whiteTextColor,
+                      flex: 2,
+                      textAlign: 'start',
+                      padding: '0 0 0 27%',
+                      fontSize: 16
+                    }}
+                  >
+                    {item.ShopName}
+                  </ColumnInfo>
+                </Column>
+                <Column theme={theme} style={{ alignItems: "center", flex: 1 }}>{item.TotalProducts}</Column>
+                <Column theme={theme} style={{ alignItems: "center", flex: 1 }}>{item.TotalOrders}</Column>
+                <Column theme={theme} style={{ flex: 2, alignItems: "center" }}>{item.OwnerName}</Column>
+                <Column theme={theme} style={{ alignItems: "center", flex: 2 }}>
+                  <ColumnInfo theme={theme} status={item.ShopStatus}>{item.ShopStatus}</ColumnInfo>
+                </Column>
+                <Column style={{ flex: 1 }}>
+                  <ColumnInfo style={{
+                    display: "flex",
+                    backgroundColor: "transparent",
+                    width: "100%",
+                    justifyContent: "center",
+                  }}>
+                    <div>
+                      <IconButton onClick={() => handlClick(item.ShopID, item.ShopStatus)}>
+                        {item.ShopStatus === 'Open'
+                          ? <VisibilityTwoToneIcon sx={{ color: main }} />
+                          : <DoneIcon sx={{ color: main }} />}
+                      </IconButton>
+                      <IconButton onClick={() => handleDelete(item.ShopID, item.ShopStatus)}>
+                        {item.ShopStatus === 'Open'
+                          ? <DeleteIcon sx={{ color: darkRed }} />
+                          : <CloseIcon sx={{ color: darkRed }} />}
+                      </IconButton>
+                    </div>
+                  </ColumnInfo>
+                </Column>
+              </Row>
+              <Divider sx={{
+                backgroundColor: theme === "light" ? grayBackground : colorBackgroundBlack
+              }} />
+            </React.Fragment>
+          )) : loading ? <Loading /> : <LottieContainer style={{
+            backgroundColor: theme === "light" ? whiteTextColor : colorBackgroundBlack
+          }}>
+            <Lottie animationData={me} style={{ width: "40%" }} />
+          </LottieContainer>}
+        </Table>
       </StaticContainer>
-      </Container>
+      <Box sx={{display:'flex' , alignContent:'center' , justifyContent:'center'}}>
+
+      <Pagination
+        count={Math.ceil((filteredRows?.length > 0 ? filteredRows?.length : shops?.length) / itemsPerPage)}
+        page={currentPage}
+        onChange={handlePageChange}
+        sx={{
+          ".css-yuzg60-MuiButtonBase-root-MuiPaginationItem-root": {
+            backgroundColor: theme === 'light' ? lightMain : colorAccentDarkTransparent,
+            color: theme === "light" ? main : colorAccentMain
+          },
+          ".css-yuzg60-MuiButtonBase-root-MuiPaginationItem-root.Mui-selected" : {
+            backgroundColor: theme === 'light' ? main : colorAccentMain,
+            color: whiteTextColor 
+          }
+        }}
+        />
+        </Box>
+   
+    </Container>
   );
 };
 

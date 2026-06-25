@@ -284,7 +284,7 @@ email:""
             <Information>
               <Label>{item.Label}</Label>
               
-              <Input theme={theme}  name={item.name} placeholder={edit ? '' : item.value} value={edit ? item.value : item.value} onChange={handleChange} disabled={edit ? false : true}  />
+              <Input theme={theme}  name={item.name} placeholder={edit ? '' : item.value} value={edit ? item.value : item.value} onChange={handleChange} disabled={edit ? false : true} edit={edit}  />
 
             </Information>
           ))}

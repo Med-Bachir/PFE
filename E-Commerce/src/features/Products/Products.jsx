@@ -13,24 +13,24 @@ import { primaryTextColor } from "../../Colors.jsx";
 const Container = styled.div`
   width: 100%;
   height: auto;
-  display: grid;
+  display: flex;
   gap: 20px;
   padding: 32px;
-  grid-template-columns: repeat(3, 1fr); /* Responsive grid */
-
-  & > * {
-    width: 100%; /* Ensure grid items fill the column */
+  flex-wrap: wrap; /* Responsive grid */
+  @media (max-width: 768px) {
+  padding: 12px;
+  gap: 12px;
   }
-
-  @media (max-width: 1000px) {
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); /* Responsive grid */
-    
+  @media (max-width: 320px) {
+  padding: 8px;
+  
+ 
   }
 `;
 
 const LottieContainer = styled.div`
   display: flex;
-  align-items: center;
+  align-items: right;
   justify-content: center;
   flex-direction: column;
   width: calc(100vw - 402px);
@@ -56,14 +56,21 @@ const Products = ({theme}) => {
       let res;
       if (categoryName && subName && typeName) {
         res = await newRequest.get(`/products/${categoryName}/${subName}/${typeName}`);
+        console.log(typeName)
       } else if (categoryName && subName) {
-        res = await newRequest.get(`/products/${categoryName}/${subName}`);
+        res = await newRequest.get(`/products/${categoryNames}/${subName}`);
+        console.log(subName)
+
       } else if (categoryName) {
-        res = await newRequest.get(`/products/${categoryName}`);
+        res = await newRequest.get(`/products/${catego9ryName}`);
+        console.log(categoryName)
+
       } else {
         res = await newRequest.get(`/products`);
       }
 
+
+console.log(res.data)
       return res.data;
     } catch (error) {
       console.error("Error fetching filtered products:", error);
@@ -73,7 +80,7 @@ const Products = ({theme}) => {
   const { isPending, error, data } = useQuery({
     queryKey: ['filter', categoryName, subName, typeName],
     queryFn: getFilter,
-    retry: 3,
+    
   });
 
   if (isPending) {

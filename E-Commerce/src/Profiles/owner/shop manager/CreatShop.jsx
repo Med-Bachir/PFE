@@ -18,6 +18,10 @@ const Container = styled.div`
   gap: 20px;
   overflow-y: auto;
   color: ${props => props.theme == "light" ? primaryTextColor : whiteTextColor};
+  gap: 32px;
+  @media (max-width: 768px) {
+  padding: 32px 12px;
+}
 `;
 
 const FormContainer = styled.div`
@@ -26,7 +30,9 @@ const FormContainer = styled.div`
   border-top: 1px dashed #bebebe;
   padding: 32px 0;
   gap: 32px;
-  
+  @media (max-width: 768px) {
+  flex-direction: column;
+}
 `;
 
 const FormTitle = styled.h3`
@@ -89,6 +95,7 @@ const Input = styled.input`
   &:focus {
     border: 1px solid ${main};
   }
+  transition: 200ms;
 `;
 
 const Area = styled.textarea`

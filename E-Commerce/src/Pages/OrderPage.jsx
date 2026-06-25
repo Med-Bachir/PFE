@@ -13,7 +13,7 @@ import LockTwoToneIcon from "@mui/icons-material/LockTwoTone";
 import { useSelector } from "react-redux";
 import newRequest from "../utils/newRequest";
 import EmptyData from "../Components/Pending/EmptyData";
-import { colorAccentDark, colorAccentDarkTransparent, colorAccentLight, colorAccentMain, colorAccentMedium, colorAccentMediumTransparent, colorAccentMoreTransparent, colorAccentSoft, colorAccentSoftTransparent, colorAccentSub, colorAccentSubDark, colorAccentTransparent, colorBackgroundBlack, colorBackgroundGray, colorHighlightSoftYellow, colorHighlightText, colorPrimaryBlack, colorWarningDark, colorWarningSoft, darkOrange, darkYellow, elementGrayBackground, grayBackground, hovredText, lightMain, lightMedMain, lightSoftMain, main, medMain, primaryTextColor, secondaryTextColor, softMain, softMainTransparent, softOrange, softYellow, transparentMain, whiteTextColor } from "../Colors";
+import { colorAccentDark, colorAccentDarkTransparent, colorAccentLight, colorAccentMain, colorAccentMedium, colorAccentMediumTransparent, colorAccentMoreTransparent, colorAccentSoft, colorAccentSoftTransparent, colorAccentSub, colorAccentSubDark, colorAccentTransparent, colorBackgroundBlack, colorBackgroundGray, colorHighlightDarkYellow, colorHighlightSoftYellow, colorPrimaryBlack, colorWarningDark, colorWarningSoft, darkOrange, darkYellow, elementGrayBackground, grayBackground, hovredText, lightMain, lightMedMain, lightSoftMain, main, medMain, primaryTextColor, secondaryTextColor, softMain, softMainTransparent, softOrange, softYellow, transparentMain, whiteTextColor } from "../Colors";
 
 const Container = styled.div`
   height: calc(100vh - 132px);
@@ -120,7 +120,7 @@ const Progress = styled.span`
       ? props.theme == "light" ? main : colorAccentMain
       : props.status == "Waiting"
       ? props.theme == "light" ? darkOrange : colorWarningDark
-      : props.theme == "light" ? darkYellow : colorHighlightText};
+      : props.theme == "light" ? darkYellow : colorHighlightDarkYellow};
   border-radius: 4px;
   width: 50%;
   text-align: center;
@@ -228,7 +228,7 @@ const OrderProcessing = styled.span`
       ? props.theme == "light" ? main : colorAccentMain
       : props.status == "Waiting"
       ? props.theme == "light" ? darkOrange : colorWarningDark
-      : props.theme == "light" ? darkYellow : colorHighlightText};
+      : props.theme == "light" ? darkYellow : colorHighlightDarkYellow};
   font-weight: 300;
   @media (max-width:768px) {
    width: 45%;

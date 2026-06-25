@@ -1,5 +1,5 @@
 import { IconButton, Rating } from "@mui/material";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import styled from "styled-components";
 import DeleteForeverOutlinedIcon from "@mui/icons-material/DeleteForeverOutlined";
 import EditTwoToneIcon from "@mui/icons-material/EditTwoTone";
@@ -12,6 +12,7 @@ import MoreHorizTwoToneIcon from "@mui/icons-material/MoreHorizTwoTone";
 import Loading from "../../../Components/Pending/Loading";
 import Product from "../../../Components/updateForms/Product";
 import { colorAccentDark, colorAccentDarkTransparent, colorAccentLight, colorAccentMedium, colorAccentMediumTransparent, colorAccentSoft, colorAccentSoftTransparent, colorAccentSub, colorAccentSubDark, colorBackgroundBlack, colorBackgroundGray, colorPrimaryBlack, grayBackground, lightSoftMain, main, primaryTextColor, subColumnMain, whiteTextColor } from "../../../Colors";
+import LazyAvatar from "../../../Components/Pending/LazyAvatar";
 
 
 
@@ -218,7 +219,7 @@ const getTagsForCategory = (product) => {
         "Storage",
         "Screen Size",
       ];
-    case "Dicors":
+    case "Decors":
       return [
         "Craft Material",
         "Dimensions",
@@ -244,6 +245,7 @@ const ProductList = ({ productData , loading , handle }) => {
   const [selectedOrderId, setSelectedOrderId] = useState(null);
   const [edited, setEdited] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState();
+ 
   
   const Location = useLocation().pathname.split("/")[1]
   const user = useSelector((state) => state.user?.currentUser);
@@ -253,7 +255,7 @@ const ProductList = ({ productData , loading , handle }) => {
   };
 
  
-  
+ 
  
   return (
     <Container theme={theme}>
@@ -271,12 +273,27 @@ const ProductList = ({ productData , loading , handle }) => {
       productData.map((product , index) => {
         const tags = getTagsForCategory(product);
         const parsedAttributes = product?.attributes ? JSON.parse(product.attributes) : null;
-
+        
+          
+          console.log(productData[index])
+           
         return (
           <Table theme={theme} >
             <Row theme={theme}>
               <ProductInfo theme={theme}>
-                <Image theme={theme} src={product.productimage} />
+             
+                <LazyAvatar
+  src={product?.productimage}
+  sx={{
+    bgcolor: theme === "light" ? whiteTextColor: colorPrimaryBlack ,
+    borderRadius: '4px',
+    padding:'4px',
+    border: `1px solid ${theme == "light" ? grayBackground : colorBackgroundBlack}`,
+    width: '45px' ,
+    height: 45,
+    objectFit: 'contain',
+     }}
+/>
                 <Name>{product.productname}</Name>
               </ProductInfo>
               <Detail theme={theme}>{product.categoryName}</Detail>
@@ -284,7 +301,18 @@ const ProductList = ({ productData , loading , handle }) => {
               {user?.userRole === "admin" && Location == "products" ? (
                 <ShopList>
                   <Link to={`/Shops/${product.isshop}`}>
-                    <Shops src={product.shopimage} />
+              
+                    <LazyAvatar
+  src={product?.shopimage}
+  sx={{
+    bgcolor: theme === "light" ? whiteTextColor: colorPrimaryBlack ,
+    borderRadius: '4px',
+    width: '40px' ,
+    height: 40,
+    textAlign:'center',
+   
+     }}
+/>
                   </Link>
                 </ShopList>
               ) : (
@@ -298,9 +326,12 @@ const ProductList = ({ productData , loading , handle }) => {
               <Detail>{product.discount}%</Detail>
 
               <Detail>
+                {user?.userRole == "admin" && Location != "products" ?
+                
                 <IconButton color="success" onClick={() => {setEdited(product?.idPRODUCT) , setSelectedProduct(product)}}>
                   <EditTwoToneIcon  style={{ color: main }} />
-                </IconButton>
+                </IconButton> : ''
+                }
                 <IconButton color="error" onClick={() => handle(product.idPRODUCT)}>
                   <DeleteForeverOutlinedIcon color="error" />
                 </IconButton>
@@ -368,7 +399,7 @@ const ProductList = ({ productData , loading , handle }) => {
                 : ''}
                 
                   </>
-              : product?.categoryName == "Dicors" ?
+              : product?.categoryName == "Decors" ?
               <>
               <Detail>{parsedAttributes?.material}</Detail>
                 <Detail>{parsedAttributes?.dimension}</Detail>
@@ -396,7 +427,7 @@ const ProductList = ({ productData , loading , handle }) => {
       </LottieContainer>
     )}
 
-    {edited && selectedProduct != "" ? <Product product={selectedProduct} /> : ""}
+    {edited && selectedProduct != "" ? <Product product={selectedProduct} setEdited={setEdited} theme={theme} /> : ""}
   </Container>
   );
 };

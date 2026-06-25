@@ -1,30 +1,32 @@
-import AddBusinessTwoToneIcon from "@mui/icons-material/AddBusinessTwoTone";
 import styled from "styled-components";
-import { LoadingOutlined, PlusOutlined } from "@ant-design/icons";
-import { Checkbox, Divider, Flex, message, Upload } from "antd";
-
-import CloudUploadTwoToneIcon from "@mui/icons-material/CloudUploadTwoTone";
+import AddBusinessTwoToneIcon from "@mui/icons-material/AddBusinessTwoTone";
 import CloudUploadTwoTone from "@mui/icons-material/CloudUploadTwoTone";
 import {
   CircularProgress,
   Fab,
   FormControl,
-  FormControlLabel,
   FormHelperText,
-  FormLabel,
   InputLabel,
   MenuItem,
-  Radio,
-  RadioGroup,
   Select,
   Tooltip,
 } from "@mui/material";
+import { LoadingOutlined, PlusOutlined } from "@ant-design/icons";
+import { Checkbox, Divider, message, Upload , Input , Tag , theme} from "antd";
 import { useEffect, useRef, useState } from "react";
-
-import { Input, Tag, theme } from "antd";
 import newRequest from "../../../utils/newRequest";
 import { useSelector } from "react-redux";
-import { darkRed, grayBackground, main, whiteTextColor } from "../../../Colors";
+import { colorAccentDarkTransparent, colorAccentLight, colorAccentMain, colorAccentMedium, colorAccentMoreTransparent, colorAccentSoft, colorPrimaryBlack, darkRed, elementGrayBackground, grayBackground, lightMain, main, primaryTextColor, secondText, whiteTextColor } from "../../../Colors";
+import InputField from "../../../Components/productAttributes/InputField";
+import ClothsAttirbutes from "../../../Components/productAttributes/ClothsAttirbutes";
+import FoodAttributes from "../../../Components/productAttributes/FoodAttributes";
+import FitnessAttribute from "../../../Components/productAttributes/FitnessAttribute";
+import ElectronicsAttributes from "../../../Components/productAttributes/ElectronicsAttributes";
+import DecorsAttributes from "../../../Components/productAttributes/DecorsAttributes";
+import BooksAttribute from "../../../Components/productAttributes/BooksAttribute";
+import HomeClaining from "../../../Components/productAttributes/CleaningTools";
+import DishesAttributes from "../../../Components/productAttributes/DishesAttributes";
+import CleaningTools from "../../../Components/productAttributes/CleaningTools";
 
 const Container = styled.div`
   height: calc(100vh - 80px);
@@ -33,6 +35,10 @@ const Container = styled.div`
   flex-direction: column;
   gap: 20px;
   overflow-y: auto;
+  color: ${({theme}) => theme == "light" ? primaryTextColor : elementGrayBackground};
+  @media (max-width: 768px) {
+ padding:32px 12px;
+}
 `;
 
 const FormContainer = styled.div`
@@ -41,6 +47,9 @@ const FormContainer = styled.div`
   border-top: 1px dashed #bebebe;
   padding: 32px 0;
   gap: 32px;
+  @media (max-width: 768px) {
+  flex-direction: column;
+}
 `;
 
 const FormTitle = styled.h3`
@@ -62,12 +71,12 @@ const Title = styled.span`
 
 const Desc = styled.span`
   font-size: 13px;
-  color: ${grayBackground};
+  color: ${secondText};
 `;
 
 const Right = styled.div`
   flex: 2;
-  background-color: ${whiteTextColor};
+  background-color: ${({theme}) => theme == "light" ? whiteTextColor : colorPrimaryBlack};
   padding: 32px;
   border-radius: 4px;
 `;
@@ -75,12 +84,14 @@ const Right = styled.div`
 const Required = styled.span`
   font-size: 14px;
   font-weight: 400;
+  color: ${secondText};
+
 `;
 
 const Span = styled.span`
   font-size: 16px;
   font-weight: 600;
-  color: ${main};
+  color: ${({theme}) => theme == "light" ? main : colorAccentMain};
 `;
 
 const InputContainer = styled.div`
@@ -96,22 +107,30 @@ const InputText = styled.input`
   padding: 14px 16px;
   outline: none;
   border-radius: 4px;
-  border: 1px solid #d4d4d4;
+  background-color: ${({theme}) => theme == "light" ? whiteTextColor : colorAccentDarkTransparent};
+  border: 1px solid ;
+  border-color: ${({theme}) => theme == "light" ? elementGrayBackground : colorAccentLight};
 
-  &:focus {
-    border: 1px solid #46a25d;
+  &:focus , &:hover {
+    border: 1px solid ;
+    border-color: ${({theme}) => theme == "light" ? main : colorAccentMain};
   }
+  transition: 200ms ease-in-out ;
 `;
 
 const Area = styled.textarea`
   padding: 14px 16px;
   outline: none;
   border-radius: 4px;
-  border: 1px solid #d4d4d4;
+  border: 1px solid ;
+  background-color: ${({theme}) => theme == "light" ? whiteTextColor : colorAccentDarkTransparent};
+  border-color: ${({theme}) => theme == "light" ? elementGrayBackground : colorAccentLight};
 
-  &:focus {
-    border: 1px solid #46a25d;
+  &:focus , &:hover {
+    border: 1px solid ;
+    border-color: ${({theme}) => theme == "light" ? main : colorAccentMain};
   }
+  transition: 200ms;
 `;
 
 const getBase64 = (img, callback) => {
@@ -135,31 +154,24 @@ const beforeUpload = (file) => {
 
 const AddProduct = () => {
   const user = useSelector((state) => state.user?.currentUser);
+  const mode = useSelector((state) => state.theme.mode);
   const [product, setProduct] = useState([]);
   const plainOptions = ["XS", "S", "M", "L", "XL"];
   const [loading, setLoading] = useState(false);
-  const [imageUrl, setImageUrl] = useState();
-  const [name, setName] = useState("");
-  const { token } = theme.useToken();
+
   const [tags, setTags] = useState([]);
-  const [inputVisible, setInputVisible] = useState(false);
-  const [inputValue, setInputValue] = useState("");
-  const [editInputIndex, setEditInputIndex] = useState(-1);
-  const [editInputValue, setEditInputValue] = useState("");
-  const [checkedList, setCheckedList] = useState([]);
+ 
+  const [checkedList, setCheckedList] = useState("");
   const [logoImageUrl, setLogoImageUrl] = useState(null);
   const [shops, setShops] = useState("");
-  const [selectedValues, setSelectedValues] = useState({
-    productFor: "",
-    productType: "",
-  });
+
 
   const [cats, setCats] = useState(null);
   const [cat, setCat] = useState(null);
-  const [catsID, setCatsID] = useState(null);
+  
   const [subs, setSubs] = useState(null);
   const [sub, setSub] = useState(null);
-  const [subsID, setSubsID] = useState(null);
+  
   const [types, setTypes] = useState(null);
   const [type, setType] = useState(null);
   const [catname, setCatName] = useState(null);
@@ -168,71 +180,8 @@ const AddProduct = () => {
   const [typename, setTypesName] = useState(null);
   const [att, setAtt] = useState({});
 
-  const CheckboxGroup = Checkbox.Group;
-  const checkAll = plainOptions.length === checkedList.length;
-  const indeterminate =
-    checkedList.length > 0 && checkedList.length < plainOptions.length;
+ 
 
-  const handleChangeRadio = (event) => {
-    const { name, value } = event.target;
-    setSelectedValues((prevState) => ({
-      ...prevState,
-      [name]: value,
-    }));
-    console.log(selectedValues);
-  };
-
-  const onChange = (list) => {
-    setCheckedList(list);
-  };
-
-  const onCheckAllChange = (e) => {
-    setCheckedList(e.target.checked ? plainOptions : []);
-  };
-
-  const inputRef = useRef(null);
-  const editInputRef = useRef(null);
-  useEffect(() => {
-    if (inputVisible) {
-      inputRef.current?.focus();
-    }
-  }, [inputVisible]);
-  useEffect(() => {
-    editInputRef.current?.focus();
-  }, [editInputValue]);
-  const handleClose = (removedTag) => {
-    const newTags = tags.filter((tag) => tag !== removedTag);
-    console.log(newTags);
-    setTags(newTags);
-  };
-  const showInput = () => {
-    setInputVisible(true);
-  };
-  const handleInputChange = (e) => {
-    setInputValue(e.target.value);
-  };
-  const handleInputConfirm = () => {
-    if (inputValue && !tags.includes(inputValue)) {
-      setTags([...tags, inputValue]);
-    }
-    setInputVisible(false);
-    setInputValue("");
-  };
-  const handleEditInputChange = (e) => {
-    setEditInputValue(e.target.value);
-  };
-  const handleEditInputConfirm = () => {
-    const newTags = [...tags];
-    newTags[editInputIndex] = editInputValue;
-    setTags(newTags);
-    setEditInputIndex(-1);
-    setEditInputValue("");
-  };
-  const tagPlusStyle = {
-    height: 22,
-    background: token.colorBgContainer,
-    borderStyle: "dashed",
-  };
   const handleChange = (info) => {
     if (info.file.status === "uploading") {
       setLoading(true);
@@ -258,31 +207,46 @@ const AddProduct = () => {
   };
   const handlNameChange = (e) => {
     e.preventDefault();
+  
+    // Update product state
     setProduct((prev) => ({ ...prev, [e.target.name]: e.target.value }));
-    setAtt({
-      ...att,
-      size: Object.values(checkedList).join(","),
-      color: Object.values(tags).join(","),
+  
+    // Use the functional updater to ensure att is up-to-date
+    setAtt((prevAtt) => {
+      const currentCheckedList = [...checkedList]; // Access the latest checkedList
+      const currentTags = [...tags]; // Access the latest tags
+  
+      const updatedAtt = {
+        ...prevAtt,
+        ...(currentCheckedList.length > 0 && { size: currentCheckedList.join(",") }),
+        ...(currentTags.length > 0 && { color: currentTags.join(",") }),
+      };
+  
+      // Log updated attributes for debugging
+      console.log("Updated Attributes:", att);
+  
+      // Build product details using the most recent states
+      const productDetails = {
+        ...product,
+        productimage: logoImageUrl,
+        shopname: shops,
+        catID: cat,
+        subID: sub,
+        typeID: type,
+        attribute: updatedAtt,
+      };
+  
+      console.log("Product Details:", productDetails);
+  
+      return updatedAtt; // Return the updated attributes
     });
-    console.log(att);
-    const productDetails = {
-      ...product,
-      productimage: logoImageUrl,
-      shopname: shops,
-      catID: cat,
-      subID: sub,
-      typeID: type,
-      attribute: att,
-    };
-    console.log(productDetails);
   };
+  
+  
   const handleSubmit = async () => {
     setIsLoading(true);
 
-    setAtt({
-      size: Object.values(checkedList).join(","),
-      color: Object.values(tags).join(","),
-    });
+    
 
     const productDetails = {
       ...product,
@@ -340,26 +304,45 @@ const AddProduct = () => {
         console.error("Error fetching users:", err);
       }
     };
+    const getSubs = async () => {
+      try {
+        const res = await newRequest.get(`/category/sub/${cat}`);
+        setSubs(res.data);
+      } catch (err) {
+        console.error("Error fetching users:", err);
+      }
+    };
+    const getTypes = async () => {
+      try {
+        const res = await newRequest.get(`/category/type/${sub}`);
+        setTypes(res.data);
+      } catch (err) {
+        console.error("Error fetching users:", err);
+      }
+    };
+    getTypes();
+    getSubs();
     getCats();
-  }, []);
+  }, [cat , sub , type]);
 
   const handleChangeShop = (event) => {
     setShops(event.target.value);
   };
 
-  const handleChangeField = (event, field, name) => {
+  const handleChangeField = (event, field) => {
     const value = event.target.value;
-
+console.log(field)
     switch (field) {
       case "cat":
         setCat(value); // Only update the ID here
-        setCatName(cats.find((cat) => cat.idCATEGORIES === value).categoryname);
-
+        setCatName(cats.find((cat) => cat.id === value).name);
+        setSub(null);
+        setType(null);
         break;
       case "sub":
         setSub(value);
         setSubName(subs.find((sub) => sub.id === value).name);
-
+        setType(null);
         break;
       case "type":
         setType(value);
@@ -372,33 +355,35 @@ const AddProduct = () => {
     // You can now directly access the category name from the 'cats' array
   };
 
-  // get Subs
 
-  useEffect(() => {
-    const getSubs = async () => {
-      try {
-        const res = await newRequest.get(`/category/sub/${cat}`);
-        setSubs(res.data);
-      } catch (err) {
-        console.error("Error fetching users:", err);
-      }
+
+ 
+
+
+  const customTextField = {
+    flex: 1,
+      minWidth:'40%', borderRadius:1 , bgcolor:mode == "light" ? whiteTextColor : colorAccentMoreTransparent ,  ".css-1t8l2tu-MuiInputBase-input-MuiOutlinedInput-input":{color: theme == "light" ? primaryTextColor : elementGrayBackground},
+                  "& .MuiOutlinedInput-root": {
+                    
+                    "&:hover fieldset": {
+                      borderColor: mode == "light" ? lightMain : colorAccentSoft, // Hover border color
+                    },
+                    "&.Mui-focused fieldset": {
+                      borderColor: mode == "light" ? main : colorAccentMedium, // Focused border color
+                    },
+                  },
+                  "& .MuiInputLabel-root": {
+                    color: secondText, // Default label color
+                  },
+                  "& .MuiInputLabel-root.Mui-focused": {
+                    color: mode == "light" ? main : colorAccentMain, // Focused label color
+                  },
+                  "& .MuiInputLabel-root.Mui-error": {
+                    color: "orange", // Error label color
+                  },
+              ".css-1n4twyu-MuiInputBase-input-MuiOutlinedInput-input" : { color:theme == "light" ? primaryTextColor : elementGrayBackground}
+                
     };
-    getSubs();
-  }, [cat]);
-
-  // get Types
-
-  useEffect(() => {
-    const getTypes = async () => {
-      try {
-        const res = await newRequest.get(`/category/type/${sub}`);
-        setTypes(res.data);
-      } catch (err) {
-        console.error("Error fetching users:", err);
-      }
-    };
-    getTypes();
-  }, [sub]);
 
   const uploadButton = (
     <button
@@ -409,16 +394,16 @@ const AddProduct = () => {
       type="button"
     >
       {loading ? (
-        <LoadingOutlined style={{ fontSize: 50, color: main }} />
+        <LoadingOutlined style={{ fontSize: 50, color: mode == "light" ? main : colorAccentMain }} />
       ) : (
-        <CloudUploadTwoTone style={{ color: main, fontSize: 50 }} />
+        <CloudUploadTwoTone style={{ color: mode == "light" ? main : colorAccentMain , fontSize: 50 }} />
       )}
       <div
         style={{
           marginTop: 8,
         }}
       >
-        <Required>
+        <Required theme={mode}>
           <Span>Upload an image</Span> Or drag and drop. png,jpg
         </Required>
       </div>
@@ -460,624 +445,84 @@ const AddProduct = () => {
       desc: <>Add some basic information about your product here</>,
       body: (
         <>
-          <InputContainer>
-            <Label>
-              Name <Span style={{ color: darkRed }}>*</Span>
-            </Label>
-            <InputText
-              name="productname"
-              onChange={(e) => handlNameChange(e)}
-            ></InputText>
-          </InputContainer>
-          <InputContainer>
-            <Label>Category</Label>
-            <FormControl sx={{ width: "100%" }}>
-              <InputLabel id="demo-simple-select-helper-label">
-                Categories
-              </InputLabel>
-              <Select
-                labelId="demo-simple-select-helper-label"
-                id="demo-simple-select-helper"
-                value={cat}
-                label="Categories"
-                onChange={(e) =>
-                  handleChangeField(
-                    e,
-                    "cat",
-                    cats.find((cat) => cat.idCATEGORIES === e.target.value)
-                      ?.categoryname
-                  )
-                }
-              >
-                {cats?.map((cat) => (
-                  <MenuItem name={cat?.categoryname} value={cat?.idCATEGORIES}>
-                    {cat.categoryname}
-                  </MenuItem>
-                ))}
-              </Select>
-              <FormHelperText>
-                Please Select Your Product Category
-              </FormHelperText>
-            </FormControl>
-          </InputContainer>
+        <InputField mode={mode} type={'text'} name={"Name"} inputName={"productname"} handlNameChange={handlNameChange} />
+        <InputField mode={mode} type={'select'} name={"Category"} handleChangeField={handleChangeField} itemList={cats} style={customTextField} selectLabel="Categories" selectValue={cat} selectType="cat"/>
           {cat != null ? (
-            <InputContainer>
-              <Label>Sub Category</Label>
-              <FormControl sx={{ width: "100%" }}>
-                <InputLabel id="demo-simple-select-helper-label">
-                  Sub Categories
-                </InputLabel>
-                <Select
-                  labelId="demo-simple-select-helper-label"
-                  id="demo-simple-select-helper"
-                  value={sub}
-                  label="Sub Categories"
-                  onChange={(e) => handleChangeField(e, "sub")}
-                >
-                  {subs?.map((sub) => (
-                    <MenuItem value={sub?.id}>{sub.name}</MenuItem>
-                  ))}
-                </Select>
-                <FormHelperText>
-                  Please Select Your Product Sub Category
-                </FormHelperText>
-              </FormControl>
-            </InputContainer>
+        <InputField mode={mode} type={'select'} name={"Sub Category"} handleChangeField={handleChangeField} itemList={subs} style={customTextField} selectLabel="Sub Categories" selectValue={sub} selectType="sub"/>
           ) : (
             ""
           )}
           {sub != null ? (
-            <InputContainer>
-              <Label>Type</Label>
-              <FormControl sx={{ width: "100%" }}>
-                <InputLabel id="demo-simple-select-helper-label">
-                  Types
-                </InputLabel>
-                <Select
-                  labelId="demo-simple-select-helper-label"
-                  id="demo-simple-select-helper"
-                  value={type}
-                  label="Types"
-                  onChange={(e) => handleChangeField(e, "type")}
-                >
-                  {types?.map((type) => (
-                    <MenuItem value={type?.id}>{type.name}</MenuItem>
-                  ))}
-                </Select>
-                <FormHelperText>Please Select Your Product Type</FormHelperText>
-              </FormControl>
-            </InputContainer>
+                    <InputField mode={mode} type={'select'} name={"Types"} handleChangeField={handleChangeField} itemList={types} style={customTextField} selectLabel="Types" selectValue={type} selectType="type"/>
+            
           ) : (
             ""
           )}
-          {catname !== "Cloths" ? (
-            catname === "Electronics" ? (
-              <>
-                <InputContainer>
-                  {subname == "Mobiles" || subname == "Tablets" ? (
-                    <InputContainer>
-                      <Label>
-                        Camera<Span style={{ color: "red" }}>*</Span>
-                      </Label>
-                      <InputText
-                        name="camera"
-                        type="number"
-                        onChange={(e) => {
-                          handlNameChange(e), handleAtt(e);
-                        }}
-                        placeholder="48 , 108"
-                      />
-                    </InputContainer>
-                  ) : null}
-                  <Label>
-                    RAM <Span style={{ color: "red" }}>*</Span>
-                  </Label>
-                  <InputText
-                    name="RAM"
-                    type="number"
-                    onChange={(e) => {
-                      handlNameChange(e), handleAtt(e);
-                    }}
-                    placeholder="RAM (GB)"
-                  />
-                </InputContainer>
-                <InputContainer>
-                  <Label>
-                    CPU <Span style={{ color: "red" }}>*</Span>
-                  </Label>
-                  <InputText
-                    name="CPU"
-                    type="text"
-                    onChange={(e) => {
-                      handlNameChange(e), handleAtt(e);
-                    }}
-                    placeholder="ex: Intel Core i7"
-                  />
-                </InputContainer>
-                <InputContainer>
-                  <Label>
-                    GPU <Span style={{ color: "red" }}>*</Span>
-                  </Label>
-                  <InputText
-                    name="GPU"
-                    type="text"
-                    onChange={(e) => {
-                      handlNameChange(e), handleAtt(e);
-                    }}
-                    placeholder="ex: RTX 4090 Ti "
-                  />
-                </InputContainer>
-                <InputContainer>
-                  <Label>
-                    Battery Capacity <Span style={{ color: "red" }}>*</Span>
-                  </Label>
-                  <InputText
-                    name="battery"
-                    type="number"
-                    onChange={(e) => {
-                      handlNameChange(e), handleAtt(e);
-                    }}
-                    placeholder="in MW"
-                  />
-                </InputContainer>
-                <InputContainer>
-                  <Label>
-                    Storage <Span style={{ color: "red" }}>*</Span>
-                  </Label>
-                  <InputText
-                    name="storage"
-                    type="number"
-                    onChange={(e) => {
-                      handlNameChange(e), handleAtt(e);
-                    }}
-                    placeholder="in GB"
-                  />
-                </InputContainer>
-                <InputContainer>
-                  <Label>
-                    Screen Size <Span style={{ color: "red" }}>*</Span>
-                  </Label>
-                  <InputText
-                    name="screen"
-                    type="number"
-                    onChange={(e) => {
-                      handlNameChange(e), handleAtt(e);
-                    }}
-                    placeholder="15, 14"
-                  />
-                </InputContainer>
-              </>
-            ) : subname == "Tools" ? (
-              <>
-                <InputContainer>
-                  <Label>
-                    Craft Material <Span style={{ color: "red" }}>*</Span>
-                  </Label>
-                  <InputText
-                    name="material"
-                    type="text"
-                    onChange={(e) => {
-                      handlNameChange(e), handleAtt(e);
-                    }}
-                    placeholder="Steel , Plastique , Carbon"
-                  />
-                </InputContainer>
-
-                <InputContainer>
-                  <Label>
-                    Weight <Span style={{ color: "red" }}>*</Span>
-                  </Label>
-                  <InputText
-                    name="weight"
-                    type="text"
-                    onChange={(e) => {
-                      handlNameChange(e), handleAtt(e);
-                    }}
-                    placeholder="KG"
-                  />
-                  <FormHelperText>
-                    if your product have different weight add " , " beetween
-                    them
-                  </FormHelperText>
-                </InputContainer>
-
-                <InputContainer>
-                  <Label>
-                    Height <Span style={{ color: "red" }}>*</Span>
-                  </Label>
-                  <InputText
-                    name="height"
-                    type="number"
-                    onChange={(e) => {
-                      handlNameChange(e), handleAtt(e);
-                    }}
-                    placeholder="cm"
-                  />
-                </InputContainer>
-              </>
-            ) : catname === "Food" ? (
-              <>
-                <InputContainer>
-                  <Label>
-                    Expiration Date <Span style={{ color: "red" }}>*</Span>
-                  </Label>
-                  <InputText
-                    name="expiration"
-                    type="date"
-                    onChange={(e) => {
-                      handlNameChange(e), handleAtt(e);
-                    }}
-                  />
-                </InputContainer>
-                <InputContainer>
-                  <Label>
-                    Calories (100g) <Span style={{ color: "red" }}>*</Span>
-                  </Label>
-                  <InputText
-                    name="Cal"
-                    type="number"
-                    onChange={(e) => {
-                      handlNameChange(e), handleAtt(e);
-                    }}
-                  />
-                </InputContainer>
-                <InputContainer>
-                  <Label>
-                    Protein (100g) <Span style={{ color: "red" }}>*</Span>
-                  </Label>
-                  <InputText
-                    name="protein"
-                    type="number"
-                    onChange={(e) => {
-                      handlNameChange(e), handleAtt(e);
-                    }}
-                  />
-                </InputContainer>
-                <InputContainer>
-                  <Label>
-                    Carbohydrates (100g) <Span style={{ color: "red" }}>*</Span>
-                  </Label>
-                  <InputText
-                    name="carbs"
-                    type="number"
-                    onChange={(e) => {
-                      handlNameChange(e), handleAtt(e);
-                    }}
-                  />
-                </InputContainer>
-                <InputContainer>
-                  <Label>
-                    Sugar (100g) <Span style={{ color: "red" }}>*</Span>
-                  </Label>
-                  <InputText
-                    name="sugar"
-                    type="number"
-                    onChange={(e) => {
-                      handlNameChange(e), handleAtt(e);
-                    }}
-                  />
-                </InputContainer>
-              </>
-            ) : catname === "Dicors" ? (
-              <>
-                <InputContainer>
-                  <Label>
-                    Craft Material <Span style={{ color: "red" }}>*</Span>
-                  </Label>
-                  <InputText
-                    name="material"
-                    type="text"
-                    onChange={(e) => {
-                      handlNameChange(e), handleAtt(e);
-                    }}
-                    placeholder="Steel , Plastique , Carbon"
-                  />
-                </InputContainer>
-                <InputContainer>
-                  <Label>
-                    Dimensions <Span style={{ color: "red" }}>*</Span>
-                  </Label>
-                  <InputText
-                    name="dimension"
-                    type="text"
-                    onChange={(e) => {
-                      handlNameChange(e), handleAtt(e);
-                    }}
-                    placeholder="Height, width, depth (e.g., 200 cm x 100 cm x 80 cm)"
-                  />
-                </InputContainer>
-                <InputContainer>
-                  <Label>
-                    Weight (Kg) <Span style={{ color: "red" }}>*</Span>
-                  </Label>
-                  <InputText
-                    name="weight"
-                    type="number"
-                    onChange={(e) => {
-                      handlNameChange(e), handleAtt(e);
-                    }}
-                  />
-                </InputContainer>
-                <InputContainer>
-                  <Label>
-                    Color <Span style={{ color: "red" }}>*</Span>
-                  </Label>
-                  <InputText
-                    name="colors"
-                    type="text"
-                    onChange={(e) => {
-                      handlNameChange(e), handleAtt(e);
-                    }}
-                    placeholder="red , black , blue"
-                  />
-                  <FormHelperText>
-                    if your product have different colors add " , " beetween
-                    them
-                  </FormHelperText>
-                </InputContainer>
-                {subname == "Furniture\n" ? (
-                  <>
-                    <InputContainer>
-                      <Label>
-                        Shape <Span style={{ color: "red" }}>*</Span>
-                      </Label>
-                      <InputText
-                        name="shape"
-                        type="text"
-                        onChange={(e) => {
-                          handlNameChange(e), handleAtt(e);
-                        }}
-                        placeholder="Round, Rectangular, L-shaped, etc."
-                      />
-                    </InputContainer>
-                    <InputContainer>
-                      <Label>
-                        Finish <Span style={{ color: "red" }}>*</Span>
-                      </Label>
-                      <InputText
-                        name="finish"
-                        type="text"
-                        onChange={(e) => {
-                          handlNameChange(e), handleAtt(e);
-                        }}
-                        placeholder="Matte, Glossy, Polished, Stained, Painted."
-                      />
-                    </InputContainer>
-                  </>
-                ) : subname == "Home Appliances" ? (
-                  <>
-                    <InputContainer>
-                      <Label>
-                        Power Rating (V) <Span style={{ color: "red" }}>*</Span>
-                      </Label>
-                      <InputText
-                        name="power"
-                        type="number"
-                        onChange={(e) => {
-                          handlNameChange(e), handleAtt(e);
-                        }}
-                        placeholder="voltage required (e.g., 220V)"
-                      />
-                    </InputContainer>
-                    <InputContainer>
-                      <Label>
-                        Primary Funtion <Span style={{ color: "red" }}>*</Span>
-                      </Label>
-                      <InputText
-                        name="function"
-                        type="text"
-                        onChange={(e) => {
-                          handlNameChange(e), handleAtt(e);
-                        }}
-                        placeholder="E.g., Cooling, Heating, Washing, Cooking."
-                      />
-                    </InputContainer>
-                    <InputContainer>
-                      <Label>
-                        Smart Features <Span style={{ color: "red" }}>*</Span>
-                      </Label>
-                      <InputText
-                        name="smart"
-                        type="text"
-                        onChange={(e) => {
-                          handlNameChange(e), handleAtt(e);
-                        }}
-                        placeholder="Wi-Fi connectivity, Voice control, App integration."
-                      />
-                    </InputContainer>
-                    {typename == "Laundry" ? (
-                      <InputContainer>
-                        <Label>
-                          Capacity (Kg) <Span style={{ color: "red" }}>*</Span>
-                        </Label>
-                        <InputText
-                          name="capacity"
-                          type="number"
-                          onChange={(e) => {
-                            handlNameChange(e), handleAtt(e);
-                          }}
-                          placeholder="Cloths Weight"
-                        />
-                      </InputContainer>
-                    ) : (
-                      <InputContainer>
-                        <Label>
-                          Temperature Range (°C){" "}
-                          <Span style={{ color: "red" }}>*</Span>
-                        </Label>
-                        <InputText
-                          name="temperature"
-                          type="number"
-                          onChange={(e) => {
-                            handlNameChange(e), handleAtt(e);
-                          }}
-                          placeholder="E.g., Fridge: 1-8°C, Freezer: -15°C to -25°C."
-                        />
-                      </InputContainer>
-                    )}
-                  </>
-                ) : (
-                  ""
-                )}
-              </>
-            ) : (
-              ""
-            )
-          ) : (
+          {catname == "Cloths" ? 
+           (
             <>
-              <InputContainer>
-                <Label>Color</Label>
-                <div
-                  style={{ display: "flex", gap: "4px 0", flexWrap: "wrap" }}
-                >
-                  {tags.map((tag, index) => {
-                    if (editInputIndex === index) {
-                      return (
-                        <Input
-                          ref={editInputRef}
-                          key={tag}
-                          size="small"
-                          style={{
-                            width: 64,
-                            height: 22,
-                            marginInlineEnd: 8,
-                            verticalAlign: "top",
-                          }}
-                          value={editInputValue}
-                          onChange={(e) => {
-                            handleEditInputChange(e);
-                            handleInputChange(e);
-                            handlNameChange(e);
-                          }}
-                          onBlur={handleEditInputConfirm}
-                          onPressEnter={(e) => handleEditInputConfirm(e)}
-                        />
-                      );
-                    }
-                    const isLongTag = tag.length > 20;
-                    const tagElem = (
-                      <Tag
-                        color={tag}
-                        key={tag}
-                        closable={index !== 0}
-                        style={{ userSelect: "none" }}
-                        onClose={() => handleClose(tag)}
-                      >
-                        <span
-                          onDoubleClick={(e) => {
-                            if (index !== 0) {
-                              setEditInputIndex(index);
-                              setEditInputValue(tag);
-                              e.preventDefault();
-                            }
-                          }}
-                        >
-                          {isLongTag ? `${tag.slice(0, 20)}...` : tag}
-                        </span>
-                      </Tag>
-                    );
-                    return isLongTag ? (
-                      <Tooltip title={tag} key={tag}>
-                        {tagElem}
-                      </Tooltip>
-                    ) : (
-                      tagElem
-                    );
-                  })}
-                  {inputVisible ? (
-                    <Input
-                      ref={inputRef}
-                      type="text"
-                      size="small"
-                      name="color"
-                      style={{
-                        width: 64,
-                        height: 22,
-                        marginInlineEnd: 8,
-                        verticalAlign: "top",
-                      }}
-                      value={inputValue}
-                      onChange={(e) => {
-                        handleInputChange(e);
-                        handlNameChange(e);
-                      }}
-                      onBlur={handleInputConfirm}
-                      onPressEnter={(e) => {
-                        handleInputConfirm(e);
-                        handlNameChange(e);
-                      }}
-                    />
-                  ) : (
-                    <Tag
-                      style={tagPlusStyle}
-                      icon={<PlusOutlined />}
-                      onClick={showInput}
-                    >
-                      New Color
-                    </Tag>
-                  )}
-                </div>
-              </InputContainer>
-              <InputContainer>
-                <Label>Size</Label>
-                <Checkbox
-                  name="size"
-                  indeterminate={indeterminate}
-                  onClick={(e) => {
-                    onCheckAllChange(e);
-                    handlNameChange(e);
-                  }}
-                  checked={checkAll}
-                >
-                  Check all
-                </Checkbox>
-                <Divider />
-                <CheckboxGroup
-                  name="size"
-                  options={plainOptions}
-                  value={checkedList}
-                  onClick={(e) => {
-                    handlNameChange(e);
-                  }}
-                  onChange={onChange}
-                />
-              </InputContainer>
-            </>
-          )}
 
-          <InputContainer>
+<ClothsAttirbutes mode={mode} handlNameChange={handlNameChange} tags={tags} setTags={setTags} sizeValue={checkedList} setCheckedList={setCheckedList} handlAtt={handleAtt} type={typename}/>
+             
+            </>
+          ) :  catname === "Electronics" ? (
+            <ElectronicsAttributes   mode={mode} handlNameChange={handlNameChange} handlAtt={handleAtt} type={subname} />
+          ) : catname == "Fitness" ? (
+            
+            <FitnessAttribute  mode={mode} handlNameChange={handlNameChange} sizeValue={checkedList} setCheckedList={setCheckedList} handlAtt={handleAtt} type={subname} />
+              
+          ) : catname === "Food" ? (
+            <FoodAttributes mode={mode} handlNameChange={handlNameChange} handlAtt={handleAtt} />
+          ) : catname === "Decors" ? (
+            <DecorsAttributes mode={mode} handlNameChange={handlNameChange} tags={tags} setTags={setTags} handlAtt={handleAtt} type={subname} />
+          ) : catname === "Book" ? (
+            <BooksAttribute mode={mode} handlNameChange={handlNameChange} handlAtt={handleAtt} />
+          ) : catname == "Cleaning Tools" ? 
+          ( 
+            <CleaningTools mode={mode} handlNameChange={handlNameChange} tags={tags} setTags={setTags} handlAtt={handleAtt} type={subname} />
+          
+        ) : catname == "Dishes" ?
+        (
+          <DishesAttributes mode={mode} handlNameChange={handlNameChange} tags={tags} setTags={setTags} handlAtt={handleAtt} type={subname} />
+        ) : ('')
+         }
+
+          <InputContainer theme={mode}>
             <Label>Description</Label>
             <Area
+            theme={mode}
               type="textarea"
               name="productdesc"
               onChange={handlNameChange}
             />
           </InputContainer>
-          <InputContainer>
+          <InputContainer theme={mode}>
             <Label>
               Price <Span style={{ color: "red" }}>*</Span>
             </Label>
             <InputText
               name="productprice"
               type="number"
+              theme={mode}
               onChange={handlNameChange}
             ></InputText>
           </InputContainer>
-          <InputContainer></InputContainer>
-          <InputContainer>
+          
+          <InputContainer theme={mode}>
             <Label>
               Discount <Span style={{ color: "red" }}></Span>
             </Label>
             <InputText
               name="discount"
               type="number"
+              theme={mode}
               onChange={handlNameChange}
             ></InputText>
           </InputContainer>
 
-          <InputContainer>
+          <InputContainer >
             <Label>Shops</Label>
-            <FormControl sx={{ width: "100%" }}>
+            <FormControl sx={customTextField}>
               <InputLabel id="demo-simple-select-helper-label">
                 Shops
               </InputLabel>
@@ -1092,16 +537,17 @@ const AddProduct = () => {
                   <MenuItem value={shop?.idSHOP}>{shop.shopname}</MenuItem>
                 ))}
               </Select>
-              <FormHelperText>Select Your Shop</FormHelperText>
+              <FormHelperText sx={{color: mode == "light" ? primaryTextColor : elementGrayBackground}}>Select Your Shop</FormHelperText>
             </FormControl>
           </InputContainer>
-          <InputContainer>
+          <InputContainer theme={mode}>
             <Label>
               Quantity <Span style={{ color: "red" }}>*</Span>
             </Label>
             <InputText
               name="qte"
               type="number"
+              theme={mode}
               onChange={handlNameChange}
             ></InputText>
           </InputContainer>
@@ -1111,15 +557,15 @@ const AddProduct = () => {
   ];
 
   return (
-    <Container>
+    <Container theme={mode}>
       <FormTitle>Add Product</FormTitle>
       {form.map((item) => (
         <FormContainer key={item.title}>
-          <Left>
+          <Left theme={mode}>
             <Title>{item.title}</Title>
             <Desc>{item.desc}</Desc>
           </Left>
-          <Right>{item.body}</Right>
+          <Right theme={mode}>{item.body}</Right>
         </FormContainer>
       ))}
 

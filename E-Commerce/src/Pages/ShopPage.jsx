@@ -24,6 +24,7 @@ import {
   secondaryTextColor,
   whiteTextColor,
 } from "../Colors";
+import LazyAvatar from "../Components/Pending/LazyAvatar";
 
 const items = [
   {
@@ -284,7 +285,8 @@ const ShopPage = () => {
           <ShopInfo theme={theme}>
             <Top>
               <Profile>
-                <Avatar src={shop.ShopImage} sx={{ width: 85, height: 85 }} />
+                <LazyAvatar src={shop.ShopImage} sx={{ width: 85, height: 85 , bgcolor:'transparent'}}/>
+              
                 <Info>
                   <Date>Since {shop.CreatedAt}</Date>
                   <ShopName>{shop.ShopName} </ShopName>
@@ -303,12 +305,12 @@ const ShopPage = () => {
             <Center>
               {items.map((item) => (
                 <Item theme={theme}>
-                  <ItemIcon src={item.img} />
+                  <LazyAvatar src={item.img} sx={{ width: 40, height: 40 , bgcolor:'transparent'}}/>
                   <ItemTitle>{item.title}</ItemTitle>
                 </Item>
               ))}
             </Center>
-            <Divider sx={{bgcolor:theme == "light" ? elementGrayBackground : colorElementBackgroundGray}}/>
+            <Divider sx={{  bgcolor:theme == "light" ? elementGrayBackground : colorElementBackgroundGray}}/>
             <Bottom>
               <Title>Address</Title>
               <BottomInfo>
@@ -325,8 +327,9 @@ const ShopPage = () => {
         </InfoContainer>
         <ProductContainer>
           <Cover theme={theme}>
+          <LazyAvatar src={shop.ShopCover} sx={{ width:'100%', height:'100%'  , borderRadius:0 , objectFit:'fill' , bgcolor:'transparent'}} />
 
-            <img src={shop.ShopCover} style={{width:'100%', height:'100%' , objectFit:'contain'}} />
+           
           </Cover>
           {products != "" ? (
             <ShopProducts role={user?.userRole}>

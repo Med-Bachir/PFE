@@ -3,6 +3,7 @@ import React from 'react'
 import styled from 'styled-components';
 import { colorBackgroundBlack, colorPrimaryBlack, grayBackground, whiteTextColor } from '../Colors';
 import { useSelector } from 'react-redux';
+import LazyAvatar from './Pending/LazyAvatar';
 
 
 const Item = styled.div`
@@ -83,7 +84,10 @@ const StaticsContainer = ({color , title , value , icon , loading }) => {
     </Item>
       :
       <Item theme={theme} color={color}>
-      <ItemIcon theme={theme} src={icon} />
+            <LazyAvatar
+  src={icon}
+  sx={{ borderRadius: 2, width: 50, height: 50, mr: 4 , backgroundColor:'transparent' }}
+/>
       <ItemInfo>
       <ItemTitle>{title}</ItemTitle>
       <ItemStatic>{value}</ItemStatic>

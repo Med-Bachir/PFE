@@ -22,13 +22,11 @@ import Lottie from "lottie-react";
 // Styled Component
 
 const All = styled.div``;
-
 const MotherContainer = styled.div`
   transition: all 0.5s ease-in-out;
   filter: ${(props) => (props.open ? "brightness(80%)" : "")};
   width: 100%;
 `;
-
 const Container = styled.div`
   display: flex;
   justify-content: center;
@@ -39,16 +37,13 @@ const Container = styled.div`
   background-color: ${(props) =>
     props.theme == "light" ? whiteTextColor : colorPrimaryBlack};
   transition: 200ms ease-in-out;
-
   @media (max-width: 768px) {
-    
     text-align: center;
   }
 `;
 
 const Wrapper = styled.div`
   transition: 200ms ease-in-out;
-
   width: 100%;
   min-height: calc(100vh - 80px);
   display: flex;
@@ -58,13 +53,9 @@ const Wrapper = styled.div`
   overflow: hidden;
 
   @media (max-width: 768px) {
-    
-    
     flex-direction: column-reverse;
-    
   }
 `;
-
 const SearchContainer = styled.div`
   display: flex;
   flex-direction: column;
@@ -75,16 +66,14 @@ const SearchContainer = styled.div`
   height: 100%;
   padding: 0 32px;
   color: ${(props) =>
-    props.theme == "light" ? primaryTextColor : whiteTextColor};
+  props.theme == "light" ? primaryTextColor : whiteTextColor};
   transition: 200ms ease-in-out;
 
   @media (max-width: 768px) {
     padding: 20px;
-  
     width: 100%;
   }
 `;
-
 const SearchTitle = styled.h1`
   font-size: 48px;
   margin-bottom: 20px;
@@ -93,7 +82,6 @@ const SearchTitle = styled.h1`
     font-size: 32px;
   }
 `;
-
 const SearchPara = styled.p`
   font-size: 17px;
   margin-bottom: 30px;
@@ -121,14 +109,13 @@ const SearchInput = styled.input`
   border-top-left-radius: 10px;
   border-bottom-left-radius: 10px;
   transition: 200ms ease-in-out;
-
   border: none;
   padding: 20px 10px;
   background-color: ${(props) =>
-    props.theme == "light" ? grayBackground : colorAccentDarkTransparent};
+  props.theme == "light" ? grayBackground : colorAccentDarkTransparent};
   color: ${(props) =>
-    props.theme == "light" ? primaryTextColor : whiteTextColor};
-
+  props.theme == "light" ? primaryTextColor : whiteTextColor};
+  // ON FOCUS
   &:focus {
     border: ${(props) =>
       props.theme == "light"
@@ -150,19 +137,17 @@ const SearchButton = styled.button`
   border-top-right-radius: 10px;
   border-bottom-right-radius: 10px;
   background-color: ${(props) =>
-    props.theme == "light" ? main : colorAccentMedium};
-
+  props.theme == "light" ? main : colorAccentMedium};
   color: ${whiteTextColor};
   font-weight: 600;
   font-size: 17px;
   cursor: pointer;
   border: 2px solid;
   border-color: ${(props) =>
-    props.theme == "light" ? main : colorAccentMedium};
-
+  props.theme == "light" ? main : colorAccentMedium};
   padding: 20px 10px;
   transition: all 0.2s ease-in-out;
-
+  // ON HOVER
   &:hover {
     opacity: 0.8;
   }
@@ -176,7 +161,7 @@ const SearchButton = styled.button`
 const ProductConatiner = styled.div`
   display: flex;
   background-color: ${(props) =>
-    props.theme == "light" ? grayBackground : colorBackgroundBlack};
+  props.theme == "light" ? grayBackground : colorBackgroundBlack};
   transition: 200ms ease-in-out;
 
   @media (max-width: 768px) {
@@ -188,10 +173,9 @@ const ProductConatiner = styled.div`
 const SideBarContainer = styled.div`
   height: calc(100vh - 80px);
   background-color: ${(props) =>
-    props.theme == "light" ? whiteTextColor : colorPrimaryBlack};
+  props.theme == "light" ? whiteTextColor : colorPrimaryBlack};
   color: ${(props) =>
-    props.theme == "light" ? primaryTextColor : whiteTextColor};
-
+  props.theme == "light" ? primaryTextColor : whiteTextColor};
   position: sticky;
   top: 80px;
   flex: 0.25;
@@ -202,6 +186,8 @@ const SideBarContainer = styled.div`
     flex: unset;
   }
 `;
+
+// PRODUCTS CONTAINER
 
 const ProductsContainer = styled.div`
   flex: 1;
@@ -246,8 +232,7 @@ const PHomepage = () => {
               </SearchInputContainer>
             </SearchContainer>
             <LottieContainer>
-
-            <Lottie animationData={ism} style={{ width: "100%" }} />
+              <Lottie animationData={ism} style={{ width: "100%" }} />
             </LottieContainer>
 
             <div
@@ -259,7 +244,7 @@ const PHomepage = () => {
                 bottom: -150,
                 borderRadius: "80% 0 0 0",
                 backgroundColor:
-                  theme == "light" ? lightSoftMain : colorAccentLight,
+                theme == "light" ? lightSoftMain : colorAccentLight,
                 zIndex: -1,
               }}
             />

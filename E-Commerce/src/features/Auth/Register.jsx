@@ -636,12 +636,8 @@ const customTextField = {
                 </Information>
               </PayInformation>
               Add your paiment prof here 
-              <Flex
-  gap="middle"
-  style={{
-    // Center alignment
-  }}
->
+ 
+
  
     <Upload
       name="avatar"
@@ -651,7 +647,7 @@ const customTextField = {
       action="https://660d2bd96ddfa2943b33731c.mockapi.io/api/upload"
       beforeUpload={beforeUpload}
       onChange={handleChangeImage}
-      style={{width:'600px' , color:'red'}}
+     
     >
       {imageUrl ? (
         <img
@@ -668,7 +664,7 @@ const customTextField = {
       )}
     </Upload>
   
-</Flex>
+
 
       <PaymentType name='prof' value={imageUrl}>
       <CreatButton theme={theme} onClick={(e) => {handleChange2(e) , setFinished(true) }} style={{width: !isMobile ? 200 : "100%" , marginRight:'auto'}} >Submit</CreatButton>

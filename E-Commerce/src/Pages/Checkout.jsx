@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import styled from "styled-components";
-import { colorAccentDark, colorAccentDarkTransparent, colorAccentLight, colorAccentMain, colorAccentMedium, colorAccentMediumTransparent, colorAccentMoreTransparent, colorAccentSoft, colorAccentSoftTransparent, colorAccentSub, colorAccentSubDark, colorBackgroundBlack, colorBackgroundGray, elementGrayBackground, gradientBackground, hovredText, lightMain, lightMedMain, lightSoftMain, main, medMain, primaryTextColor, secondText, softMain, softMainTransparent, transparentMain, whiteTextColor } from "../Colors";
+import { colorAccentDark, colorAccentDarkTransparent, colorAccentLight, colorAccentMain, colorAccentMedium, colorAccentMediumTransparent, colorAccentMoreTransparent, colorAccentSoft, colorAccentSoftTransparent, colorAccentSub, colorAccentSubDark, colorBackgroundBlack, colorBackgroundGray, colorElementBackgroundGray, darkMain, elementGrayBackground, gradientBackground, hovredText, lightMain, lightMedMain, lightSoftMain, main, medMain, primaryTextColor, secondText, softMain, softMainTransparent, transparentMain, whiteTextColor } from "../Colors";
 import {
   Avatar,
   Divider,
@@ -18,8 +18,11 @@ import newRequest from "../utils/newRequest";
 import AlertMessage from "../Components/Alert";
 import EmptyData from "../Components/Pending/EmptyData";
 import { useNavigate } from "react-router-dom";
+import MoreHorizTwoToneIcon from "@mui/icons-material/MoreHorizTwoTone";
+
 
 import { createTheme, ThemeProvider } from "@mui/material/styles";
+import LazyAvatar from "../Components/Pending/LazyAvatar";
 
 
 
@@ -34,6 +37,8 @@ const Container = styled.div`
 
   @media (max-width: 768px) {
     flex-direction: column;
+    height: auto;
+    gap: 32px;
   }
 `;
 
@@ -102,7 +107,7 @@ const Title = styled.div`
   color: ${whiteTextColor};
   margin: ${(props) => (props.type === "Action" ? "0 8px" : "")};
   flex: ${(props) =>
-    props.type === "product" ? 2 : props.type === "Action" ? "" : 1};
+    props.type === "product" ? 2 : 1};
   font-size: 18px;
   border-right: ${(props) => (props.type === "Action" ? "" : "1px solid #eee")};
   text-align: center;
@@ -116,7 +121,8 @@ const Type = styled.span`
 const ItemContainer = styled.div`
   display: flex;
   align-items: center;
-  padding: 8px 0 0 32px;
+  position: relative;
+  padding: 12px 0 12px 32px;
   @media (max-width: 768px) {
     padding: 8px 0 0 16px;
   }
@@ -132,8 +138,40 @@ const Item = styled.div`
 const Detail = styled.div`
   flex: 1;
   font-size: 18px;
-  border-right: 1px solid #eee;
+  border-right: 1px solid ${main};
   text-align: ${(props) => (props.type === "name" ? "" : "center")};
+`;
+const CartProduct= styled.div`
+min-width: 600px;
+
+`;
+const Attributs = styled.div`
+height : ${({selected}) => selected ? '130px' : '0px'};
+overflow: hidden;
+display: flex;
+flex-direction: column;
+margin: 0 20px;
+transition: height 200ms ease-in-out;
+`;
+const Attribute = styled.div`
+flex: 1;
+text-align: center;
+`;
+const Values = styled.div`
+display: flex;
+padding: 20px 0 20px 32px;
+background-color: ${props => props.theme == "light" ? softMainTransparent : colorAccentMoreTransparent};
+  
+  @media (max-width: 768px) {
+    padding: 10px 0 10px 16px;
+  }
+`;
+const Value = styled.div`
+flex: 1;
+text-align: center;
+display: flex;
+align-items: center;
+justify-content: center;
 `;
 
 const Right = styled.div`
@@ -171,6 +209,13 @@ const OrderDetail = styled.div`
   align-items: center;
 `;
 
+const Color = styled.div`
+padding: 4px 12px;
+max-width: 25px;
+border-radius: 8px;
+background-color: ${props => props.color};
+opacity: 0.8;
+`;
 const Info = styled.div``;
 
 const Button = styled.button`
@@ -188,6 +233,8 @@ const CheckOut = () => {
   const [message, setMessage] = useState("");
   const [type, setType] = useState("");
   const [open, setOpen] = useState(false);
+    const [selectedOrderId, setSelectedOrderId] = useState(null);
+  
   const [order, setOrder] = useState({
     state: "",
     city: "",
@@ -446,11 +493,13 @@ sx={customTextField}
         </InputContainer>
 
         <LeftTitle>Products </LeftTitle>
+
+
+
         <Products theme={theme}>
           <ItemContainerTitles theme={theme}>
-            <Title type="product">Pale</Title>
-            <Title>Color</Title>
-            <Title>Size</Title>
+            <Title type="product">Product</Title>
+           
             <Title>
               Price <Type>($)</Type>
             </Title>
@@ -461,31 +510,85 @@ sx={customTextField}
             <EmptyData text="No Pales To the Cart" />
           ) : (
             cart?.products.map((item, index) => (
+              <CartProduct>
+
               <ItemContainer key={index}>
                 <Item>
-                  <Avatar
-                    sx={{
-                      borderRadius: 2,
-                      mr: 3,
-                      border: "1px solid #eee",
-                      padding: "6px",
-                    }}
-                    src={item.image}
-                  />
+                 
+                      <LazyAvatar src={item.image} sx={{
+  borderRadius: 2,
+  mr: 3,
+  border:`1px solid ${ theme === "light" ? elementGrayBackground : colorElementBackgroundGray}` ,
+  paddingTop: "2px",
+bgcolor:'transparent'
+
+              }} />
+                           
                   <Detail type="name">{item.name}</Detail>
                 </Item>
-                <Detail>{item.attributes?.color}</Detail>
-                <Detail>{item.attributes?.size} </Detail>
+                
                 <Detail> $ {item.price - item.price * item.discount / 100} </Detail>
                 <Detail>{item.quantity}</Detail>
+                <div style={{flex:1 , padding:'0 8px' , display:'flex' , alignItems:'center' , justifyContent:'center'}}>
+
                 <IconButton
                   color="error"
-                  sx={{ outline: "none", m: 2 }}
+                  sx={{ outline: "none" }}
                   onClick={() => handleDelete(item.cart)}
-                >
+                  >
                   <DeleteOutlineTwoToneIcon />
                 </IconButton>
+                <IconButton
+                  color="secondary"
+                  onClick={() => setSelectedOrderId(selectedOrderId === item?.cart ? null : item?.cart)}
+                  sx={{ rotate: selectedOrderId === item?.cart ? "90deg" : "0deg", transition: "200ms" , outline: "none" }}
+                  >
+                    <MoreHorizTwoToneIcon color="secondary" />
+                  </IconButton>
+              </div>
+              
               </ItemContainer>
+                
+        <Attributs selected ={selectedOrderId === item?.cart}>
+             
+                
+
+          <ItemContainerTitles style={{ color: whiteTextColor,backgroundColor: theme == "light" ? main : colorAccentSubDark , padding:'12px 0 12px 32px'}}>
+
+          {item.attributes &&
+            Object.entries(item.attributes).map(([key, value]) => (
+              <Attribute key={key}>
+                {key} 
+              </Attribute>
+            ))}
+            </ItemContainerTitles>
+        
+                  <Values>
+                  {item.attributes &&
+    Object.entries(item.attributes).map(([key, value]) => {
+      if (key === "color" || key === "colors") {
+        return (
+          <Value key={key}>
+            <Color color={value} />
+          </Value>
+        );
+      }
+
+      return (
+        <Attribute key={key}>
+          {value}
+        </Attribute>
+      );
+    })}
+
+                
+               
+                  </Values>
+              </Attributs>
+              
+      
+               
+          </CartProduct>
             ))
           )}
         </Products>

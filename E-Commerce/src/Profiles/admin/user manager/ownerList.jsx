@@ -1,4 +1,4 @@
-import { Avatar, Divider, IconButton } from "@mui/material";
+import { Avatar, Box, Divider, IconButton, Pagination } from "@mui/material";
 import React, { useEffect, useState } from "react";
 import styled from "styled-components";
 import DeleteIcon from "@mui/icons-material/Delete";
@@ -8,8 +8,11 @@ import HowToRegTwoToneIcon from '@mui/icons-material/HowToRegTwoTone';
 import VisibilityTwoToneIcon from '@mui/icons-material/VisibilityTwoTone';
 import Loading from "../../../Components/Pending/Loading";
 import EmptyData from "../../../Components/Pending/EmptyData";
-import { colorAccentDarkTransparent, colorAccentLight, colorAccentMain, colorAccentMediumTransparent, colorErrorDark, colorErrorSoft, colorPrimaryBlack, darkRed, hovredImage, lightMain, lightSoftMain, main, primaryTextColor, softRed, whiteTextColor } from "../../../Colors";
+import { colorAccentDark, colorAccentDarkTransparent, colorAccentLight, colorAccentMain, colorAccentMediumTransparent, colorBackgroundBlack, colorErrorDark, colorErrorSoft, colorPrimaryBlack, darkRed, grayBackground, hovredImage, lightMain, lightSoftMain, main, primaryTextColor, softRed, whiteTextColor } from "../../../Colors";
+import PersonSearchIcon from '@mui/icons-material/PersonSearch';
+
 import { useSelector } from "react-redux";
+import SearchComponent from "../../../features/Search";
 
 
 const Container = styled.div`
@@ -156,20 +159,29 @@ z-index: 99;
 
 
 `
+
 const OwnersList = () => {
   const theme = useSelector(state => state.theme.mode)
+  const [filteredRows, setFilteredRows] = useState([]);
   const [users, setUsers] = useState([]);
   const [message, setMessage] = useState("");
   const [type, setType] = useState("");
   const [open, setOpen] = useState(false);
   const [show, setShow] = useState("");
   const [loading, setLoading] = useState(false);
+
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 10; // Number of shops per page
   const getUsers = async () => {
     try {
       const res = await newRequest.get("/seller");
       setUsers(res.data);
+      setFilteredRows(res.data)
       setLoading(true)
-    } catch (err) {}finally{
+    } catch (err) {
+      console.log(err)
+      
+    }finally{
       setTimeout(() => {
 
         setLoading(false)
@@ -217,13 +229,32 @@ const OwnersList = () => {
   const handlShow = (img) => {
 setShow(img)
   }
+
+
+
+  const handleSearchResults = (rows) => {
+    setFilteredRows(rows); // Update filtered rows in parent
+    setCurrentPage(1);
+  };
+  
+   
+    const paginatedRows = filteredRows.slice(
+      (currentPage - 1) * itemsPerPage,
+      currentPage * itemsPerPage
+    );
+  
+    const handlePageChange = (event, value) => {
+      setCurrentPage(value);
+    };
+  
   return (
     <Container>
       <AlertMessage open={open} setOpen={setOpen} message={message} type={type} />
 
-    <StaticContainer theme={theme}>
-  <StaticTitle theme={theme}>All Owners</StaticTitle>
-    </StaticContainer>
+      <StaticContainer theme={theme} style={{padding:'20px 20px 20px 0', display:'flex',alignItems:'center' , flexDirection:'row' , justifyContent:'space-between'}}>
+<SearchComponent data={users} onSearch={handleSearchResults} type={'Sellers'} />
+        
+      </StaticContainer>
   
   
   
@@ -241,7 +272,8 @@ setShow(img)
   
           <ColumnTag style={{ border: "none", flex: 1 }}>Action</ColumnTag>
         </Row>
-        {users != "" && !loading ? users.map((item) => (
+        {paginatedRows.length > 0 && !loading ? 
+          paginatedRows.map((item) => (
           <>
             <Row theme={theme} key={item.idUSER} type={"normal"}>
               
@@ -301,6 +333,24 @@ setShow(img)
           </>
         )) : loading ? <Loading /> : <EmptyData /> }
       </Table>
+      <Box sx={{display:'flex' , alignContent:'center' , justifyContent:'center' , mt:2}}>
+
+<Pagination
+  count={Math.ceil((filteredRows?.length > 0 ? filteredRows?.length : users?.length) / itemsPerPage)}
+  page={currentPage}
+  onChange={handlePageChange}
+  sx={{
+    ".css-yuzg60-MuiButtonBase-root-MuiPaginationItem-root": {
+      backgroundColor: theme === 'light' ? lightMain : colorAccentDarkTransparent,
+      color: theme === "light" ? main : colorAccentMain
+    },
+    ".css-yuzg60-MuiButtonBase-root-MuiPaginationItem-root.Mui-selected" : {
+      backgroundColor: theme === 'light' ? main : colorAccentMain,
+      color: whiteTextColor 
+    }
+  }}
+  />
+  </Box>
       {show == "" ? '' :
            <DisabledBackground  onClick={() => setShow('')}>
             <img style={{height:'65%' , objectFit:'contain'}} src={show} />

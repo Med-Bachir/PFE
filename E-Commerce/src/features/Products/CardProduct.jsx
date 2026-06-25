@@ -37,10 +37,12 @@ import {
   softMain,
   whiteTextColor,
 } from "../../Colors.jsx";
+import LazyAvatar from "../../Components/Pending/LazyAvatar.jsx";
+import AttributeContainer from "../../Components/productAttributes/AttributeContainer.jsx";
 
 const Container = styled.div`
-background-color: ${props => props.theme == "light" ? whiteTextColor : colorBackgroundBlack};
-color: ${props => props.theme == "light" ? colorPrimaryBlack : elementGrayBackground};
+  background-color: ${props => props.theme == "light" ? whiteTextColor : colorBackgroundBlack};
+  color: ${props => props.theme == "light" ? colorPrimaryBlack : elementGrayBackground};
 `;
 const Wrapper = styled.div`
   padding: 30px;
@@ -58,21 +60,32 @@ const Wrapper = styled.div`
   }
   transition: 200ms ease-in-out;
 `;
-const HeartContainer = styled.div`
-  border: 2px solid ${props => props.theme == "light" ? main : colorAccentMain};
-  border-radius: 50%;
-  width: 30px;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  height: 30px;
-  padding: 20px;
-`;
 const ProductConatainer = styled.div`
   display: flex;
-
+  position: relative;
   width: 100%;
-`;
+  gap: 20px;
+  @media (max-width: 768px) {
+    flex-direction: column;
+    
+  }
+  `;
+  const HeartContainer = styled.div`
+    border: 2px solid ${props => props.theme == "light" ? main : colorAccentMain};
+    border-radius: 50%;
+    width: 30px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 30px;
+    padding: 20px;
+    
+   @media (max-width: 768px) {
+    position: fixed;
+   right: 8px;
+   top: 188px;
+  }
+  `;
 const ImageContainer = styled.div`
   flex: 1;
   display: flex;
@@ -82,18 +95,13 @@ const InfoContainer = styled.div`
   flex: 1;
   
 `;
-const Image = styled.img`
-  height: 100%;
-  height: calc(100vh - 144px);
-  width: 100%;
-  object-fit: contain;
-`;
+
 const Title = styled.h2`
   margin-bottom: 20px;
   font-size: 24px;
   font-weight: 600;
   flex: 4;
-  
+
 `;
 const Desc = styled.p`
   margin-bottom: 20px;
@@ -168,6 +176,9 @@ const AmountContainer = styled.div`
   color: ${props => props.theme == "light" ? main : colorAccentMain};
   margin-bottom: 30px;
   min-width: 200px;
+  @media (max-width: 768px) {
+width: 100%;
+}
 
 `;
 const AddToCardContainer = styled.div`
@@ -187,6 +198,9 @@ const AddToCardContainer = styled.div`
   background-color: ${props => props.theme == "light" ? colorAccentMedium : colorAccentDark};
 
   }
+  @media (max-width: 768px) {
+width: 100%;
+}
 `;
 const Amount = styled.span``;
 const RelatedProduct = styled.div`
@@ -199,6 +213,10 @@ const CategorieContainer = styled.div`
   display: flex;
   margin-bottom: 20px;
   align-items: center;
+  @media (max-width: 768px) {
+flex-wrap: wrap;
+gap: 20px;
+}
 `;
 const Categorie = styled.span`
   margin-right: 50px;
@@ -237,8 +255,10 @@ const Button = styled.button`
   margin-bottom: 32px;
   &:hover{
   background-color: ${props => props.theme == "light" ? colorAccentMedium : colorAccentDark};
-
-  }
+}
+@media (max-width: 768px) {
+width: 100%;
+}
 `;
 
 const Input = styled.input`
@@ -275,12 +295,12 @@ const Text = styled.span`
   font-size: 14px;
   color: ${secondaryTextColor};
 `;
-const AttributeContainer = styled.div`
+/*const AttributeContainer = styled.div`
   display: flex;
   flex-direction: column;
   padding: 20px 0;
   gap: 8px;
-`;
+`;*/
 const Attribute = styled.div`
   display: flex;
   gap: 8px;
@@ -305,14 +325,15 @@ const CardProduct = () => {
   const [open, setOpen] = useState(false);
   const [isWish, setIsWish] = useState(false);
   const Location = useLocation().pathname.split("/")[2];
-  const [selectedAttributes, setSelectedAttributes] = useState(null);
-
-  const [qte, setQte] = useState(0);
-  const queryClinet = useQueryClient();
-
-  //const [isReadyToAdd, setIsReadyToAdd] = useState(false);
+  const [selectedAttributes, setSelectedAttributes] = useState({});
+  const [qte, setQte] = useState(0); // Initialize to 1 instead of 0
   const [product, setProduct] = useState({});
   const [value, setValue] = useState(2);
+  const [reviews, setReviews] = useState([]);
+  const [total, setTotal] = useState([]);
+  const queryClient = useQueryClient();
+
+
   ///////////////////////
   const handleAttributes = (name, value) => {
     setSelectedAttributes((prev) => ({
@@ -336,18 +357,21 @@ const CardProduct = () => {
     const getProduct = async () => {
       try {
         const res = await newRequest.get(`/products/product/${Location}`);
-        setProduct(res.data);
+
+        setProduct(res.data)
+
+       
       } catch (error) {
-        console.log("error", error);
+        console.error("Error fetching product:", error);
       }
     };
-
     getProduct();
+   
+    Wish();
+    getReviews();
   }, [Location]);
 
-  useEffect(() => {
-    Wish();
-  }, [Location]);
+
 
   ////reactredux
   const quantity = useSelector((state) => state.cartProduct?.quantity);
@@ -355,11 +379,12 @@ const CardProduct = () => {
   console.log(selectedAttributes)
 
   const handleQte = (option) => {
-    {
-      option == "add" ? setQte(qte + 1) : qte > 1 && setQte(qte - 1);
+    if (option === "add") {
+      setQte(prev => prev + 1);
+    } else if (option === "remove" && qte > 1) {
+      setQte(prev => prev - 1);
     }
   };
-
 
   const handlAction = () => {
     mutation.mutate();
@@ -370,7 +395,9 @@ const CardProduct = () => {
       attributes: selectedAttributes,
       quantity: qte,
     };
-    if( (product.categoryname == "Cloths" || product.categoryname == "Dicors") && selectedAttributes == null){
+    
+    if ((product.name === "Cloths" || product.name === "Decors") && 
+        Object.keys(selectedAttributes).length === 0) {
       setMessage("Please Select item attributes");
       setType("error");
       setOpen(true);
@@ -378,34 +405,38 @@ const CardProduct = () => {
     }
 
     try {
-      if (user?.idUSER != null) {
-        const response = await newRequest.post(
-          `cards/cart/${user?.idUSER}/add/${Location}`,
-          productDetails
-        );
-        if (response.status === 200) {
-          setMessage("Product Added Successfully to the cart");
-          setType("success");
-          setOpen(true);
-        } else if(response.status === 400){
-          setMessage("Product Already exist in the Cart!!");
-          setType("error");
-          setOpen(true);
-        }
-      } else {
+      if (!user?.idUSER) {
         setMessage("You need to LOGIN first");
         setType("error");
         setOpen(true);
+        return;
       }
+
+      const response = await newRequest.post(
+        `cards/cart/${user.idUSER}/add/${Location}`,
+        productDetails
+      );
+
+      if (response.status === 200) {
+        setMessage("Product Added Successfully to the cart");
+        setType("success");
+      } else {
+        setMessage("Product Already exists in the Cart!");
+        setType("error");
+      }
+      setOpen(true);
+      
     } catch (error) {
       console.error("Error adding product:", error);
-      message.error("Failed to add product.");
+      setMessage("Failed to add product");
+      setType("error");
+      setOpen(true);
     }
   };
   const mutation = useMutation({
     mutationFn: handleSubmitCart,
     onSuccess: () => {
-      queryClinet.invalidateQueries(["cart"]);
+      queryClient.invalidateQueries(["cart"]);
     },
   });
   const handleWish = async () => {
@@ -500,13 +531,11 @@ const CardProduct = () => {
     }
   };
 
-  const [reviews, setReviews] = useState([]);
 
-  useEffect(() => {
-    getReviews();
-  }, []);
 
-  const [total, setTotal] = useState([]);
+ 
+
+  
 
   useEffect(() => {
     const getTotal = async () => {
@@ -555,17 +584,11 @@ const CardProduct = () => {
     Fitness: {
       fields: [
         { key: "height", label: "Height", suffix: " cm" },
-        {
-          key: "weight",
-          label: "Weight",
-          type: "size",
-          split: true,
-          suffix: " KG",
-        },
+        { key: "weight", label: "Weight", type: "size", split: true, suffix: " KG" },
         { key: "material", label: "Craft Material" },
       ],
     },
-    Dicors: {
+    Decors: {
       fields: [
         { key: "dimension", label: "Dimension" },
         { key: "colors", label: "Colors", type: "color", split: true },
@@ -575,11 +598,52 @@ const CardProduct = () => {
         { key: "shape", label: "Shape" },
       ],
     },
+    Books: {
+      fields: [
+        { key: "attribute", label: "Title"},
+        { key: "attribute", label: "Author"},
+        { key: "attribute", label: "Publication Date"},
+        { key: "attribute", label: "ISBN"},
+        { key: "attribute", label: "Number of Pages"},
+      ],
+    },
+    CleaningTools: {
+      fields: {
+        'Hand Tools': [
+          { name: 'Material'},
+          { name: 'Type' },
+          { name: 'Handle Length'},
+          { name: 'Weight'},
+          { name: 'Color' },
+          { name: 'Use Case'},
+        ],
+        'Electronic Tools': [
+          { name: 'Brand' },
+          { name: 'Power'},
+          { name: 'Voltage'},
+          { name: 'Cord Length'},
+          { name: 'Battery Life'},
+          { name: 'Weight'},
+          { name: 'Noise Level'},
+        ],
+        'Chemical Tools': [
+          { name: 'Type' },
+          { name: 'Volume'},
+          { name: 'Active Ingredients'},
+          { name: 'Application' },
+          { name: 'Scent' },
+          { name: 'Safety Warnings' },
+        ],
+      },
+    },
   };
+  
 
-  const categoryConfig = categoryAttributesConfig[product.categoryname];
-  if (!categoryConfig) return null;
+  const categoryConfig = categoryAttributesConfig[product.name];
 
+  // Convert attributes to an array for mapping
+let att = product?.attributes
+  console.log()
   return (
     <Container theme={theme}>
       <AlertMessage
@@ -592,7 +656,13 @@ const CardProduct = () => {
       <Wrapper theme={theme} >
         <ProductConatainer theme={theme}>
           <ImageContainer>
-            <Image src={product.productimage} />
+            
+            <LazyAvatar src={product.productimage} sx={{
+  height: "calc(100vh - 144px)",
+  width: "100%",
+  bgcolor:'transparent',
+  borderRadius:4
+  }} />
           </ImageContainer>
           <InfoContainer theme={theme}>
             <Title>{product.productname}</Title>
@@ -610,17 +680,22 @@ const CardProduct = () => {
                     marginRight: 20,
                   }}
                 >
-                  $ {product.productprice.toFixed(2)}{" "}
+                  $ {product?.productprice?.toFixed(2)}{" "}
                 </Price>
               )}{" "}
               ${" "}
               {(
                 product.productprice -
                 (product.productprice * product.discount) / 100
-              ).toFixed(2)}{" "}
+              )?.toFixed(2)}{" "}
             </Price>
-            <AttributeContainer theme={theme}>
-              {categoryConfig.fields.map((field) => {
+
+<AttributeContainer theme={theme} product={product} selectedAttributes={selectedAttributes} handleAttributes={handleAttributes} Location={Location}/>
+            {/*<AttributeContainer theme={theme}>
+
+            
+                        
+              {categoryConfig?.fields?.map((field) => {
                 const value = product?.attributes?.[field.key];
                 if (!value || (field.condition && !field.condition(product)))
                   return null;
@@ -674,7 +749,7 @@ const CardProduct = () => {
                   </Attribute>
                 );
               })}
-            </AttributeContainer>
+            </AttributeContainer>*/}
 
             {qte == 0 ? (
               <AddToCardContainer theme={theme} onClick={() => handleQte("add")}>
@@ -711,7 +786,7 @@ const CardProduct = () => {
               <Categorie>
                 Categories :{" "}
                 <p style={{ fontSize: 16, color: theme == "light" ? main : colorAccentMain }}>
-                  {product?.categoryname}
+                  {product?.name}
                 </p>{" "}
               </Categorie>
               <Categorie>
@@ -806,7 +881,7 @@ const CardProduct = () => {
         </Wrapper>
       )}
 
-      <Wrapper theme={theme}>
+      <Wrapper  theme={theme}>
     
         <Title
           style={{
@@ -815,6 +890,7 @@ const CardProduct = () => {
             alignItems: "center",
             color: primaryTextColor,
             gap: "32px",
+            flexWrap:'wrap'
           }}
         >
           <Rating

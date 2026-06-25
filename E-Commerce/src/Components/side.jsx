@@ -8,7 +8,27 @@ import KeyboardArrowRightIcon from "@mui/icons-material/KeyboardArrowRight";
 import CategoryOutlinedIcon from "@mui/icons-material/CategoryOutlined";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { colorAccentDarkTransparent, colorAccentLight, colorAccentMain, colorAccentMediumTransparent, colorAccentSoftTransparent, colorAccentTransparent, colorBackgroundBlack, colorElementBackgroundGray, grayBackground, lightMain, main, primaryTextColor, secondaryTextColor, whiteTextColor } from "../Colors";
-const Container = styled.div``;
+const Container = styled.div`
+height: calc(100vh - 80px);
+overflow: auto;
+
+// SCROLLBARE STYLE
+&::-webkit-scrollbar{
+  width: 6px; /* width of the entire scrollbar */
+}
+&::-webkit-scrollbar-track {
+  background: transparent; /* color of the tracking area */
+}
+&::-webkit-scrollbar-thumb {
+  background-color: rgba(147, 147, 147, 0.7); /* color of the scroll thumb */
+  border-radius: 20px; /* roundness of the scroll thumb */
+}
+&::-webkit-scrollbar-thumb:hover {
+  background-color: rgba(147, 147, 147, 1); /* color of the scroll thumb */
+  width: 8px;
+  border-radius: 20px; /* roundness of the scroll thumb */
+  }
+`;
 
 const Title = styled.span`
   font-size: 18px;
@@ -34,7 +54,7 @@ const SubCategory = styled.div`
   padding: 0px 0px 0 20px;
   gap: 4px;
   max-height: ${({ open }) => (open ? "500px" : "40px")};
-  contain: paint;
+  overflow: hidden;
   transition: max-height 0.4s ease-in-out;
 `;
 
@@ -45,12 +65,13 @@ const Information = styled.div`
   padding: 8px 10px;
   border-radius: 8px;
   cursor: pointer;
-background-color: ${props => props.open ? props.theme == 'light' ? lightMain :  colorAccentDarkTransparent :  ""};
-color: ${props => props.open ? props.theme == 'light' ?  main : colorAccentMain : ''};
+  background-color: ${props => props.open ? props.theme == 'light' ? lightMain :  colorAccentDarkTransparent :  ""};
+  
+  color: ${props => props.open ? props.theme == 'light' ?  main : colorAccentMain : ''};
+  // ON HOVER
   &:hover {
     background-color: ${props => props.theme == 'light' ? grayBackground : colorElementBackgroundGray};
     color: ${props => props.theme == 'light' ? primaryTextColor : whiteTextColor};
-
   }
 
   transition: 200ms ease-in-out;
@@ -69,9 +90,8 @@ const Icon = styled.img`
   height: 25px;
   filter: ${props => props.theme === "light" ? "brightness(1) invert(0)" : "brightness(0) invert(1)"};
 
-  //filter: brightness(0) invert(1); /* Works for solid white backgrounds */
-  filter: ${props => props.open ? "brightness(0) invert(0.28) sepia(1) saturate(1000%) hue-rotate(160deg);" : ""} ;
-
+  // FOR SELECTED CATEGORIES
+  filter: ${props => props.open ? "brightness(0) invert(0.4) sepia(0.8) saturate(40) hue-rotate(160deg);" : ""} ;
 
   @media (max-width: 768px) {
     width: 20px;
@@ -81,7 +101,6 @@ const Icon = styled.img`
 
 const Name = styled.div`
   font-size: 16px;
-
   @media (max-width: 768px) {
     font-size: 14px;
   }
@@ -181,26 +200,26 @@ const Side = ({theme}) => {
       {categories.length > 0 ? (
         categories.map((category) => (
           <Category
-            key={category.categoryname}
-            open={openCategoryId === category.categoryname}
+            key={category.name}
+            open={openCategoryId === category.name}
           >
             <Information
             theme={theme}
               onClick={() => {
-                handleCategoryClick(category.categoryname);
-                onClickFilter(category.categoryname, "category");
+                handleCategoryClick(category.name);
+                onClickFilter(category.name, "category");
                 handleAction();
               }}
-            open={openCategoryId === category.categoryname}
+            open={openCategoryId === category.name}
 
             >
-              <Icon theme={theme} open={openCategoryId === category.categoryname} src={category.icon} />
-              <Name>{category.categoryname}</Name>
+              <Icon theme={theme} open={openCategoryId === category.name} src={category.icon} />
+              <Name>{category.name}</Name>
               <KeyboardArrowRightIcon
                 sx={{
                   marginLeft: "auto",
                   rotate:
-                    openCategoryId === category.categoryname ? "90deg" : "0",
+                    openCategoryId === category.name ? "90deg" : "0",
                   transition: "0.4s ease-in-out",
                 }}
               />

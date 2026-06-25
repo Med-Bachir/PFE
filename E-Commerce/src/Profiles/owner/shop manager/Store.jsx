@@ -10,6 +10,7 @@ import Lottie from "lottie-react";
 import me from "../../../assets/Lotties/Animation - 1716145973359.json";
 import Loading from '../../../Components/Pending/Loading';
 import { colorAccentDark, colorAccentDarkTransparent, colorAccentLight, colorAccentMain, colorAccentMediumTransparent, colorAccentSoft, colorAccentSoftTransparent, colorBackgroundBlack, colorErrorDark, colorErrorSoft, colorPrimaryBlack, grayBackground, main, primaryTextColor, whiteTextColor } from '../../../Colors';
+import LazyAvatar from '../../../Components/Pending/LazyAvatar';
 
 
 const Container = styled.div`
@@ -179,7 +180,8 @@ const Store = () => {
             <StoreProfile theme={theme}>
               <Shop theme={theme}>
                 <Circle>
-                  <Avatar src={shop.ShopImage} style={{ width: '100%', height: '100%' }} />
+                  
+                  <LazyAvatar src={shop.ShopImage} sx={{ width: '100%', height: '100%' , bgcolor:'transparent' }}  />
                 </Circle>
                 <StorInfo theme={theme}>
                   <Name>{shop.ShopName}</Name>

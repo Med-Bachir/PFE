@@ -16,6 +16,7 @@ import AddTwoToneIcon from '@mui/icons-material/AddTwoTone';
 import Loading from "../../../Components/Pending/Loading";
 import EmptyData from "../../../Components/Pending/EmptyData";
 import { colorAccentDark, colorAccentDarkTransparent, colorAccentLight, colorAccentMedium, colorAccentMediumTransparent, colorAccentSoft, colorAccentSoftTransparent, colorPrimaryBlack, main, primaryTextColor, subColumnMain, subSubColumnMain, whiteTextColor } from "../../../Colors";
+import LazyAvatar from "../../../Components/Pending/LazyAvatar";
 const Container = styled.div`
  
   padding: 32px;
@@ -251,10 +252,22 @@ const rowTagType = [ "ID",
           <div key={index}>
             <Order theme={theme}>
               <Informations type="ID">#{cat?.id}</Informations>
-              <Informations type="Icon"><Icon theme={theme} src={cat?.icon} /> </Informations>
+              <Informations type="Icon">
+              <LazyAvatar
+  src={cat?.icon}
+  sx={{
+    width: 30,
+    height:30,
+    bgcolor:'transparent',
+    borderRadius:'4px' ,
+    filter: theme === "light" ? "brightness(1) invert(0)" : "brightness(0) invert(1)" 
+    }}
+/>
+    
+               </Informations>
               <Informations>
                 
-                  {cat?.categoryname}
+                  {cat?.name}
                 
               </Informations>
               <Informations>{cat?.productCount}</Informations>
@@ -284,7 +297,19 @@ const rowTagType = [ "ID",
                 <div key={idx}>
                   <Order theme={theme}>
                     <Informations type="ID">#{subcategory?.id}</Informations>
-                    <Informations type="Icon"><Icon theme={theme} src={subcategory?.subIcon} /> </Informations>
+                    <Informations type="Icon">
+                     
+                      <LazyAvatar
+  src={subcategory?.subIcon}
+  sx={{
+    width: 30,
+    height:30,
+    bgcolor:'transparent',
+    borderRadius:'4px' ,
+    filter: theme === "light" ? "brightness(1) invert(0)" : "brightness(0) invert(1)" 
+    }}
+/>
+                      </Informations>
                     <Informations>
                       
                         {subcategory?.subname}
@@ -319,7 +344,18 @@ const rowTagType = [ "ID",
                 <div key={idx}>
                   <Order>
                     <Informations type="ID">#{type?.id}</Informations>
-                    <Informations type="Icon"><Icon theme={theme} src={type?.icon} /> </Informations>
+                    <Informations type="Icon">
+                    <LazyAvatar
+  src={type?.icon}
+  sx={{
+    width: 30,
+    height:30,
+    bgcolor:'transparent',
+    borderRadius:'4px' ,
+    filter: theme === "light" ? "brightness(1) invert(0)" : "brightness(0) invert(1)" 
+    }}
+/>
+                    </Informations>
                     <Informations>
                       
                         {type?.name}

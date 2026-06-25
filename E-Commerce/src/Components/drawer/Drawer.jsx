@@ -80,7 +80,7 @@ const DrawerHeader = styled.div`
 const Left = styled.div`
   width: ${(props) => (props.open ? `288px` : `80px`)};
   display: flex;
-  transition: 500ms;
+  transition: 300ms ease-in-out;
   overflow: hidden;
   align-items: center;
   @media (max-width: 768px) {
@@ -91,7 +91,7 @@ const Left = styled.div`
 const Logo = styled.img`
   width: 300px;
   margin-left: ${(props) => (props.open ? 0 : "-35px")};
-  transition: 500ms ease-in-out;
+  transition: 300ms ease-in-out;
   filter: ${props => props.theme === "light" ? "brightness(1) invert(0)" : "brightness(0) invert(1)"};
 `;
 
@@ -173,7 +173,7 @@ const DrawerSideBar = styled.div`
     border-radius: 20px; /* roundness of the scroll thumb */
     /* creates padding around scroll thumb */
   }
-  transition: 500ms ease-in-out;
+  transition: 300ms ease-in-out;
   @media (max-width: 768px) {
     width: ${(props) =>
     props.open ? `288px` : `60px`}; // Using template literals
@@ -185,7 +185,7 @@ const InfoComponents = styled.div`
   background-color: ${grayBackground};
   width: ${(props) =>
     props.open ? `calc(100vw - 288px)` : `calc(100vw - 80px)`};
-  transition: 500ms;
+  transition: 300ms ease-in-out;
   background-color: ${(props) =>
     props.theme == "light" ? grayBackground : colorBackgroundBlack};
 
@@ -236,7 +236,7 @@ const Notifications = styled.div`
   right: ${(props) => (props.open ? "0" : "-250px")};
   top: 20px;
 
-  transition: 200ms;
+  transition: 300ms ease-in-out;
 `;
 const Text = styled.div`
   display: flex;
@@ -360,6 +360,7 @@ const Drawer = () => {
         <Link to="/">
           <Left open={open}>
             <Logo open={open} src={logo} theme={theme} />
+            
           </Left>
         </Link>
         <Divider orientation="vertical" />

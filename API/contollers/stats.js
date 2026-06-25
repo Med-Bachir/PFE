@@ -22,12 +22,20 @@ router.get("/stats", verifyTokenAndAdmin, async (req, res) => {
 
   try {
     const query = `
-          SELECT MONTHNAME(STR_TO_DATE(CONCAT('2024-', months.month, '-01'), '%Y-%m-%d')) AS month, COUNT(USER.idUSER) AS total
-          FROM (
-              SELECT '01' AS month UNION SELECT '02' UNION SELECT '03' UNION SELECT '04' UNION SELECT '05' UNION SELECT '06' UNION SELECT '07' UNION SELECT '08' UNION SELECT '09' UNION SELECT '10' UNION SELECT '11' UNION SELECT '12'
-          ) AS months
-          LEFT JOIN USER ON LPAD(months.month, 2, '0') = MONTH(STR_TO_DATE(USER.createdAt, '%Y-%m-%d')) AND STR_TO_DATE(USER.createdAt, '%Y-%m-%d') >= ?
-          GROUP BY months.month
+         SELECT 
+    MONTHNAME(STR_TO_DATE(CONCAT('2024-', months.month, '-01'), '%Y-%m-%d')) AS month,
+    SUM(CASE WHEN USER.userRole = 'client' THEN 1 ELSE 0 END) AS totalClients,
+    SUM(CASE WHEN USER.userRole = 'seller' THEN 1 ELSE 0 END) AS totalSellers
+FROM (
+    SELECT '01' AS month UNION SELECT '02' UNION SELECT '03' UNION SELECT '04' UNION 
+    SELECT '05' UNION SELECT '06' UNION SELECT '07' UNION SELECT '08' UNION 
+    SELECT '09' UNION SELECT '10' UNION SELECT '11' UNION SELECT '12'
+) AS months
+LEFT JOIN USER 
+    ON LPAD(MONTH(USER.createdAt), 2, '0') = months.month
+    AND USER.createdAt >= ?
+GROUP BY months.month
+ORDER BY months.month;
       `;
     const values = [formattedLastYear];
 
@@ -371,7 +379,8 @@ router.get(
              FROM ecommerce.orderitem oi 
              JOIN ecommerce.order o ON oi.id_Order = o.idORDER
              JOIN OwnerProducts op ON oi.id_Product = op.idPRODUCT
-             WHERE o.progress = 'Arrived') AS TotalArrivedOrderValue;
+             WHERE o.progress = 'Arrived') AS TotalArrivedOrderValue ,
+             u.subscription AS sub from user u;
         `;
 
       connection.query(query, (err, results) => {
@@ -389,4 +398,105 @@ router.get(
   }
 );
 
+
+
+router.get('/monthly-revenue', verifyTokenAndAdmin, async (req, res) => {
+    try {
+        
+
+        const getMonthlyRevenueQuery = `
+     SELECT 
+    YEAR(CURDATE()) AS year,
+    m.month AS monthNumber,
+    COALESCE(SUM(
+        CASE 
+            WHEN u.subscription = 'Monthly' THEN 40 
+            WHEN u.subscription = 'Annual' THEN 400 
+            ELSE 0 
+        END
+    ), 0) AS monthlyRevenue
+FROM (
+    SELECT 1 AS month UNION ALL SELECT 2 UNION ALL SELECT 3 UNION ALL
+    SELECT 4 UNION ALL SELECT 5 UNION ALL SELECT 6 UNION ALL
+    SELECT 7 UNION ALL SELECT 8 UNION ALL SELECT 9 UNION ALL
+    SELECT 10 UNION ALL SELECT 11 UNION ALL SELECT 12
+) m
+LEFT JOIN USER u 
+    ON YEAR(u.createdAt) = YEAR(CURDATE()) 
+    AND MONTH(u.createdAt) = m.month
+GROUP BY m.month
+ORDER BY m.month;
+        `;
+
+        const monthlyRevenue = await query(getMonthlyRevenueQuery);
+
+        // Convert month numbers to month names
+        const monthNames = [
+            "January", "February", "March", "April", "May", "June",
+            "July", "August", "September", "October", "November", "December"
+        ];
+
+        const result = monthlyRevenue.map((item , index) => ({
+            year: item.year,
+            month: monthNames[index],
+            monthlyRevenue: item.monthlyRevenue 
+        }));
+
+        res.status(200).json(result);
+    } catch (error) {
+        console.error('Error fetching monthly revenue:', error);
+        res.status(500).json({ error: 'Failed to fetch monthly revenue.' });
+    }
+});
+
+
+router.get('/order-stats', verifyTokenAndAdmin, async (req, res) => {
+  try {
+      
+
+      const getMonthlyRevenueQuery = `
+   SELECT 
+  YEAR(CURDATE()) AS year,
+  m.month AS monthNumber,
+  COALESCE(SUM(
+      CASE 
+          WHEN oi.subscription = 'Monthly' THEN 40 
+          WHEN oi.subscription = 'Annual' THEN 400 
+          WHEN oi.subscription = 'Annual' THEN 400 
+          ELSE 0 
+      END
+  ), 0) AS monthlyRevenue
+FROM (
+  SELECT 1 AS month UNION ALL SELECT 2 UNION ALL SELECT 3 UNION ALL
+  SELECT 4 UNION ALL SELECT 5 UNION ALL SELECT 6 UNION ALL
+  SELECT 7 UNION ALL SELECT 8 UNION ALL SELECT 9 UNION ALL
+  SELECT 10 UNION ALL SELECT 11 UNION ALL SELECT 12
+) m
+LEFT JOIN USER u 
+  ON YEAR(u.createdAt) = YEAR(CURDATE()) 
+  AND MONTH(u.createdAt) = m.month
+GROUP BY m.month
+ORDER BY m.month;
+      `;
+
+      const monthlyRevenue = await query(getMonthlyRevenueQuery);
+
+      // Convert month numbers to month names
+      const monthNames = [
+          "January", "February", "March", "April", "May", "June",
+          "July", "August", "September", "October", "November", "December"
+      ];
+
+      const result = monthlyRevenue.map((item , index) => ({
+          year: item.year,
+          month: monthNames[index],
+          monthlyRevenue: item.monthlyRevenue 
+      }));
+
+      res.status(200).json(result);
+  } catch (error) {
+      console.error('Error fetching monthly revenue:', error);
+      res.status(500).json({ error: 'Failed to fetch monthly revenue.' });
+  }
+});
 module.exports = router;

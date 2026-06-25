@@ -21,10 +21,31 @@ import {
 } from "@mui/material";
 import { useEffect, useRef, useState } from "react";
 
-
 import newRequest from "../../../utils/newRequest";
 import { useSelector } from "react-redux";
-import { colorAccentDark, colorAccentDarkTransparent, colorAccentLight, colorAccentMain, colorAccentMedium, colorAccentMediumTransparent, colorBackgroundBlack, colorBackgroundGray, colorPrimaryBlack, grayBackground, main, primaryTextColor, secondaryTextColor, whiteTextColor } from "../../../Colors";
+import {
+  colorAccentDark,
+  colorAccentDarkTransparent,
+  colorAccentLight,
+  colorAccentMain,
+  colorAccentMedium,
+  colorAccentMediumTransparent,
+  colorAccentMoreTransparent,
+  colorAccentSoft,
+  colorBackgroundBlack,
+  colorBackgroundGray,
+  colorElementBackgroundGray,
+  colorPrimaryBlack,
+  elementGrayBackground,
+  grayBackground,
+  lightMain,
+  main,
+  primaryTextColor,
+  secondaryTextColor,
+  secondText,
+  softMain,
+  whiteTextColor,
+} from "../../../Colors";
 
 const Container = styled.div`
   height: calc(100vh - 80px);
@@ -33,22 +54,31 @@ const Container = styled.div`
   flex-direction: column;
   gap: 20px;
   overflow-y: auto;
+  @media (max-width: 768px) {
+ padding:32px 12px;
+}
 `;
 
 const FormContainer = styled.div`
   display: flex;
   justify-content: space-between;
-  border-top: 1px dashed  ${props => props.theme == "light" ? "#bebebe" : "#454545"};
+  border-top: 1px dashed
+    ${(props) => (props.theme == "light" ? "#bebebe" : "#454545")};
 
   padding: 32px 0;
   gap: 32px;
-  color: ${props => props.theme == "light" ? primaryTextColor : whiteTextColor};
-  
+  color: ${(props) =>
+    props.theme == "light" ? primaryTextColor : whiteTextColor};
+    gap: 32px;
+  @media (max-width: 768px) {
+  flex-direction: column;
+}
 `;
 
 const FormTitle = styled.h3`
   font-weight: 500;
-  color: ${props => props.theme == "light" ? primaryTextColor : whiteTextColor};
+  color: ${(props) =>
+    props.theme == "light" ? primaryTextColor : whiteTextColor};
 `;
 
 const Left = styled.div`
@@ -73,9 +103,10 @@ const Right = styled.div`
   flex: 2;
   padding: 32px;
   border-radius: 4px;
-  background-color: ${props => props.theme == "light" ? whiteTextColor : colorPrimaryBlack};
-  color: ${props => props.theme == "light" ? primaryTextColor : whiteTextColor};
-
+  background-color: ${(props) =>
+    props.theme == "light" ? whiteTextColor : colorPrimaryBlack};
+  color: ${(props) =>
+    props.theme == "light" ? primaryTextColor : whiteTextColor};
 `;
 
 const Required = styled.span`
@@ -86,7 +117,7 @@ const Required = styled.span`
 const Span = styled.span`
   font-size: 16px;
   font-weight: 600;
-  color: ${props => props.theme == "light" ? main : colorAccentMain};
+  color: ${(props) => (props.theme == "light" ? main : colorAccentMain)};
 `;
 
 const InputContainer = styled.div`
@@ -102,23 +133,29 @@ const InputText = styled.input`
   padding: 14px 16px;
   outline: none;
   border-radius: 4px;
-  border: 1px solid ${props => props.theme == "light" ? grayBackground : colorBackgroundGray};
-  background-color: ${props => props.theme == "light" ? whiteTextColor : colorAccentDarkTransparent};
-  color: ${props => props.theme == "light" ? primaryTextColor : whiteTextColor};
+  border: 1px solid
+    ${(props) =>
+      props.theme == "light" ? grayBackground : colorBackgroundGray};
+  background-color: ${(props) =>
+    props.theme == "light" ? whiteTextColor : colorAccentDarkTransparent};
+  color: ${(props) =>
+    props.theme == "light" ? primaryTextColor : whiteTextColor};
 
-
-  &:focus {
-    border: 1px solid ${props => props.theme == "light" ? main : colorAccentLight};
+  &:hover {
+    border: 1px solid
+      ${(props) => (props.theme == "light" ? softMain : colorAccentMedium)};
   }
+  &:focus {
+    border: 1px solid
+      ${(props) => (props.theme == "light" ? main : colorAccentMain)};
+  }
+  transition: 200ms ease-in-out;
 `;
-
-
 
 const getBase64 = (img, callback) => {
   const reader = new FileReader();
   reader.addEventListener("load", () => callback(reader.result));
   reader.readAsDataURL(img);
-  console.log(reader.result);
 };
 
 const beforeUpload = (file) => {
@@ -134,44 +171,88 @@ const beforeUpload = (file) => {
 };
 
 const AddCategory = () => {
- const theme = useSelector(state => state.theme.mode)
-
+  const theme = useSelector((state) => state.theme.mode);
   const [loading, setLoading] = useState(false);
-
-  const [logoImageUrl, setLogoImageUrl] = useState(null);
-
-  
-
   const [cats, setCats] = useState(null);
   const [cat, setCat] = useState(null);
-  const [catId, setCatId] = useState(null);
-
   const [subs, setSubs] = useState(null);
-  const [sub, setSub] = useState({idCat : null , subname:'' , image:''});
+  const [sub, setSub] = useState({ idCat: null, subname: "", image: "" });
+  const [type, setType] = useState({
+    idCat: null,
+    typename: "",
+    image: "",
+    idSub: null,
+  });
 
-  const [type, setType] = useState({idCat : null , typename:'' , image:'' , idSub : null});
-
-  const handleChange = (info) => {
+  const handleChange = (info, field) => {
     if (info.file.status === "uploading") {
       setLoading(true);
       getBase64(info.file.originFileObj, (url) => {
         setLoading(false);
-        setLogoImageUrl(url);
+
+        switch (field) {
+          case "cat":
+            setCat({ ...cat, image: url });
+
+            break;
+          case "sub":
+            setSub({ ...sub, image: url });
+            break;
+          case "type":
+            setType({ ...type, image: url });
+            console.log(cat);
+            break;
+          default:
+            console.warn(`Unhandled field: ${field}`);
+        }
       });
-      console.log(logoImageUrl);
+      if (info.file.status === "done") {
+        getBase64(info.file.originFileObj, (url) => {
+          setLoading(false);
+
+          switch (field) {
+            case "cat":
+              setCat({ ...cat, image: url });
+
+              break;
+            case "sub":
+              setSub({ ...sub, image: url });
+              break;
+            case "type":
+              setType({ ...type, image: url });
+              console.log(cat);
+              break;
+            default:
+              console.warn(`Unhandled field: ${field}`);
+          }
+        });
+      }
+
       return;
     }
     if (info.file.status === "done") {
       getBase64(info.file.originFileObj, (url) => {
         setLoading(false);
 
-        setLogoImageUrl(url);
+        switch (field) {
+          case "cat":
+            setCat({ ...cat, image: url });
+
+            break;
+          case "sub":
+            setSub({ ...sub, image: url });
+            break;
+          case "type":
+            setType({ ...type, image: url });
+            console.log(cat);
+            break;
+          default:
+            console.warn(`Unhandled field: ${field}`);
+        }
       });
     }
+    console.log(type);
   };
-
-
-
 
   // get cat
   useEffect(() => {
@@ -192,15 +273,15 @@ const AddCategory = () => {
 
     switch (field) {
       case "cat":
-        setCat((prev) =>  ({...prev , [event.target.name]: value, image: logoImageUrl }));
+        setCat((prev) => ({ ...prev, [event.target.name]: value }));
 
         break;
       case "sub":
-        setSub((prev) => ({...prev, [event.target.name]: value, image: logoImageUrl  }));
+        setSub((prev) => ({ ...prev, [event.target.name]: value }));
         break;
       case "type":
-        setType((prev) => ({...prev, [event.target.name]: value , image: logoImageUrl }));
-        console.log(cat)
+        setType((prev) => ({ ...prev, [event.target.name]: value }));
+        console.log(cat);
         break;
       default:
         console.warn(`Unhandled field: ${field}`);
@@ -210,32 +291,23 @@ const AddCategory = () => {
   };
 
   const handleSubmitField = async (event, field) => {
-    
-console.log(type)
+    setLoading(true);
     try {
-        let response ;
+      let response;
       switch (field) {
         case "cat":
-            response = await newRequest.post(
-            `category/add-cat`,
-            cat
-          );
+          response = await newRequest.post(`category/add-cat`, cat);
 
           break;
         case "sub":
-            response = await newRequest.post(
-                `category/add-sub`,
-                sub
-              );
+          response = await newRequest.post(`category/add-sub`, sub);
+
           break;
         case "type":
-            response = await newRequest.post(
-                `category/add-type`,
-                type
-              );
+          response = await newRequest.post(`category/add-type`, type);
+
           break;
       }
-      console.log(response.status);
 
       if (response.status === 200) {
         message.success("Product added successfully.");
@@ -245,9 +317,9 @@ console.log(type)
     } catch (error) {
       console.error("Error adding product:", error);
       message.error("Failed to add product.");
+    } finally {
+      setLoading(false);
     }
-
-   
   };
 
   // get Subs
@@ -264,28 +336,74 @@ console.log(type)
     getSubs();
   }, [type?.idCat]);
 
+  const customButton = {
+    bgcolor: theme == "light" ? main : colorAccentMedium,
+    "&:hover": { backgroundColor: colorAccentDark },
+    "&.Mui-disabled": {
+      color: secondText,
+      bgcolor:
+        theme == "light" ? elementGrayBackground : colorElementBackgroundGray,
+    },
+  };
 
-  // get Types
-
+  const customTextField = {
+    flex: 1,
+    minWidth: "40%",
+    borderRadius: 1,
+    bgcolor: theme == "light" ? whiteTextColor : colorAccentMoreTransparent,
+    ".css-1t8l2tu-MuiInputBase-input-MuiOutlinedInput-input": {
+      color: theme == "light" ? primaryTextColor : elementGrayBackground,
+    },
+    "& .MuiOutlinedInput-root": {
+      "&:hover fieldset": {
+        borderColor: theme == "light" ? lightMain : colorAccentSoft, // Hover border color
+      },
+      "&.Mui-focused fieldset": {
+        borderColor: theme == "light" ? main : colorAccentMedium, // Focused border color
+      },
+    },
+    "& .MuiInputLabel-root": {
+      color: secondText, // Default label color
+    },
+    "& .MuiInputLabel-root.Mui-focused": {
+      color: theme == "light" ? main : colorAccentMain, // Focused label color
+    },
+    "& .MuiInputLabel-root.Mui-error": {
+      color: "orange", // Error label color
+    },
+    ".css-1n4twyu-MuiInputBase-input-MuiOutlinedInput-input": {
+      color: theme == "light" ? primaryTextColor : elementGrayBackground,
+    },
+  };
   const uploadButton = (
     <button
       style={{
-        width:'100%',
+        width: "100%",
         background: theme == "light" ? "none" : colorAccentDarkTransparent,
       }}
       type="button"
     >
       {loading ? (
-        <LoadingOutlined style={{ fontSize: 50, color: theme == "light" ? main : colorAccentMain}} />
+        <LoadingOutlined
+          style={{
+            fontSize: 50,
+            color: theme == "light" ? main : colorAccentMain,
+          }}
+        />
       ) : (
-        <CloudUploadTwoTone style={{ color: theme == "light" ? main : colorAccentMain, fontSize: 50 }} />
+        <CloudUploadTwoTone
+          style={{
+            color: theme == "light" ? main : colorAccentMain,
+            fontSize: 50,
+          }}
+        />
       )}
       <div
         style={{
           marginTop: 8,
         }}
       >
-        <Required style={{color: theme == "light" ? "" : secondaryTextColor}}>
+        <Required style={{ color: theme == "light" ? "" : secondaryTextColor }}>
           <Span theme={theme}>Upload an Icon</Span> Or drag and drop. png,jpg
         </Required>
       </div>
@@ -302,15 +420,14 @@ console.log(type)
       ),
       body: (
         <Upload
-          name="categoryimage"
           listType="picture-card"
-          showUploadList={true}
+          showUploadList={false}
           beforeUpload={beforeUpload}
-          onChange={(info) => handleChange(info, "logo")}
+          onChange={(info) => handleChange(info, "cat")}
         >
-          {logoImageUrl ? (
+          {cat?.image ? (
             <img
-              src={logoImageUrl}
+              src={cat.image}
               alt="avatar"
               style={{
                 width: "100%",
@@ -331,17 +448,18 @@ console.log(type)
             <Label>
               Name <Span style={{ color: "red" }}>*</Span>
             </Label>
-            <InputText theme={theme}
-              name="categoryname"
+            <InputText
+              theme={theme}
+              name="name"
               onChange={(e) => handleChangeField(e, "cat")}
             ></InputText>
           </InputContainer>
           <Button
-            
-            sx={{bgcolor:theme == "light" ? main : colorAccentMedium , "&:hover" : {backgroundColor:colorAccentDark}}}
+            sx={customButton}
             variant="contained"
-            startIcon={<SaveAltTwoToneIcon />}
-            onClick={(e) => handleSubmitField(e , 'cat')}
+            startIcon={loading ? <LoadingOutlined /> : <SaveAltTwoToneIcon />}
+            onClick={(e) => handleSubmitField(e, "cat")}
+            disabled={loading}
           >
             Save
           </Button>
@@ -359,13 +477,13 @@ console.log(type)
         <Upload
           name="categoryimage"
           listType="picture-card"
-          showUploadList={true}
+          showUploadList={false}
           beforeUpload={beforeUpload}
-          onChange={(info) => handleChange(info, "logo")}
+          onChange={(info) => handleChange(info, "sub")}
         >
-          {logoImageUrl ? (
+          {sub?.image ? (
             <img
-              src={logoImageUrl}
+              src={sub?.image}
               alt="avatar"
               style={{
                 width: "100%",
@@ -386,7 +504,8 @@ console.log(type)
             <Label>
               Name <Span style={{ color: "red" }}>*</Span>
             </Label>
-            <InputText theme={theme}
+            <InputText
+              theme={theme}
               name="subname"
               onChange={(e) => handleChangeField(e, "sub")}
             ></InputText>
@@ -394,12 +513,19 @@ console.log(type)
 
           <InputContainer theme={theme}>
             <Label>Category</Label>
-            <FormControl sx={{ width: "100%","& > *" :{bgcolor:theme == "light" ? whiteTextColor : colorAccentDarkTransparent } }}>
-              <InputLabel sx={{color:theme == "light" ? primaryTextColor : whiteTextColor}} id="demo-simple-select-helper-label">
+            <FormControl sx={customTextField}>
+              <InputLabel
+                sx={{
+                  color: theme == "light" ? primaryTextColor : whiteTextColor,
+                }}
+                id="demo-simple-select-helper-label"
+              >
                 Categories
               </InputLabel>
               <Select
-              sx={{color : theme == "light" ?  primaryTextColor : whiteTextColor }}
+                sx={{
+                  color: theme == "light" ? primaryTextColor : whiteTextColor,
+                }}
                 labelId="demo-simple-select-helper-label"
                 id="demo-simple-select-helper"
                 name="idCat"
@@ -408,20 +534,26 @@ console.log(type)
                 onChange={(e) => handleChangeField(e, "sub")}
               >
                 {cats?.map((cat) => (
-                  <MenuItem value={cat?.idCATEGORIES}>
-                    {cat.categoryname}
-                  </MenuItem>
+                  <MenuItem value={cat?.id}>{cat.name}</MenuItem>
                 ))}
               </Select>
-              <FormHelperText style={{backgroundColor:'transparent' ,color:secondaryTextColor } }>Please Select The Main Category</FormHelperText>
+              <FormHelperText
+                style={{
+                  backgroundColor: "transparent",
+                  color: secondaryTextColor,
+                }}
+              >
+                Please Select The Main Category
+              </FormHelperText>
             </FormControl>
           </InputContainer>
           <Button
             color="success"
-            sx={{bgcolor:theme == "light" ? main : colorAccentMedium , "&:hover" : {backgroundColor:colorAccentDark}}}
+            sx={customButton}
             variant="contained"
-            startIcon={<SaveAltTwoToneIcon />}
-            onClick={(e) => handleSubmitField(e , 'sub')}
+            startIcon={loading ? <LoadingOutlined /> : <SaveAltTwoToneIcon />}
+            onClick={(e) => handleSubmitField(e, "sub")}
+            disabled={loading}
           >
             Save
           </Button>
@@ -441,11 +573,11 @@ console.log(type)
           listType="picture-card"
           showUploadList={true}
           beforeUpload={beforeUpload}
-          onChange={(info) => handleChange(info, "logo")}
+          onChange={(info) => handleChange(info, "type")}
         >
-          {logoImageUrl ? (
+          {type?.image ? (
             <img
-              src={logoImageUrl}
+              src={type.image}
               alt="avatar"
               style={{
                 width: "100%",
@@ -466,38 +598,54 @@ console.log(type)
             <Label>
               Name <Span style={{ color: "red" }}>*</Span>
             </Label>
-            <InputText theme={theme}
+            <InputText
+              theme={theme}
               name="typename"
               onChange={(e) => handleChangeField(e, "type")}
             ></InputText>
           </InputContainer>
           <InputContainer>
             <Label>Category</Label>
-            <FormControl sx={{ width: "100%","& > *" :{bgcolor:theme == "light" ? whiteTextColor : colorAccentDarkTransparent } }}>
-              <InputLabel sx={{color:theme == "light" ? primaryTextColor : whiteTextColor}} id="demo-simple-select-helper-label">
+            <FormControl sx={customTextField}>
+              <InputLabel
+                sx={{
+                  color: theme == "light" ? primaryTextColor : whiteTextColor,
+                }}
+                id="demo-simple-select-helper-label"
+              >
                 Categories
               </InputLabel>
               <Select
                 labelId="demo-simple-select-helper-label"
                 id="demo-simple-select-helper"
-                name='idCat'
+                name="idCat"
                 value={cat?.id}
                 label="Categories"
                 onChange={(e) => handleChangeField(e, "type")}
               >
                 {cats?.map((cat) => (
-                  <MenuItem value={cat?.idCATEGORIES}>
-                    {cat.categoryname}
-                  </MenuItem>
+                  <MenuItem value={cat?.id}>{cat.name}</MenuItem>
                 ))}
               </Select>
-              <FormHelperText style={{backgroundColor:'transparent' , color:secondaryTextColor }}>Please Select The Main Category</FormHelperText>
+              <FormHelperText
+                style={{
+                  backgroundColor: "transparent",
+                  color: secondaryTextColor,
+                }}
+              >
+                Please Select The Main Category
+              </FormHelperText>
             </FormControl>
           </InputContainer>
           <InputContainer>
             <Label>Sub Category</Label>
-            <FormControl sx={{ width: "100%","& > *" :{bgcolor:theme == "light" ? whiteTextColor : colorAccentDarkTransparent } }}>
-              <InputLabel sx={{color:theme == "light" ? primaryTextColor : whiteTextColor}} id="demo-simple-select-helper-label">
+            <FormControl sx={customTextField}>
+              <InputLabel
+                sx={{
+                  color: theme == "light" ? primaryTextColor : whiteTextColor,
+                }}
+                id="demo-simple-select-helper-label"
+              >
                 Sub Categories
               </InputLabel>
               <Select
@@ -505,24 +653,30 @@ console.log(type)
                 id="demo-simple-select-helper"
                 value={sub?.id}
                 label="Sub Categories"
-                name='idSub'
+                name="idSub"
                 onChange={(e) => handleChangeField(e, "type")}
               >
                 {subs?.map((sub) => (
                   <MenuItem value={sub?.id}>{sub.name}</MenuItem>
                 ))}
               </Select>
-              <FormHelperText style={{backgroundColor:'transparent' , color:secondaryTextColor }}>
+              <FormHelperText
+                style={{
+                  backgroundColor: "transparent",
+                  color: secondaryTextColor,
+                }}
+              >
                 Please Select Your Product Sub Category
               </FormHelperText>
             </FormControl>
           </InputContainer>
           <Button
             color="success"
-            sx={{bgcolor:theme == "light" ? main : colorAccentMedium , "&:hover" : {backgroundColor:colorAccentDark}}}
+            sx={customButton}
             variant="contained"
-            startIcon={<SaveAltTwoToneIcon />}
-            onClick={(e) => handleSubmitField(e , 'type')}
+            startIcon={loading ? <LoadingOutlined /> : <SaveAltTwoToneIcon />}
+            onClick={(e) => handleSubmitField(e, "type")}
+            disabled={loading}
           >
             Save
           </Button>

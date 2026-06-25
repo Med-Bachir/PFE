@@ -3,6 +3,8 @@ import { Bar } from "react-chartjs-2"; // Import Bar chart component
 import { Chart as ChartJS } from "chart.js/auto";
 import styled from "styled-components";
 import { useSelector } from "react-redux";
+import { theme } from "antd";
+import { colorAccentDark, colorAccentMain, colorAccentMediumTransparent, colorAccentMoreTransparent, lightMain, main } from "../../Colors";
 
 const Container = styled.div`
   padding: 32px;
@@ -18,9 +20,7 @@ function BarChart({ chartData }) {
     maintainAspectRatio: false, // Allow chart to resize based on container width
     elements: {
       bar: {
-        backgroundColor: chartData.datasets.map(dataset => dataset.backgroundColor), // Set bar colors from data
         borderRadius: 5, // Add rounded corners to bars
-        
       },
       
     },

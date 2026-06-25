@@ -17,7 +17,7 @@ import { useDispatch, useSelector } from "react-redux";
 import AlertMessage from "../../Components/Alert";
 import { loginFailure, loginStart, loginSuccess } from "../../redux/user";
 import { Link, Navigate, useNavigate } from "react-router-dom";
-import { colorAccentMain, colorAccentMedium, colorAccentMoreTransparent, colorAccentSoft, colorBackgroundBlack, colorElementBackgroundGray, colorPrimaryBlack, elementGrayBackground, lightMain, lightSoftMain, main, primaryTextColor, secondText, whiteTextColor } from "../../Colors";
+import { colorAccentMain, colorAccentMedium, colorAccentMoreTransparent, colorAccentSoft, colorAccentTransparent, colorBackgroundBlack, colorElementBackgroundGray, colorPrimaryBlack, elementGrayBackground, lightMain, lightSoftMain, main, primaryTextColor, secondText, whiteTextColor } from "../../Colors";
 
 
 const Container = styled.div`
@@ -230,6 +230,7 @@ const theme = useSelector(state => state.theme.mode)
             id="outlined-adornment-password"
             name="password"
             type={showPassword ? 'text' : 'password'}
+            sx={{color: theme === "light" ? colorPrimaryBlack : elementGrayBackground}}
             endAdornment={
               <InputAdornment position="end">
                 <IconButton
@@ -238,7 +239,7 @@ const theme = useSelector(state => state.theme.mode)
                   onMouseDown={handleMouseDownPassword}
                   edge="end"
                 >
-                  {showPassword ? <VisibilityOff /> : <Visibility />}
+                  {showPassword ? <VisibilityOff sx={{color : theme === "light" ? main : colorAccentMain}} /> : <Visibility sx={{color : theme === "light" ? lightMain : colorAccentTransparent}}  />}
                 </IconButton>
               </InputAdornment>
             }

@@ -1,120 +1,129 @@
 import React, { useEffect, useState } from "react";
 import ProductList from "./ProductList";
-import { Fab, Tooltip } from "@mui/material";
+import { Fab, Tooltip, Pagination, Box } from "@mui/material";
 import AddShoppingCartIcon from "@mui/icons-material/AddShoppingCart";
 import styled from "styled-components";
 import { useSelector } from "react-redux";
 import { Link } from "react-router-dom";
 import newRequest from "../../../utils/newRequest";
-import { main, primaryTextColor, whiteTextColor } from "../../../Colors";
+import { colorAccentDarkTransparent, colorAccentMain, colorPrimaryBlack, lightMain, main, primaryTextColor, whiteTextColor } from "../../../Colors";
+import SearchComponent from "../../../features/Search";
 
 const Container = styled.div`
   display: flex;
-  align-items: start;
-  justify-content: center;
-  padding: 32px;
+  flex-direction: column;
+  padding: 20px 32px;
+  gap: 20px;
   height: calc(100vh - 80px);
 `;
+
 const StaticContainer = styled.div`
-  background-color: ${whiteTextColor};
+  background-color: ${({ theme }) => (theme === "light" ? whiteTextColor : colorPrimaryBlack)};
   width: 100%;
   max-height: calc(100vh - 144px);
   overflow-y: auto;
   &::-webkit-scrollbar {
-    width: 5px; /* width of the entire scrollbar */
+    width: 5px;
   }
   &::-webkit-scrollbar-track {
-    background: transparent; /* color of the tracking area */
+    background: transparent;
   }
   &::-webkit-scrollbar-thumb {
-    background-color: rgba(
-      147,
-      147,
-      147,
-      0.543
-    ); /* color of the scroll thumb */
-    border-radius: 20px; /* roundness of the scroll thumb */
-    /* creates padding around scroll thumb */
+    background-color: rgba(147, 147, 147, 0.543);
+    border-radius: 20px;
   }
 `;
 
 const Products = () => {
   const user = useSelector((state) => state.user?.currentUser);
-
+  const theme = useSelector((state) => state.theme.mode);
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 10; // Number of shops per page
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(null);
-
-
+  const [filteredRows, setFilteredRows] = useState([]);
 
   const getProducts = async () => {
-    let res ;
+    let res;
     try {
-      if (user?.userRole == "admin") {
-         res = await newRequest.get(`/products/all-products`);
-        
-        
+      if (user?.userRole === "admin") {
+        res = await newRequest.get(`/products/all-products`);
       } else {
-         res = await newRequest.get(
-          `/products/seller-products/${user?.idUSER}`
-        );
-
+        res = await newRequest.get(`/products/seller-products/${user?.idUSER}`);
       }
       setProducts(res.data);
-      setLoading(true)
-
+      setFilteredRows(res.data);
+      setLoading(true);
     } catch (err) {
       console.error("Error fetching users:", err);
-    }finally {
+    } finally {
       setTimeout(() => {
-        setLoading(false)
-              },[1000])
+        setLoading(false);
+      }, 1000);
     }
   };
+
   useEffect(() => {
-    
     getProducts();
   }, []);
-  const handleDelete = async (id) => {
-    try {
-      const response = await newRequest.delete(
-        `/products/delete-product/${id}`
-      );
-      console.log(response.status);
-setLoading(true)
-      if (response.status === 200) {
-        message.success("Product added successfully.");
-      } else {
-        message.error("Failed to add product.");
-      }
-      getProducts()
 
-    } catch (error) {
-      console.error("Error adding product:", error);
-      message.error("Failed to add product.");
-    }finally{
-      setTimeout(() => {
-        setLoading(false)
-              },[1000])
-    }
+  const handleSearchResults = (rows) => {
+    setFilteredRows(rows);
+    setCurrentPage(1); // Reset to first page on search
+  };
+
+  const totalPages = Math.ceil(filteredRows.length / itemsPerPage);
+  const paginatedData = filteredRows.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
+  );
+
+  const handlePageChange = (event, page) => {
+    setCurrentPage(page);
   };
 
   return (
     <>
       <Container>
-        <StaticContainer style={{ borderRadius: 4 }}>
-          <ProductList productData={products} loading={loading} handle={handleDelete}/>
+      <StaticContainer theme={theme} style={{padding:'20px 20px 20px 0', display:'flex',alignItems:'center' , flexDirection:'row' , justifyContent:'space-between' , borderRadius:8 }}>
+          <SearchComponent data={products} onSearch={handleSearchResults} type="Products" />
         </StaticContainer>
-        <Link to="Add">
-        <Tooltip title='Add Product'>
+        <StaticContainer theme={theme} style={{ borderRadius: 4 }}>
+          <ProductList productData={paginatedData} loading={loading} />
+        </StaticContainer>
+        <Box sx={{display:'flex' , alignContent:'center' , justifyContent:'center'}}>
 
-          <Fab
-            sx={{bgcolor:main}}
-            aria-label="add"
-            style={{ position: "absolute", bottom: 120, right: 50 }}
+         <Pagination
+               count={Math.ceil((filteredRows?.length > 0 ? filteredRows?.length : products?.length) / itemsPerPage)}
+               page={currentPage}
+               onChange={handlePageChange}
+               sx={{
+                 ".css-yuzg60-MuiButtonBase-root-MuiPaginationItem-root": {
+                   backgroundColor: theme === 'light' ? lightMain : colorAccentDarkTransparent,
+                   color: theme === "light" ? main : colorAccentMain
+                  },
+                  ".css-yuzg60-MuiButtonBase-root-MuiPaginationItem-root.Mui-selected" : {
+                    backgroundColor: theme === 'light' ? main : colorAccentMain,
+                    color: whiteTextColor 
+                  }
+                }}
+                />
+            </Box>
+        <Link to="Add">
+          <Tooltip title="Add Product">
+            <Fab
+              aria-label="add"
+              sx={{
+                bgcolor: main,
+                position: "absolute",
+                bottom: 120,
+                right: 50,
+                "@media (max-width: 768px)": { bottom: 92, right: 8 },
+              }}
             >
-            <AddShoppingCartIcon sx={{color:whiteTextColor , "&:hover" : {color : primaryTextColor}}} />
-          </Fab>
-            </Tooltip>
+              <AddShoppingCartIcon sx={{ color: whiteTextColor, "&:hover": { color: primaryTextColor } }} />
+            </Fab>
+          </Tooltip>
         </Link>
       </Container>
     </>

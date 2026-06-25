@@ -13,7 +13,8 @@ import ItemContainer from "../../Components/ItemContainer"
 
 import me from "../../assets/Lotties/Animation - 1716145973359.json";
 import Loading from "../../Components/Pending/Loading";
-import { colorAccentDarkTransparent, colorAccentLight, colorAccentMain, colorAccentMedium, colorAccentMediumTransparent, colorAccentSoft, colorAccentSoftTransparent, colorAccentTransparent, colorBackgroundBlack, colorBackgroundGray, colorPrimaryBlack, grayBackground, lightSoftMain, main, primaryTextColor, transparentMain, whiteTextColor } from "../../Colors";
+import { colorAccentDarkTransparent, colorAccentLight, colorAccentMain, colorAccentMedium, colorAccentMediumTransparent, colorAccentSoft, colorAccentSoftTransparent, colorAccentTransparent, colorBackgroundBlack, colorBackgroundGray, colorHighlightDarkYellow, colorPrimaryBlack, colorWarningDark, darkOrange, darkYellow, grayBackground, lightSoftMain, main, primaryTextColor, transparentMain, whiteTextColor } from "../../Colors";
+import DoughnutChart from "../../Components/charts/DoughnutChart";
 
 const Container = styled.div`
   padding: 0 32px;
@@ -205,6 +206,13 @@ const LottieContainer = styled.div`
   justify-content: center;
   flex-direction: column;
 `;
+const Charts = styled.div`
+  display: flex;
+  gap: 20px;
+  @media (max-width: 768px) {
+   flex-direction: column;
+}
+`;
 
 const OwnerPf = () => {
   const open = useSelector((state) => state.cart.open);
@@ -235,12 +243,15 @@ const OwnerPf = () => {
   let [index, setIndex] = useState(0);
   const [userData, setUserData] = useState({
     labels: [],
-    datasets: [
-      {
-        label: "New Users",
-        data: [],
-      },
-    ],
+    datasets: [{
+      type: 'bar',
+      label: 'Bar Dataset',
+      data: [10, 20, 30, 40]
+  }, {
+      type: 'line',
+      label: 'Line Dataset',
+      data: [50, 50, 50, 50],
+  }],
   });
 
   useEffect(() => {
@@ -310,6 +321,33 @@ const OwnerPf = () => {
   const handleClick = (buttonName) => {
     setActiveButton(buttonName);
   };
+
+
+   const orderStats = {
+      labels: ["Total Orders","Waiting Orders", "On Way Orders", "Arrived Orders"], // Inner circle labels
+      datasets: [
+        {
+          
+          data: [stats?.totalOrdersFromOwner,0 ,0 ,0], // Total orders only
+          backgroundColor:  theme === "light" ? [ "#b20dbb6e",`${darkOrange}6e`, `${darkYellow}6e`, `${main}6e`] : [ "#5e05636e",`${colorWarningDark}6e`, `${colorHighlightDarkYellow}6e`, `${colorAccentMain}6e`], // Single color for the total orders
+          borderColor:  theme === "light" ? [ "#b20dbb",`${darkOrange}`, `${darkYellow}`, `${main}`] : [ "#5e0563",`${colorWarningDark}`, `${colorHighlightDarkYellow}`, `${colorAccentMain}`], // Single color for the total orders
+          hoverBackgroundColor:theme === "light" ? [ "#b20dbb",`${darkOrange}`, `${darkYellow}`, `${main}`] : [ "#5e0563",`${colorWarningDark}`, `${colorHighlightDarkYellow}`, `${colorAccentMain}`], // Hover color
+           // Leave space for the inner circle
+          // Full size for the outer circle
+        },
+        {
+        
+          data: [0,stats?.WaitingOrders, stats?.OnWayOrders, stats?.ArrivedOrders], // Waiting, On Way, Arrived
+          borderColor:  theme === "light" ? ["#b20dbb",`${darkOrange}`, `${darkYellow}`, `${main}`] : ["#5e0563",`${colorWarningDark}`, `${colorHighlightDarkYellow}`, `${colorAccentMain}`], // Single color for the total orders
+          backgroundColor: theme === "light" ? ["#b20dbb6e",`${darkOrange}6e`, `${darkYellow}6e`, `${main}6e`] : ["#5e05636e",`${colorWarningDark}6e`, `${colorHighlightDarkYellow}6e`, `${colorAccentMain}6e`], // Different colors for each category
+          hoverBackgroundColor:theme === "light" ? ["#b20dbb",`${darkOrange}`, `${darkYellow}`, `${main}`] : ["#5e0563",`${colorWarningDark}`, `${colorHighlightDarkYellow}`, `${colorAccentMain}`], // Hover colors
+           // Smaller size for the inner circle
+           // Ensures it stays inside the outer circle
+           radius: "90%", 
+        },
+      ],
+    };
+    
   return (
     <Container>
       <StaticContainer theme={theme}>
@@ -427,11 +465,17 @@ const OwnerPf = () => {
           />
         </Statics>
       </StaticContainer>
+<Charts>
 
-      <StaticContainer theme={theme}>
+      <StaticContainer theme={theme} style={{width:"70%"}}>
         <StaticTitle>INCOM HISTORY</StaticTitle>
         <LineChart chartData={userData} />
       </StaticContainer>
+      <StaticContainer theme={theme} style={{width:"30%"}}>
+        <StaticTitle>Orders</StaticTitle>
+        <DoughnutChart chartData={orderStats} loading={loading} />
+      </StaticContainer>
+</Charts>
 
       <StaticContainer
         style={{
