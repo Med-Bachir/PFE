@@ -9,7 +9,7 @@ const Container = styled.div`
 `;
 
 function LineChart({ chartData }) {
-  const open = useSelector(state => state.cart.open);
+ 
   const chartRef = useRef(null);
 
   useEffect(() => {

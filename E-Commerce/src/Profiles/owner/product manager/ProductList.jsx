@@ -56,6 +56,7 @@ const Row = styled.div`
 const ProductInfo = styled.div`
   display: flex;
   align-items: center;
+  height: 45px;
   gap: 20px;
   flex: 2;
 `;
@@ -237,7 +238,24 @@ const getTagsForCategory = (product) => {
 };
 
 
+const ImageContainer = styled.div`
+  
 
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+ height: 49px;
+ 
+
+    
+    img {
+
+      
+   height: 45px;
+    width: 45px;
+    }
+`;
 
 const ProductList = ({ productData , loading , handle }) => {
   const theme = useSelector((state) => state.theme.mode);
@@ -275,25 +293,29 @@ const ProductList = ({ productData , loading , handle }) => {
         const parsedAttributes = product?.attributes ? JSON.parse(product.attributes) : null;
         
           
-          console.log(productData[index])
+          
            
         return (
           <Table theme={theme} >
             <Row theme={theme}>
               <ProductInfo theme={theme}>
-             
+             <ImageContainer>
+
                 <LazyAvatar
   src={product?.productimage}
   sx={{
     bgcolor: theme === "light" ? whiteTextColor: colorPrimaryBlack ,
     borderRadius: '4px',
-    padding:'4px',
+    padding:'2px',
     border: `1px solid ${theme == "light" ? grayBackground : colorBackgroundBlack}`,
-    width: '45px' ,
-    height: 45,
-    objectFit: 'contain',
-     }}
+   width:45,
+   height:45
+    
+    
+   
+  }}
 />
+  </ImageContainer>
                 <Name>{product.productname}</Name>
               </ProductInfo>
               <Detail theme={theme}>{product.categoryName}</Detail>

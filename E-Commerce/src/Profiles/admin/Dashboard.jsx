@@ -82,7 +82,7 @@ const StaticButContainer = styled.div`
 `;
 const ButtonGroup = styled.div`
   border-radius: 40px;
-  contain: paint;
+  overflow:hidden;
   display: flex;
   
   gap: 2px;
@@ -120,7 +120,7 @@ const PopularContainer = styled.div`
 `;
 const PopularInfo = styled.div`
   display: flex;
-  contain: paint;
+ overflow: hidden;
   width: 100%;
   color: ${props => props.theme == "light" ? primaryTextColor: whiteTextColor};
 `;
@@ -238,9 +238,7 @@ const ListItemConatiner = styled.div`
    
 }
 `;
-const ItemImage = styled.img`
- 
-`;
+
 const ItemDesc = styled.div`
   flex: 7;
   display: flex;
@@ -279,6 +277,25 @@ const LottieContainer = styled.div`
   flex-direction: column;
 `;
 
+
+const ImageContainer = styled.div`
+  
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+ height: 54px;
+ 
+
+    
+    img {
+
+      
+   height: 48px;
+    width: 48px;
+    }
+`;
 const AdminPf = () => {
   const user = useSelector((state) => state.user?.currentUser);
   const theme = useSelector((state) => state.theme.mode);
@@ -286,7 +303,7 @@ const AdminPf = () => {
   const [prod, setProd] = useState([]);
   const [prodS, setProdS] = useState([]);
 
-  const open = useSelector((state) => state.cart.open);
+  const open = useSelector((state) => state.drawer.open);
   const [activeButton, setActiveButton] = useState("Today");
   const [loading, setLoading] = useState(false);
   let [index, setIndex] = useState(0);
@@ -742,6 +759,8 @@ const AdminPf = () => {
             {prodS != '' && !loading ? (
               prodS.map((item) => (
                 <ListItemConatiner theme={theme} key={item?.idPRODUCT}>
+                  <ImageContainer>
+
                         <LazyAvatar 
   src={item?.productimage}
   sx={{
@@ -752,8 +771,9 @@ const AdminPf = () => {
     width: '48px' ,
     height: 48,
     objectFit: 'contain',
-     }}
+  }}
 />
+  </ImageContainer>
 
                   <ItemDesc>
                     <ItemName>{item?.productname}</ItemName>
@@ -871,6 +891,8 @@ const AdminPf = () => {
             {myProdS != "" && !loading ? (
               myProdS.map((item) => (
                 <ListItemConatiner  theme={theme} key={item.idPRODUCT}>
+                  <ImageContainer>
+
                                      <LazyAvatar 
   src={item?.productimage}
   sx={{
@@ -881,8 +903,9 @@ const AdminPf = () => {
     width: 48 ,
     height: 48,
     objectFit: 'contain',
-     }}
+  }}
 />
+  </ImageContainer>
                   <ItemDesc>
                     <ItemName>{item.productname}</ItemName>
                     <ItemType>Solds : {item.totalSold}</ItemType>

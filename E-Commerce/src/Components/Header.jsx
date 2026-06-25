@@ -113,14 +113,15 @@ const Notifications = styled.div`
   padding: 8px 0;
   width: 250px;
   display: flex;
-
   border-radius: 4px;
   flex-direction: column;
   background-color: ${softMain};
   right: ${(props) => (props.open ? "0" : "-250px")};
   top: 80px;
-
   transition: 200ms;
+  color: black;
+  height: calc(100vh - 150px);
+  overflow-y:auto;
   @media (max-width: 768px) {
     top: 185px;
     width: 100%;
@@ -215,7 +216,7 @@ const Header = () => {
       const response = await newRequest.put(
         `/seller/become-seller/${user?.idUSER}`
       );
-      console.log(response.data.message);
+      
       alert("you have become a seller");
     } catch (error) {
       console.error("Error deleting user:");
@@ -314,9 +315,6 @@ const Header = () => {
             <Link style={{color:theme == "light" ? primaryTextColor : whiteTextColor , fontWeight: 400 }} to="/Shops">
               Shops
             </Link>
-            <Link style={{color:theme == "light" ? primaryTextColor : whiteTextColor , fontWeight: 400 }} to="/offer">
-              Offer
-            </Link>
             <Link style={{color:theme == "light" ? primaryTextColor : whiteTextColor , fontWeight: 400 }} to="/contact">
               Contact
             </Link>
@@ -340,12 +338,7 @@ const Header = () => {
               }}
               sx={{".css-6hp17o-MuiList-root-MuiMenu-list" : {backgroundColor: theme == "light" ? whiteTextColor : colorBackgroundBlack}}}
               >
-              <Link
-                to="/Orders"
-                style={{ textDecoration: "none", color:theme == "light" ? primaryTextColor : whiteTextColor , fontWeight: 400 }}
-                >
-                <MenuItem onClick={handleClose}>My Orders</MenuItem>
-              </Link>
+             
               <Link style={{color:theme == "light" ? primaryTextColor : whiteTextColor , fontWeight: 400 }}>
               <MenuItem onClick={handleClose}>About Us</MenuItem>
               </Link>
@@ -464,7 +457,7 @@ const Header = () => {
             </LottieContainer>
           )}
         </Notifications>
-        <Fab style={{position:'fixed' , bottom:32 , right : 32 , width:"fit-content" , borderRadius:50, padding:0 , backgroundColor: theme == 'light' ? whiteTextColor : colorAccentDarkTransparent}}>
+        <Fab style={{position:'fixed' , bottom:12 , right : 12 , width:"fit-content" , borderRadius:50, padding:0 , backgroundColor: theme == 'light' ? whiteTextColor : colorAccentDarkTransparent , transform:"scale(0.6)"}}>
         <ThemeSwitcher />
 
         </Fab>

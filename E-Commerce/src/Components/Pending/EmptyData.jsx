@@ -22,7 +22,7 @@ const EmptyData = ({text}) => {
   return (
     <Container>
 
-<Lottie style={{width:'50%'}} animationData={empty}/>
+<Lottie style={{width:'30%'}} animationData={empty}/>
 <Empty>{text}</Empty>
                 </Container>
   )

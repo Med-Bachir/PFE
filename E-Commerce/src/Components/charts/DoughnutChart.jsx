@@ -15,7 +15,7 @@ const Container = styled.div`
 `;
 
 function DoughnutChart({ chartData, loading }) {
-  const open = useSelector((state) => state.cart.open); // Example usage of Redux state
+  
 
   const options = {
     responsive: true,

@@ -53,9 +53,10 @@ const SubCategory = styled.div`
   flex-direction: column;
   padding: 0px 0px 0 20px;
   gap: 4px;
-  max-height: ${({ open }) => (open ? "500px" : "40px")};
+  max-height: ${({ open }) => (open ? "500px" : "50px")};
   overflow: hidden;
   transition: max-height 0.4s ease-in-out;
+
 `;
 
 const Information = styled.div`
@@ -64,6 +65,7 @@ const Information = styled.div`
   gap: 12px;
   padding: 8px 10px;
   border-radius: 8px;
+  
   cursor: pointer;
   background-color: ${props => props.open ? props.theme == 'light' ? lightMain :  colorAccentDarkTransparent :  ""};
   

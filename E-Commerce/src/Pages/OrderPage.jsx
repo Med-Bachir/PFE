@@ -1,46 +1,73 @@
-import { Avatar, Divider, Tooltip } from "@mui/material";
+import { Divider, IconButton, Tooltip } from "@mui/material";
 import React, { useEffect, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import styled from "styled-components";
-import Header from "../Components/Header";
 import RemoveRedEyeOutlinedIcon from "@mui/icons-material/RemoveRedEyeOutlined";
-
 import LocationOnTwoToneIcon from "@mui/icons-material/LocationOnTwoTone";
 import LocalShippingTwoToneIcon from "@mui/icons-material/LocalShippingTwoTone";
 import ApartmentTwoToneIcon from "@mui/icons-material/ApartmentTwoTone";
 import WhereToVoteTwoToneIcon from "@mui/icons-material/WhereToVoteTwoTone";
-import LockTwoToneIcon from "@mui/icons-material/LockTwoTone";
 import { useSelector } from "react-redux";
 import newRequest from "../utils/newRequest";
 import EmptyData from "../Components/Pending/EmptyData";
-import { colorAccentDark, colorAccentDarkTransparent, colorAccentLight, colorAccentMain, colorAccentMedium, colorAccentMediumTransparent, colorAccentMoreTransparent, colorAccentSoft, colorAccentSoftTransparent, colorAccentSub, colorAccentSubDark, colorAccentTransparent, colorBackgroundBlack, colorBackgroundGray, colorHighlightDarkYellow, colorHighlightSoftYellow, colorPrimaryBlack, colorWarningDark, colorWarningSoft, darkOrange, darkYellow, elementGrayBackground, grayBackground, hovredText, lightMain, lightMedMain, lightSoftMain, main, medMain, primaryTextColor, secondaryTextColor, softMain, softMainTransparent, softOrange, softYellow, transparentMain, whiteTextColor } from "../Colors";
+import {
+  colorAccentLight,
+  colorAccentMain,
+  colorAccentMedium,
+  colorAccentMoreTransparent,
+  colorAccentSubDark,
+  colorAccentTransparent,
+  colorBackgroundGray,
+  colorHighlightDarkYellow,
+  colorHighlightSoftYellow,
+  colorPrimaryBlack,
+  colorWarningDark,
+  colorWarningSoft,
+  darkOrange,
+  darkYellow,
+  elementGrayBackground,
+  grayBackground,
+  lightMain,
+  lightMedMain,
+  lightSoftMain,
+  main,
+  medMain,
+  primaryTextColor,
+  secondaryTextColor,
+  softMainTransparent,
+  softOrange,
+  softYellow,
+  transparentMain,
+  whiteTextColor,
+} from "../Colors";
+import MoreHorizTwoToneIcon from "@mui/icons-material/MoreHorizTwoTone";
 
 const Container = styled.div`
-  height: calc(100vh - 132px);
-  
+  height: calc(100vh - 80px);
+  width: calc(100% - 64px);
+  margin: 32px;
   contain: paint;
-   color: ${({theme}) => theme == "light" ? primaryTextColor : elementGrayBackground};
-   background-color: ${({theme}) => theme == "light" ? whiteTextColor : colorBackgroundGray};
+  color: ${({ theme }) =>
+    theme == "light" ? primaryTextColor : elementGrayBackground};
+  background-color: ${({ theme }) =>
+    theme == "light" ? whiteTextColor : colorBackgroundGray};
   padding: ${(props) => (props.location == "Orders" ? "32px" : 0)};
-  @media (max-width:768px) {
-    
+  @media (max-width: 768px) {
     height: auto;
     contain: content;
   }
 `;
 const OrderContainer = styled.div`
-  height:100% ;
-  
+  height: 100%;
 
   contain: paint;
 
-  background-color: ${({theme}) => theme == "light" ? grayBackground : colorBackgroundGray};
+  background-color: ${({ theme }) =>
+    theme == "light" ? grayBackground : colorBackgroundGray};
   display: flex;
-
   gap: 32px;
   overflow-y: auto;
-  @media (max-width:768px) {
-    
+  @media (max-width: 768px) {
     flex-direction: column;
     height: auto;
     contain: content;
@@ -49,16 +76,14 @@ const OrderContainer = styled.div`
 
 const Center = styled.div`
   width: 30%;
-  background-color: ${({theme}) => theme == "light" ? whiteTextColor : colorPrimaryBlack};
+  background-color: ${({ theme }) =>
+    theme == "light" ? whiteTextColor : colorPrimaryBlack};
   border-radius: 4px;
   padding: 20px;
   display: flex;
   flex-direction: column;
   gap: 20px;
-
-  
   overflow-y: auto;
-
   &::-webkit-scrollbar {
     width: 4px;
   }
@@ -70,8 +95,8 @@ const Center = styled.div`
     border-radius: 20px;
   }
   max-height: 100%;
-  @media (max-width:768px) {
-   width: 100%;
+  @media (max-width: 768px) {
+    width: 100%;
   }
 `;
 const Title = styled.span`
@@ -87,17 +112,16 @@ const Order = styled.div`
   display: flex;
   flex-direction: column;
   gap: 16px;
-
   padding: 16px;
   border-radius: 4px;
-  background-color: ${({theme}) => theme == "light" ? grayBackground : colorBackgroundGray};
+  background-color: ${({ theme }) =>
+    theme == "light" ? grayBackground : colorBackgroundGray};
   cursor: pointer;
   border: ${({ isSelected }) => (isSelected ? `2px solid ${main}` : "none")};
   transition: 200ms;
 `;
 const OrderHeader = styled.div`
   display: flex;
-
   align-items: center;
   gap: 8px;
 `;
@@ -111,16 +135,28 @@ const Progress = styled.span`
   padding: 4px;
   background-color: ${(props) =>
     props.status == "Arrived"
-      ? props.theme == "light" ? lightSoftMain : colorAccentLight
+      ? props.theme == "light"
+        ? lightSoftMain
+        : colorAccentLight
       : props.status == "Waiting"
-      ? props.theme == "light" ? softOrange : colorWarningSoft 
-      : props.theme == "light" ? softYellow : colorHighlightSoftYellow};
+      ? props.theme == "light"
+        ? softOrange
+        : colorWarningSoft
+      : props.theme == "light"
+      ? softYellow
+      : colorHighlightSoftYellow};
   color: ${(props) =>
     props.status == "Arrived"
-      ? props.theme == "light" ? main : colorAccentMain
+      ? props.theme == "light"
+        ? main
+        : colorAccentMain
       : props.status == "Waiting"
-      ? props.theme == "light" ? darkOrange : colorWarningDark
-      : props.theme == "light" ? darkYellow : colorHighlightDarkYellow};
+      ? props.theme == "light"
+        ? darkOrange
+        : colorWarningDark
+      : props.theme == "light"
+      ? darkYellow
+      : colorHighlightDarkYellow};
   border-radius: 4px;
   width: 50%;
   text-align: center;
@@ -138,20 +174,18 @@ const Info = styled.span`
   width: 50%;
   text-align: ${(props) => (props.direction == "left" ? "left" : "right")};
 `;
-
 const Right = styled.div`
   width: 70%;
   display: flex;
   flex-direction: column;
-  background-color: ${({theme}) => theme == "light" ? whiteTextColor : colorPrimaryBlack};
+  background-color: ${({ theme }) =>
+    theme == "light" ? whiteTextColor : colorPrimaryBlack};
   border-radius: 4px;
   padding: 0 0 0 0;
   gap: 20px;
- 
   contain: paint;
   overflow-y: auto;
   max-height: calc(100vh - 80px);
-
   &::-webkit-scrollbar {
     width: 2px;
   }
@@ -162,11 +196,11 @@ const Right = styled.div`
     background-color: rgba(147, 147, 147, 0.543);
     border-radius: 20px;
   }
-  @media (max-width:768px) {
-   width: calc(100vw - 64px);
+  @media (max-width: 768px) {
+    width: calc(100vw - 64px);
   }
 `;
-const SelectedOrder = styled.div``
+const SelectedOrder = styled.div``;
 const OrderTitle = styled.div`
   display: flex;
   justify-content: space-between;
@@ -180,28 +214,23 @@ const Detail = styled.span`
   display: flex;
   align-items: center;
   gap: 8px;
-  color: ${({theme}) => theme == "light" ? main : colorAccentMain};
-
+  color: ${({ theme }) => (theme == "light" ? main : colorAccentMain)};
 `;
 const OrderInfos = styled.div`
   padding: 20px;
- 
 `;
 const Status = styled.div`
   justify-content: space-between;
   display: flex;
-
   padding: 16px 32px;
-  background-color: ${({theme}) => theme == "light" ? grayBackground : colorBackgroundGray};
-
+  background-color: ${({ theme }) =>
+    theme == "light" ? grayBackground : colorBackgroundGray};
   border-radius: 4px;
   margin-bottom: 20px;
-  @media (max-width:768px) {
-  
-   flex-direction: column;
-   gap: 8px;
-   padding: 20px 8px;
-   
+  @media (max-width: 768px) {
+    flex-direction: column;
+    gap: 8px;
+    padding: 20px 8px;
   }
 `;
 const TypeTitle = styled.span`
@@ -209,7 +238,7 @@ const TypeTitle = styled.span`
   gap: 20px;
   align-items: center;
   font-weight: 500;
-  @media (max-width:768px) {
+  @media (max-width: 768px) {
     font-weight: 400;
     justify-content: space-between;
   }
@@ -219,43 +248,49 @@ const OrderProcessing = styled.span`
   border-radius: 4px;
   background-color: ${(props) =>
     props.status == "Arrived"
-      ? props.theme == "light" ? lightSoftMain : colorAccentLight
+      ? props.theme == "light"
+        ? lightSoftMain
+        : colorAccentLight
       : props.status == "Waiting"
-      ? props.theme == "light" ? softOrange : colorWarningSoft 
-      : props.theme == "light" ? softYellow : colorHighlightSoftYellow};
+      ? props.theme == "light"
+        ? softOrange
+        : colorWarningSoft
+      : props.theme == "light"
+      ? softYellow
+      : colorHighlightSoftYellow};
   color: ${(props) =>
     props.status == "Arrived"
-      ? props.theme == "light" ? main : colorAccentMain
+      ? props.theme == "light"
+        ? main
+        : colorAccentMain
       : props.status == "Waiting"
-      ? props.theme == "light" ? darkOrange : colorWarningDark
-      : props.theme == "light" ? darkYellow : colorHighlightDarkYellow};
+      ? props.theme == "light"
+        ? darkOrange
+        : colorWarningDark
+      : props.theme == "light"
+      ? darkYellow
+      : colorHighlightDarkYellow};
   font-weight: 300;
-  @media (max-width:768px) {
-   width: 45%;
+  @media (max-width: 768px) {
+    width: 45%;
   }
 `;
 const PaymentType = styled.span`
   padding: 4px 12px;
   border-radius: 4px;
   background-color: ${(props) =>
-    
-       props.theme == "light" ? lightSoftMain : colorAccentLight
-      };
-  color: ${(props) =>
-    
-      props.theme == "light" ? main : colorAccentMain
-      
-     };
+    props.theme == "light" ? lightSoftMain : colorAccentLight};
+  color: ${(props) => (props.theme == "light" ? main : colorAccentMain)};
   font-weight: 300;
-  @media (max-width:768px) {
-   width: 60%;
+  @media (max-width: 768px) {
+    width: 60%;
   }
 `;
 
 const Details = styled.div`
   display: flex;
-  @media (max-width:768px) {
-   flex-direction: column;
+  @media (max-width: 768px) {
+    flex-direction: column;
   }
 `;
 const Addresses = styled.div`
@@ -266,20 +301,17 @@ const Addresses = styled.div`
   gap: 12px;
   padding: 16px 16px 0 0;
   border-right: 1px solid ${grayBackground};
-  color: ${({theme}) => theme == "light" ? primaryTextColor : elementGrayBackground};
+  color: ${({ theme }) =>
+    theme == "light" ? primaryTextColor : elementGrayBackground};
 
-  
-  @media (max-width:768px) {
+  @media (max-width: 768px) {
     border-right: none;
     border-bottom: 1px solid ${grayBackground};
   }
-
-  
 `;
 const AddressType = styled.div`
   font-size: 14px;
   font-weight: 600;
- 
 `;
 const Address = styled.div`
   font-size: 13px;
@@ -293,9 +325,9 @@ const OrderTotal = styled.div`
   flex-direction: column;
   justify-content: space-between;
   padding: 12px;
-  @media (max-width:768px) {
-   padding: 12px 0;
-   gap: 9px;
+  @media (max-width: 768px) {
+    padding: 12px 0;
+    gap: 9px;
   }
 `;
 const TotalType = styled.div`
@@ -303,7 +335,12 @@ const TotalType = styled.div`
   justify-content: space-between;
 `;
 const TotalName = styled.span`
-  color: ${(props) => (props.type == "total" ? props.theme == "light" ? primaryTextColor : elementGrayBackground : secondaryTextColor)};
+  color: ${(props) =>
+    props.type == "total"
+      ? props.theme == "light"
+        ? primaryTextColor
+        : elementGrayBackground
+      : secondaryTextColor};
   font-size: ${(props) => (props.type == "total" ? "16px" : "14px ")};
   font-weight: ${(props) => (props.type == "total" ? "600" : "300 ")};
 `;
@@ -315,22 +352,19 @@ const Processing = styled.div`
   justify-content: center;
   padding: 20px;
 
- 
   @media (max-width: 768px) {
-   flex-direction: column;
-   padding: 0;
-   padding-bottom: 20px;
-   justify-content: center;
-  
+    flex-direction: column;
+    padding: 0;
+    padding-bottom: 20px;
+    justify-content: center;
   }
 `;
 const StepContainer = styled.div`
   display: flex;
   flex-direction: column;
   align-items: center;
-  
+
   height: 100px;
-  
 
   gap: 8px;
   @media (max-width: 768px) {
@@ -343,7 +377,9 @@ const StepContainer = styled.div`
 
 const Step = styled.div`
   border: ${(props) =>
-    props.status == "complete" ? `3px solid ${medMain}` : `1px dashed ${medMain}`};
+    props.status == "complete"
+      ? `3px solid ${medMain}`
+      : `1px dashed ${medMain}`};
 
   width: 60px;
   height: 50px;
@@ -352,14 +388,11 @@ const Step = styled.div`
   contain: content;
   align-items: center;
   justify-content: center;
- 
 `;
 const StepLabel = styled.label`
   font-size: 12px;
   text-align: center;
   max-width: 60px;
-  
-
 
   display: flex;
   flex-direction: column;
@@ -368,13 +401,16 @@ const StepLabel = styled.label`
     justify-content: center;
     width: 100%;
   }
-  
 `;
 const Span = styled.span`
   background-color: ${(props) =>
     props.status == "complete" || props.status == "in progress"
-      ? props . theme == "light" ? lightMedMain : colorAccentTransparent
-      : props . theme == "light" ? lightSoftMain : colorAccentLight};
+      ? props.theme == "light"
+        ? lightMedMain
+        : colorAccentTransparent
+      : props.theme == "light"
+      ? lightSoftMain
+      : colorAccentLight};
   height: 100%;
   border-radius: 50%;
   width: 100%;
@@ -387,12 +423,13 @@ const Span = styled.span`
 const Connector = styled.progress`
   height: 4px;
   border-radius: 1px;
- margin-bottom: 45px;
+  margin-bottom: 45px;
   width: 20%;
   display: ${(props) => (props.step ? "none" : "")};
   &::-webkit-progress-bar {
-    background-color: ${({theme}) => theme == "light" ? lightMain : colorAccentMedium};
-    color: ${({theme}) => theme == "light" ? main : colorAccentMain};
+    background-color: ${({ theme }) =>
+      theme == "light" ? lightMain : colorAccentMedium};
+    color: ${({ theme }) => (theme == "light" ? main : colorAccentMain)};
   }
   &::-webkit-progress-value {
     background-color: ${medMain};
@@ -404,38 +441,36 @@ const Connector = styled.progress`
   }
 `;
 
-const Table = styled.div``;
+const Table = styled.div`
+  background-color: ${({ theme }) =>
+    theme == "light" ? transparentMain : colorAccentMoreTransparent};
+`;
 const TableItems = styled.div`
   display: flex;
   flex-direction: column;
   overflow: auto;
   position: relative;
   &::-webkit-scrollbar {
-   
     height: 4px;
   }
   &::-webkit-scrollbar-track {
     background: transparent;
-    
   }
   &::-webkit-scrollbar-thumb {
     background-color: rgba(147, 147, 147, 0.543);
     border-radius: 20px;
-    
   }
-  
 `;
 const TagRow = styled.div`
   display: flex;
   position: sticky;
   top: 0;
-  background-color: ${({theme}) => theme == "light" ? main : colorAccentMedium};
+  background-color: ${({ theme }) =>
+    theme == "light" ? main : colorAccentMedium};
   color: ${whiteTextColor};
   padding: 16px 0;
   contain: paint;
-    width: 1000px;
-  
-  
+  width: 1000px;
 `;
 const Tag = styled.div`
   font-size: 14px;
@@ -446,9 +481,10 @@ const Row = styled.div`
   align-items: center;
   text-align: center;
   font-size: 14px;
-  background-color: ${({theme}) => theme == "light" ? transparentMain : colorAccentMoreTransparent};
+  background-color: ${({ theme }) =>
+    theme == "light" ? transparentMain : colorAccentMoreTransparent};
   contain: paint;
-  width:1000px ;
+  width: 1000px;
 `;
 const Product = styled.div`
   display: flex;
@@ -469,6 +505,56 @@ const Price = styled.span``;
 const Warning = styled.span`
   color: ${secondaryTextColor};
   font-size: 10px;
+`;
+
+const Attributs = styled.div`
+  height: ${({ selected }) => (selected ? "120px" : "0px")};
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  margin: 0 20px;
+  width: calc(1000px - 40px);
+
+  transition: height 200ms ease-in-out;
+`;
+const Attribute = styled.div`
+  flex: 1;
+  text-align: center;
+`;
+const ItemContainerTitles = styled.div`
+  display: flex;
+  align-items: center;
+  padding: 20px 0 20px 32px;
+  background-color: ${(props) =>
+    props.theme == "light" ? medMain : colorAccentMedium};
+  @media (max-width: 768px) {
+    padding: 10px 0 10px 16px;
+  }
+  min-width: 600px;
+`;
+const Values = styled.div`
+  display: flex;
+  padding: 20px 0 20px 32px;
+  background-color: ${(props) =>
+    props.theme == "light" ? softMainTransparent : colorAccentMoreTransparent};
+
+  @media (max-width: 768px) {
+    padding: 10px 0 10px 16px;
+  }
+`;
+const Value = styled.div`
+  flex: 1;
+  text-align: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+`;
+const Color = styled.div`
+  padding: 4px 12px;
+  max-width: 25px;
+  border-radius: 8px;
+  background-color: ${(props) => props.color};
+  opacity: 0.8;
 `;
 
 const getProcessedSteps = (selectedOrder) => {
@@ -529,11 +615,12 @@ const OrderPage = () => {
   const theme = useSelector((state) => state.theme.mode);
   const Location = useLocation().pathname.split("/");
   const [ordersItems, setOrdersItems] = useState([]);
-
+  const [attributes, setAttributes] = useState([]);
   const [selectedOrderId, setSelectedOrderId] = useState();
+  const [selectedItem, setSelectedItem] = useState(null);
   const [selectedOrder, setSelectedOrder] = useState();
   const [orders, setOrders] = useState([]);
-  console.log(Location);
+
 
   const getOrdersItems = async (id) => {
     try {
@@ -546,14 +633,12 @@ const OrderPage = () => {
       console.error("Error fetching orders:", err);
     }
   };
-
   const handleOrderClick = (orderId, orderDetails) => {
     setSelectedOrderId(orderId === selectedOrderId ? null : orderId);
     setSelectedOrder(orderId === selectedOrderId ? null : orderDetails);
     getOrdersItems(orderId);
   };
   const steps = getProcessedSteps(selectedOrder);
-
   useEffect(() => {
     const getOrders = async () => {
       try {
@@ -576,7 +661,7 @@ const OrderPage = () => {
           <Orders>
             {orders.map((order) => (
               <Order
-              theme={theme}
+                theme={theme}
                 key={order.orderId}
                 isSelected={selectedOrderId === order.orderId}
                 onClick={() => handleOrderClick(order.orderId, order)}
@@ -585,7 +670,9 @@ const OrderPage = () => {
                   <OrderNumber>
                     Order<ID>#{order.orderId}</ID>
                   </OrderNumber>
-                  <Progress theme={theme} status={order.status}>{order.status}</Progress>
+                  <Progress theme={theme} status={order.status}>
+                    {order.status}
+                  </Progress>
                 </OrderHeader>
                 <Divider />
                 <Information>
@@ -638,12 +725,16 @@ const OrderPage = () => {
                   <Status theme={theme}>
                     <TypeTitle>
                       Order Status :
-                      <OrderProcessing theme={theme} status={selectedOrder.status}>
+                      <OrderProcessing
+                        theme={theme}
+                        status={selectedOrder.status}
+                      >
                         {selectedOrder.status}
                       </OrderProcessing>
                     </TypeTitle>
                     <TypeTitle>
-                      Payment Method :<PaymentType theme={theme}>Pay In Cash</PaymentType>
+                      Payment Method :
+                      <PaymentType theme={theme}>Pay In Cash</PaymentType>
                     </TypeTitle>
                   </Status>
                   <Details>
@@ -677,7 +768,9 @@ const OrderPage = () => {
                       </TotalType>
                       {selectedOrder && (
                         <TotalType>
-                          <TotalName theme={theme} type="total">Total</TotalName>
+                          <TotalName theme={theme} type="total">
+                            Total
+                          </TotalName>
                           <TypePrice>
                             $
                             {(
@@ -705,7 +798,7 @@ const OrderPage = () => {
                         </StepContainer>
                       </Tooltip>
                       <Connector
-                      theme={theme}
+                        theme={theme}
                         value={step.stepStatus == "complete" ? 100 : 0}
                         max={100}
                         step={step.last}
@@ -714,74 +807,156 @@ const OrderPage = () => {
                   ))}
                 </Processing>
 
-                <Table>
+                <Table theme={theme}>
                   <TableItems>
-                  <TagRow theme={theme}>
-                    <Tag style={{ flex: 3 }}>Item</Tag>
-                    <Tag style={{ flex: 2 }}>Color</Tag>
-                    <Tag style={{ flex: 2 }}>
-                      Size / weight <Warning>(kg)</Warning>
-                    </Tag>
-                    <Tag style={{ flex: 2 }}>Quantity</Tag>
-                    <Tag style={{ flex: 2 }}>Progress</Tag>
-                    <Tag style={{ flex: 2 }}>Price</Tag>
-                  </TagRow>
+                    <TagRow theme={theme}>
+                      <Tag style={{ flex: 3 }}>Item</Tag>
 
-                  {ordersItems.map((product) => (
-                    <Row theme={theme} key={product.id}>
-                      <Product style={{ flex: 3 }}>
-                        <ProductImage
-                          src={product.productimage}
-                          alt={product.productname}
-                          />
-                        <ProductName>{product.productname}</ProductName>
-                      </Product>
-                      <Qte style={{ flex: 2 }}>
-                        {!JSON.parse(product.attributes)?.color
-                          ? "/"
-                          : JSON.parse(product.attributes)?.color}
-                      </Qte>
-                      <Qte style={{ flex: 2 }}>
-                        {!JSON.parse(product.attributes)?.size
-                          ? "/"
-                          : JSON.parse(product.attributes)?.size}
-                      </Qte>
-                      <Qte style={{ flex: 2 }}>{product.qte}</Qte>
-                      <Progress theme={theme} status={product.status} style={{ flex: 2 }}>
-                        {product.status}
-                      </Progress>
-                      <Price style={{ flex: 2 }}>
-                        {" "}
-                        {product.discount != 0 ? (
-                          <p
-                          style={{
-                            textDecoration: "line-through",
-                            color: secondaryTextColor,
-                            fontSize: 12,
-                          }}
+                      <Tag style={{ flex: 2 }}>Quantity</Tag>
+                      <Tag style={{ flex: 2 }}>Progress</Tag>
+                      <Tag style={{ flex: 2 }}>Price</Tag>
+                      <Tag style={{ flex: 1 }}> Action </Tag>
+                    </TagRow>
+
+                    {ordersItems.map((product) => {
+                      return (
+                        <>
+                          <Row theme={theme} key={product.idPRODUCT}>
+                            <Product style={{ flex: 3 }}>
+                              <ProductImage
+                                src={product.productimage}
+                                alt={product.productname}
+                              />
+                              <ProductName>{product.productname}</ProductName>
+                            </Product>
+
+                            <Qte style={{ flex: 2 }}>{product.qte}</Qte>
+                            <Progress
+                              theme={theme}
+                              status={product.status}
+                              style={{ flex: 2 }}
+                            >
+                              {product.status}
+                            </Progress>
+                            <Price style={{ flex: 2 }}>
+                              {" "}
+                              {product.discount != 0 ? (
+                                <p
+                                  style={{
+                                    textDecoration: "line-through",
+                                    color: secondaryTextColor,
+                                    fontSize: 12,
+                                  }}
+                                >
+                                  ${product.productprice}
+                                </p>
+                              ) : (
+                                ""
+                              )}
+                              ${" "}
+                              {(
+                                product.productprice -
+                                (product.productprice * product.discount) / 100
+                              ).toFixed(2)}
+                            </Price>
+                            <Price style={{ flex: 1 }}>
+                              <IconButton
+                                color="secondary"
+                                onClick={() => {
+                                  setSelectedItem(
+                                    selectedItem === product?.idPRODUCT
+                                      ? null
+                                      : product?.idPRODUCT
+                                  );
+
+                                  if (product?.attributes) {
+                                    try {
+                                      setAttributes(
+                                        JSON.parse(product?.attributes)
+                                      );
+                                    } catch (error) {
+                                      console.error(
+                                        "Invalid JSON in product attributes:",
+                                        product?.attributes,
+                                        error
+                                      );
+                                      setAttributes(null); // Fallback to null if JSON parsing fails
+                                    }
+                                  } else {
+                                    setAttributes(null); // Set to null if attributes are undefined or null
+                                  }
+                                }}
+                                sx={{
+                                  rotate:
+                                    selectedItem === product?.idPRODUCT
+                                      ? "90deg"
+                                      : "0deg",
+                                  transition: "200ms",
+                                  outline: "none",
+                                }}
+                              >
+                                <MoreHorizTwoToneIcon color="secondary" />
+                              </IconButton>
+                            </Price>
+                          </Row>
+                          <Attributs
+                            selected={selectedItem === product?.idPRODUCT}
                           >
-                            ${product.productprice}
-                          </p>
-                        ) : (
-                          ""
-                        )}
-                        ${" "}
-                        {(
-                          product.productprice -
-                          (product.productprice * product.discount) / 100
-                        ).toFixed(2)}
-                      </Price>
-                    </Row>
-                  ))}
-          </TableItems>
+                            <ItemContainerTitles
+                              style={{
+                                color: whiteTextColor,
+                                backgroundColor:
+                                  theme == "light" ? main : colorAccentSubDark,
+                                padding: "12px 0 12px 32px",
+                              }}
+                            >
+                              {attributes &&
+                              typeof attributes === "object" &&
+                              !Array.isArray(attributes)
+                                ? Object.entries(attributes).map(
+                                    ([key, value]) => (
+                                      <Attribute key={key}>{key}</Attribute>
+                                    )
+                                  )
+                                : "NO attribbute available"}
+                            </ItemContainerTitles>
+
+                            <Values>
+                              {attributes &&
+                              typeof attributes === "object" &&
+                              !Array.isArray(attributes) ? (
+                                Object.entries(attributes).map(
+                                  ([key, value]) => {
+                                    if (key === "color" || key === "colors") {
+                                      return (
+                                        <Value key={key}>
+                                          <Color color={value} />
+                                        </Value>
+                                      );
+                                    }
+
+                                    return (
+                                      <Attribute key={key}>{value}</Attribute>
+                                    );
+                                  }
+                                )
+                              ) : (
+                                <p>No attributes available</p> // Fallback message if attributes is invalid
+                              )}
+                            </Values>
+                          </Attributs>
+                        </>
+                      );
+                    })}
+                  </TableItems>
                 </Table>
               </SelectedOrder>
             )
           )}
         </Right>
       </OrderContainer>
-      </Container>
-    );
+    </Container>
+  );
 };
 
 export default OrderPage;

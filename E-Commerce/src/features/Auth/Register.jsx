@@ -30,15 +30,8 @@ import { colorAccentDark, colorAccentDarkTransparent, colorAccentMain, colorAcce
 import { useSelector } from "react-redux";
 const Container = styled.div`
   width: 100%;
-  height: 100vh;
-  /* background: linear-gradient(
-      rgba(255, 255, 255, 0.5),
-      rgba(255, 255, 255, 0.5)
-
-
-    ),
-    url("https://images.pexels.com/photos/6984661/pexels-photo-6984661.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940")
-      center;*/
+  height: auto;
+  min-height: 100vh;
 background-color: ${props => props.theme == "light" ? whiteTextColor :  colorBackgroundBlack};
   display: flex;
   align-items: center;
@@ -309,8 +302,8 @@ const Register = () => {
     }
   
     // Validate password strength (e.g., minimum 6 characters)
-    if (user.password.length < 6) {
-      setMessage("Password must be at least 6 characters long.");
+    if (user.password.length < 8) {
+      setMessage("Password must be at least 8 characters long.");
       setType("error");
       setOpen(true);
       return;
@@ -320,12 +313,11 @@ const Register = () => {
     newRequest
       .post("/auth/register", user)
       .then((res) => {
-        console.log(user);
+        setPending(true)
         if (res.status === 201) {
           setMessage("User created successfully! Please login again.");
           setType("success");
           setOpen(true);
-          setPending(false)
           setTimeout(() => {
             navigate("/login");
             
@@ -334,7 +326,7 @@ const Register = () => {
       })
       .catch((err) => {
         // Handle server-side errors
-        if (err.response?.status === 401) {
+        if (err.response?.status === 409) {
           setMessage("User already exists!");
           setType("error");
           setOpen(true);
@@ -343,6 +335,8 @@ const Register = () => {
           setType("error");
           setOpen(true);
         }
+      }).finally(() => {
+        setPending(false)
       });
   };
   
@@ -687,7 +681,7 @@ const customTextField = {
             If you already have an account please{" "}
             <Link to="/login" style={{color:main ,fontSize:14 , fontWeight:500}}>LOGIN !!</Link>
           </Agreement>
-          <CreatButton theme={theme} onClick={(e) => {handleSubmit(e) , setPending(true)}} disabled={pending ? true : false}>{!pending ? 'CREATE' : <LoadingOutlined />}</CreatButton>
+          <CreatButton theme={theme} onClick={(e) => {handleSubmit(e) }} disabled={pending ? true : false}>{!pending ? 'CREATE' : <LoadingOutlined />}</CreatButton>
         </Form>
       </Wrapper>
     </Container>

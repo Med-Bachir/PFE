@@ -248,7 +248,7 @@ const CompareBtn = styled.button`
   width: 10%;
 `;
 const Button = styled.button`
-  background-color: ${props => props.theme == "light" ? main : lightMain};
+  background-color: ${props => props.theme == "light" ? main : colorAccentMedium};
   width: 40%;
   min-width: 200px;
   color: ${whiteTextColor};
@@ -752,9 +752,9 @@ let att = product?.attributes
             </AttributeContainer>*/}
 
             {qte == 0 ? (
-              <AddToCardContainer theme={theme} onClick={() => handleQte("add")}>
+              <Button theme={theme} onClick={() => handleQte("add")}>
                 ADD TO CARD
-              </AddToCardContainer>
+              </Button>
             ) : (
               <>
                 <AmountContainer theme={theme}>

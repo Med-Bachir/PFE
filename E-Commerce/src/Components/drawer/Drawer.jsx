@@ -50,6 +50,7 @@ import {
   colorPrimaryBlack,
   grayBackground,
   lightSoftMain,
+  main,
   primaryTextColor,
   secondaryTextColor,
   whiteTextColor,
@@ -188,7 +189,7 @@ const InfoComponents = styled.div`
   transition: 300ms ease-in-out;
   background-color: ${(props) =>
     props.theme == "light" ? grayBackground : colorBackgroundBlack};
-
+overflow-y:auto;
 @media (max-width: 768px) {
   width: ${(props) =>
     props.open ? `calc(100vw - 288px)` : `calc(100vw - 60px)`};
@@ -232,11 +233,29 @@ const Notifications = styled.div`
 
   border-radius: 4px;
   flex-direction: column;
-  background-color: ${lightSoftMain};
+  background-color: ${ ({theme}) => theme == 'light' ? main : lightSoftMain };
   right: ${(props) => (props.open ? "0" : "-250px")};
   top: 20px;
-
+max-height: 50vh;
+overflow: auto;
   transition: 300ms ease-in-out;
+  &::-webkit-scrollbar {
+    width: 8px; /* width of the entire scrollbar */
+  }
+  &::-webkit-scrollbar-track {
+    background: transparent; /* color of the tracking area */
+  }
+  &::-webkit-scrollbar-thumb {
+    background-color: rgba(76, 76, 76, 0.7); /* color of the scroll thumb */
+    border-radius: 20px; /* roundness of the scroll thumb */
+    /* creates padding around scroll thumb */
+  }
+  &::-webkit-scrollbar-thumb:hover {
+    background-color: rgba(147, 147, 147, 1); /* color of the scroll thumb */
+    width: 8px;
+    border-radius: 20px; /* roundness of the scroll thumb */
+    /* creates padding around scroll thumb */
+  }
 `;
 const Text = styled.div`
   display: flex;
@@ -269,7 +288,7 @@ const Drawer = () => {
 
   const navigate = useNavigate();
 
-  const open = useSelector((state) => state.cart.open);
+  const open = useSelector((state) => state.drawer.open);
   const dispatch = useDispatch();
   const handleClick = () => {
     dispatch(OpenDrawer());
@@ -352,7 +371,6 @@ const Drawer = () => {
     logout(dispatch);
     navigate("/login");
   };
-  console.log(total);
 
   return (
     <Container theme={theme}>

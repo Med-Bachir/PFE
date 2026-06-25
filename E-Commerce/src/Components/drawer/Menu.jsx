@@ -116,7 +116,7 @@ const MenuL = ({ title, link, itemIcon , subTitle, dropList, menuList,dropHeight
   
   const Location = useLocation().pathname.split("/");
   console.log(Location)
-  const open = useSelector((state) => state.cart.open);
+  const open = useSelector((state) => state.drawer.open);
   const theme = useSelector((state) => state.theme.mode);
 
   const [dropdownState, setDropdownState] = useState({

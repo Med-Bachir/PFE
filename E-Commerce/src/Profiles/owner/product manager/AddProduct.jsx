@@ -24,7 +24,6 @@ import FitnessAttribute from "../../../Components/productAttributes/FitnessAttri
 import ElectronicsAttributes from "../../../Components/productAttributes/ElectronicsAttributes";
 import DecorsAttributes from "../../../Components/productAttributes/DecorsAttributes";
 import BooksAttribute from "../../../Components/productAttributes/BooksAttribute";
-import HomeClaining from "../../../Components/productAttributes/CleaningTools";
 import DishesAttributes from "../../../Components/productAttributes/DishesAttributes";
 import CleaningTools from "../../../Components/productAttributes/CleaningTools";
 
@@ -137,7 +136,7 @@ const getBase64 = (img, callback) => {
   const reader = new FileReader();
   reader.addEventListener("load", () => callback(reader.result));
   reader.readAsDataURL(img);
-  console.log(reader.result);
+ 
 };
 
 const beforeUpload = (file) => {
@@ -156,7 +155,6 @@ const AddProduct = () => {
   const user = useSelector((state) => state.user?.currentUser);
   const mode = useSelector((state) => state.theme.mode);
   const [product, setProduct] = useState([]);
-  const plainOptions = ["XS", "S", "M", "L", "XL"];
   const [loading, setLoading] = useState(false);
 
   const [tags, setTags] = useState([]);
@@ -222,8 +220,7 @@ const AddProduct = () => {
         ...(currentTags.length > 0 && { color: currentTags.join(",") }),
       };
   
-      // Log updated attributes for debugging
-      console.log("Updated Attributes:", att);
+     
   
       // Build product details using the most recent states
       const productDetails = {
@@ -236,7 +233,7 @@ const AddProduct = () => {
         attribute: updatedAtt,
       };
   
-      console.log("Product Details:", productDetails);
+      
   
       return updatedAtt; // Return the updated attributes
     });
@@ -259,23 +256,30 @@ const AddProduct = () => {
     };
 
     try {
-      const response = await newRequest.post(
-        `products/add-product/${productDetails.shopname}`,
-        productDetails
-      );
-      console.log(response.status);
+      if(user?.approved == 1){
 
-      if (response.status === 200) {
-        message.success("Product added successfully.");
-
-        setIsLoading(false);
+        const response = await newRequest.post(
+          `products/add-product/${productDetails.shopname}`,
+          productDetails
+        );
+        
+        
+        if (response.status === 200) {
+          message.success("Product added successfully.");
+          
+          
+        } else {
+          message.error("Failed to add product.");
+          
+        }
       } else {
-        message.error("Failed to add product.");
-        setIsLoading(false);
+        message.error("You are not approved !! , Wait for admin approve");
       }
     } catch (error) {
       console.error("Error adding product:", error);
       message.error("Failed to add product.");
+      
+    } finally{
       setIsLoading(false);
     }
   };
@@ -331,7 +335,7 @@ const AddProduct = () => {
 
   const handleChangeField = (event, field) => {
     const value = event.target.value;
-console.log(field)
+
     switch (field) {
       case "cat":
         setCat(value); // Only update the ID here

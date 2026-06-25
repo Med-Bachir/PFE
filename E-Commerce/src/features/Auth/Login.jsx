@@ -7,7 +7,7 @@ import Select from '@mui/material/Select';
 import { useEffect, useState } from "react";
 import { Divider, IconButton, InputAdornment, OutlinedInput, TextField } from "@mui/material";
 import { UploadOutlined } from '@ant-design/icons';
-import { Button, message, Upload } from 'antd';
+
 import Visibility from '@mui/icons-material/Visibility';
 import VisibilityOff from '@mui/icons-material/VisibilityOff';
 import Lottie from "lottie-react"
@@ -18,6 +18,9 @@ import AlertMessage from "../../Components/Alert";
 import { loginFailure, loginStart, loginSuccess } from "../../redux/user";
 import { Link, Navigate, useNavigate } from "react-router-dom";
 import { colorAccentMain, colorAccentMedium, colorAccentMoreTransparent, colorAccentSoft, colorAccentTransparent, colorBackgroundBlack, colorElementBackgroundGray, colorPrimaryBlack, elementGrayBackground, lightMain, lightSoftMain, main, primaryTextColor, secondText, whiteTextColor } from "../../Colors";
+import { useContext } from "react";
+import { RecoveryContext } from "../../App";
+
 
 
 const Container = styled.div`
@@ -71,6 +74,22 @@ const Agreement = styled.span`
     margin: 20px 0 ;
     width: 100%;
 `
+const ResetPassword = styled.span`
+    font-size: 12px;
+    margin-bottom: 20px  ;
+    width: 100%;
+    cursor: pointer;
+`
+const Button = styled.button`
+    font-size: 12px;
+    margin: 10px 0 20px ;
+    width: 150px;
+    padding: 8px 20px;
+    border-radius: 4px;
+    background-color: ${({theme}) => theme == "light" ? main : colorAccentMedium};
+   color: ${whiteTextColor};
+   font-weight: 300;
+`
 
 
 const CreatButton = styled.button`
@@ -100,6 +119,10 @@ const CreatButton = styled.button`
     
 
 const Login = () => {
+  const { setEmail, setPage, email, setOTP } = useContext(RecoveryContext);
+
+  const [forgot, setForgot] = useState(false);
+ 
   const [message, setMessage] = useState("");
   const [type, setType] = useState("");
   const [open, setOpen] = useState(false);
@@ -109,6 +132,25 @@ const theme = useSelector(state => state.theme.mode)
     
     const [isMobile, setIsMobile] = useState(false);
   const navigate = useNavigate();
+
+
+  function nagigateToOtp() {
+    if (email) {
+      const OTP = Math.floor(Math.random() * 9000 + 1000);
+      console.log(OTP);
+      setOTP(OTP);
+
+      newRequest
+        .post("/users/send_recovery_email", {
+          OTP,
+          recipient_email: email,
+        })
+        .then(() => setPage("otp"))
+        .catch(console.log);
+      return;
+    }
+    return alert("Please enter your email");
+  }
 
   useEffect(() => {
       const handleResize = () => {
@@ -258,6 +300,19 @@ const theme = useSelector(state => state.theme.mode)
                 By creating an account, I consent to the processing of my personal
             data in accordance with the <b>PRIVACY POLICY</b>
                 </Agreement>
+                <ResetPassword onClick={() => {setForgot(true)}} >
+              <b>Forget password ?</b>
+                </ResetPassword>
+
+{forgot ?
+<>
+                <TextField sx={customTextField} size='small' id="outlined-basic" label="user name" name="username" variant="outlined" onChange={(e) => setEmail(e.target.value)}  required/>
+                <Button onClick={() => nagigateToOtp()} >
+                Send Code
+                  </Button>
+</>
+: ''
+              }
                 
                 <CreatButton theme={theme} onClick={handleClick}>LOGIN</CreatButton>
                 <Agreement >

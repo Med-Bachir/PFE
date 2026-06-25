@@ -1,7 +1,7 @@
 import { Skeleton } from '@mui/material';
 import React from 'react'
 import styled from 'styled-components';
-import { colorBackgroundBlack, colorPrimaryBlack, grayBackground, whiteTextColor } from '../Colors';
+import { colorBackgroundBlack, colorPrimaryBlack, elementGrayBackground, grayBackground, primaryTextColor, whiteTextColor } from '../Colors';
 import { useSelector } from 'react-redux';
 import LazyAvatar from './Pending/LazyAvatar';
 
@@ -34,15 +34,7 @@ background-color: ${props => props.theme == 'light' ? whiteTextColor : props.col
       ? "#c06dff1f"
       : "#745eff1f"};
 `;
-const ItemIcon = styled.img`
-  width: 60px;
-  padding: 4px;
-  border-radius: 4px;
-  
-background-color: ${props => props.theme == 'light' ? grayBackground : props.color};
-  
-  
-`;
+
 const ItemInfo = styled.div`
   display: flex;
   text-align: end;
@@ -59,6 +51,8 @@ const ItemTitle = styled.span`
 const ItemStatic = styled.span`
   font-weight: 600;
   font-size: 20px;
+  color: ${props => props.theme == 'light' ? primaryTextColor: elementGrayBackground};
+
 `;
 
 
@@ -76,7 +70,7 @@ const StaticsContainer = ({color , title , value , icon , loading }) => {
       <Skeleton variant="rectangular" width="80%" height={30} sx={{marginLeft:'auto'}}/>
 
         </ItemTitle>
-        <ItemStatic>
+        <ItemStatic theme={theme}>
       <Skeleton variant="rectangular" width={40} height={20} />
 
         </ItemStatic>
@@ -90,7 +84,7 @@ const StaticsContainer = ({color , title , value , icon , loading }) => {
 />
       <ItemInfo>
       <ItemTitle>{title}</ItemTitle>
-      <ItemStatic>{value}</ItemStatic>
+      <ItemStatic theme={theme}>{value}</ItemStatic>
       </ItemInfo>
       </Item>
     }

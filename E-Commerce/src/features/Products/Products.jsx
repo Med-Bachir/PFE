@@ -9,7 +9,7 @@ import Lottie from "lottie-react"
 import me from "../../assets/Lotties/Animation - 1716145973359.json"
 import newRequest from "../../utils/newRequest.js";
 import { useQuery, useQueryClient } from "@tanstack/react-query";// Styled components
-import { primaryTextColor } from "../../Colors.jsx";
+import { primaryTextColor, secondText } from "../../Colors.jsx";
 const Container = styled.div`
   width: 100%;
   height: auto;
@@ -30,12 +30,13 @@ const Container = styled.div`
 
 const LottieContainer = styled.div`
   display: flex;
-  align-items: right;
+  align-items: center;
   justify-content: center;
   flex-direction: column;
   width: calc(100vw - 402px);
   height: calc(100vh - 80px);
   text-align: center;
+
 
   @media (max-width: 768px) {
     width: 100%; /* Adjust for smaller screens */
@@ -44,7 +45,7 @@ const LottieContainer = styled.div`
 
 const Message = styled.div`
   font-size: 1.2rem;
-  color: ${primaryTextColor};
+  color: ${secondText};
   margin-top: 16px;
 `;
 
@@ -58,11 +59,11 @@ const Products = ({theme}) => {
         res = await newRequest.get(`/products/${categoryName}/${subName}/${typeName}`);
         console.log(typeName)
       } else if (categoryName && subName) {
-        res = await newRequest.get(`/products/${categoryNames}/${subName}`);
+        res = await newRequest.get(`/products/${categoryName}/${subName}`);
         console.log(subName)
 
       } else if (categoryName) {
-        res = await newRequest.get(`/products/${catego9ryName}`);
+        res = await newRequest.get(`/products/${categoryName}`);
         console.log(categoryName)
 
       } else {

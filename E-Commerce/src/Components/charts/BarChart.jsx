@@ -12,7 +12,7 @@ const Container = styled.div`
 `;
 
 function BarChart({ chartData }) {
-  const open = useSelector(state => state.cart.open);
+  
 
   const options = {
     

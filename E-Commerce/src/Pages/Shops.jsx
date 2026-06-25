@@ -35,7 +35,7 @@ overflow-y: auto;
 const Title = styled.span`
 font-size:24px;
 font-weight: 500;
-padding: 0 80px;
+padding: 0 32px;
 margin: 24px 0;
 @media (max-width: 768px) {
  padding: 0px;
@@ -48,7 +48,7 @@ flex-wrap: wrap;
 flex-direction: row;
 justify-content: start;
 gap:20px;
-padding: 0 80px 32px 80px;
+padding: 0 32px 32px 32px;
 @media (max-width: 768px) {
   padding: 0;
 }
@@ -63,7 +63,7 @@ const Shop = styled.div`
 
 background-color: ${props => props.theme == "light" ? whiteTextColor : colorPrimaryBlack};
 
-padding: 32px;
+padding: 20px;
 display: flex;
 border-radius: 8px;
 gap: 20px;
@@ -117,7 +117,7 @@ const theme = useSelector(state => state.theme.mode)
       try {
         const res = await newRequest.get(`/shop/shops-client`);
         
-        console.log("Fetched shops:", res.data); // Debug log
+      
         setShops(res.data);
       } catch (err) {
         console.error("Error fetching users:", err);

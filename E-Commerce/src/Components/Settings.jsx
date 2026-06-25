@@ -9,14 +9,35 @@ import {
   TextField,
   Tooltip,
 } from "@mui/material";
+import CloudUploadTwoTone from "@mui/icons-material/CloudUploadTwoTone";
 import { useSelector } from "react-redux";
 import SaveAsTwoToneIcon from "@mui/icons-material/SaveAsTwoTone";
-import { EditTwoTone } from "@ant-design/icons";
+import { EditTwoTone, LoadingOutlined } from "@ant-design/icons";
 import AlertMessage from "../Components/Alert";
 import newRequest from "../utils/newRequest";
 import Cookies from "js-cookie";
 import SaveAltTwoToneIcon from "@mui/icons-material/SaveAltTwoTone";
-import { colorAccentDarkTransparent, colorAccentLight, colorAccentMain, colorAccentMediumTransparent, colorAccentSoft, colorAccentSub, colorAccentSubDark, colorBackgroundBlack, colorBackgroundGray, colorPrimaryBlack, darkMain, lightMain, main, medMain, primaryTextColor, whiteTextColor } from "../Colors";
+import {
+  colorAccentDarkTransparent,
+  colorAccentLight,
+  colorAccentMain,
+  colorAccentMediumTransparent,
+  colorAccentSoft,
+  colorAccentSub,
+  colorAccentSubDark,
+  colorBackgroundBlack,
+  colorBackgroundGray,
+  colorPrimaryBlack,
+  darkMain,
+  lightMain,
+  main,
+  medMain,
+  primaryTextColor,
+  whiteTextColor,
+} from "../Colors";
+import UpdatePassword from "./updateForms/UpdatePassword";
+import { Upload } from "antd";
+import { useLocation } from "react-router-dom";
 
 const Container = styled.div`
   width: 100%;
@@ -25,14 +46,15 @@ const Container = styled.div`
   display: flex;
   flex-direction: column;
   overflow-y: auto;
-  height: calc(100vh - 60px);
-  color: ${props => props.theme == "light" ? primaryTextColor : whiteTextColor};
+  color: ${(props) =>
+    props.theme == "light" ? primaryTextColor : whiteTextColor};
   @media (max-width: 768px) {
     padding: 12px;
   }
 `;
 const SettingContainer = styled.div`
   display: flex;
+  margin-top: 32px;
   gap: 32px;
   @media (max-width: 768px) {
     flex-direction: column;
@@ -47,8 +69,9 @@ const Top = styled.div`
 const SettingGroup = styled.div`
   padding: 32px;
   border-radius: 8px;
-  background-color: ${props => props.theme == "light" ? whiteTextColor  : colorPrimaryBlack};
-  margin-bottom: 32px;
+  background-color: ${(props) =>
+    props.theme == "light" ? whiteTextColor : colorPrimaryBlack};
+
   flex: 1;
   display: flex;
   flex-direction: column;
@@ -81,9 +104,14 @@ const ButtonGroup = styled.div`
   }
 `;
 const MyButton = styled.button`
-  background-color: ${(props) => (props.type == "delete" ? "transparent" : props.theme == "light" ? "" : colorAccentDarkTransparent)};
+  background-color: ${(props) =>
+    props.type == "delete"
+      ? "transparent"
+      : props.theme == "light"
+      ? ""
+      : colorAccentDarkTransparent};
   border: ${(props) => (props.type == "delete" ? "1.5px solid" : "")};
-  color: ${props => props.theme == "light" ? main : colorAccentSub};
+  color: ${(props) => (props.theme == "light" ? main : colorAccentSub)};
 
   font-size: 14px;
 `;
@@ -119,21 +147,27 @@ const Label = styled.span``;
 const Input = styled.input`
   padding: 12px;
   border-radius: 4px;
-  border: 1px solid ${props => props.theme == "light" ? "#e0e0e0" : colorBackgroundGray } ;
+  border: 1px solid
+    ${(props) => (props.theme == "light" ? "#e0e0e0" : colorBackgroundGray)};
   font-size: 16px;
-  background-color: ${props => props.theme == "light" ? "" : props.edit ? colorAccentLight : colorAccentDarkTransparent};
-  cursor: ${props => props.edit ? 'text': 'not-allowed' };
-  color: ${props => props.theme == "light" ? colorPrimaryBlack : whiteTextColor };
-  
-
+  background-color: ${(props) =>
+    props.theme == "light"
+      ? ""
+      : props.edit
+      ? colorAccentLight
+      : colorAccentDarkTransparent};
+  cursor: ${(props) => (props.edit ? "text" : "not-allowed")};
+  color: ${(props) =>
+    props.theme == "light" ? colorPrimaryBlack : whiteTextColor};
 `;
 const HiddenInput = styled.input`
   display: none;
 `;
 const UploadButton = styled.label`
-  background-color: ${props => props.theme == "light" ? "#f8f8f8 ": colorAccentDarkTransparent };
-  color: ${props => props.theme == "light" ? main : colorAccentSub};
-  
+  background-color: ${(props) =>
+    props.theme == "light" ? "#f8f8f8 " : colorAccentDarkTransparent};
+  color: ${(props) => (props.theme == "light" ? main : colorAccentSub)};
+
   font-size: 14px;
   padding: 10px 20px;
   border-radius: 4px;
@@ -143,12 +177,49 @@ const UploadButton = styled.label`
   justify-content: center;
 
   &:hover {
-    background-color: ${props => props.theme == "light" ? "#e0e0e0":  colorBackgroundBlack};
+    background-color: ${(props) =>
+      props.theme == "light" ? "#e0e0e0" : colorBackgroundBlack};
     transform: translateY(2px);
   }
   transition: 200ms;
 `;
 
+const UpdateImage = styled.div`
+  position: absolute;
+  height: 80px;
+  width: 80px;
+  border-radius: 50%;
+  overflow: hidden;
+  border: 1px dashed;
+  opacity: 0;
+  backdrop-filter: brightness(20%);
+  &:hover {
+    opacity: 1;
+  }
+  transition: 200ms;
+`;
+
+const getBase64 = (img, callback) => {
+  const reader = new FileReader();
+  reader.addEventListener("load", () => callback(reader.result));
+  reader.readAsDataURL(img);
+
+};
+
+const beforeUpload = (file) => {
+  const isJpgOrPng =
+    file.type === "image/jpeg" ||
+    file.type === "image/png" ||
+    file.type === "image/webp";
+  if (!isJpgOrPng) {
+    message.error("You can only upload JPG/PNG file!");
+  }
+  const isLt2M = file.size / 1024 / 1024 < 2;
+  if (!isLt2M) {
+    message.error("Image must smaller than 2MB!");
+  }
+  return isJpgOrPng && isLt2M;
+};
 const Settings = () => {
   const user = useSelector((state) => state.user?.currentUser);
   const theme = useSelector((state) => state.theme.mode);
@@ -161,28 +232,39 @@ const Settings = () => {
     }
   );
   const token = Cookies.get("accessToken");
-  console.log(token);
+
 
   const [message, setMessage] = React.useState("");
   const [type, setType] = React.useState("");
   const [open, setOpen] = React.useState(false);
   const [edit, setEdit] = React.useState();
-  const [profileImage, setProfileImage] = React.useState(null);
-  console.log(newUser);
+  const [changed, setChanged] = React.useState(false);
+  const location = useLocation().pathname.split("/")[1];
+  const [logoImageUrl, setLogoImageUrl] = React.useState(null);
+  const [loading, setLoading] = React.useState(false);
 
   const handleChange = (e) => {
     e.preventDefault();
-    const { name, value, files } = e.target;
+    const { name, value } = e.target;
 
-    if (name === "userimg" && files.length > 0) {
-      setProfileImage(files[0]);
-      const reader = new FileReader();
-      reader.onload = (event) => {
-        setNewUser({ ...user, userimg: files[0].name });
-      };
-      reader.readAsDataURL(files[0]); // Convert blob URL to data URL
-    } else {
-      setNewUser((prev) => ({ ...prev, [name]: value }));
+    setNewUser((prev) => ({ ...prev, [name]: value }));
+  };
+  const handleChangeImage = (info) => {
+    if (info.file.status === "uploading") {
+      setLoading(true);
+      getBase64(info.file.originFileObj, (url) => {
+        setLoading(false);
+        setLogoImageUrl(url);
+      });
+
+      return;
+    }
+    if (info.file.status === "done") {
+      getBase64(info.file.originFileObj, (url) => {
+        setLoading(false);
+
+        setLogoImageUrl(url);
+      });
     }
   };
 
@@ -211,51 +293,112 @@ const Settings = () => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-
-    if (!user || !user?.accessToken) {
+    const accessToken = user?.accessToken;
+    if (!user) {
       console.error("User or accessToken is undefined");
       return;
     }
 
     const formData = new FormData();
-    if (profileImage) {
-      formData.append("userimg", profileImage);
+    if (logoImageUrl) {
+      formData.append("userimg", logoImageUrl);
     }
     Object.keys(newUser).forEach((key) => {
-      formData.append(key, newUser[key]);
+      if (key !== "userimg") {
+        // Avoid overwriting with old filename
+        formData.append(key, newUser[key]);
+      }
     });
 
     const headers = {
-      Authorization: `Bearer ${token}`,
+      Authorization: `Bearer ${accessToken}`,
+      "Content-Type": "multipart/form-data", // Ensure correct content type
     };
 
     newRequest
-      .put(`/users/${user?.idUSER}`, newUser, { headers })
+      .put(`/users/${user.idUSER}`, formData, { headers })
       .then((res) => {
         if (res.status === 200) {
           setMessage("Update Saved");
           setType("success");
           setOpen(true);
+
+          // 6. Update user context with new data if needed
+          // You might want to update your user context here
         }
       })
       .catch((err) => {
-        if (err.response && err.response.status === 409) {
-          setMessage("User Does Not Exist");
-          setType("error");
-          setOpen(true);
+        if (err.response) {
+          switch (err.response.status) {
+            case 401:
+              setMessage("Unauthorized - Please login again");
+              break;
+            case 409:
+              setMessage("User Does Not Exist");
+              break;
+            default:
+              setMessage("An error occurred");
+          }
         } else {
-          setMessage("An error occurred");
-          setType("error");
-          setOpen(true);
+          setMessage("Network Error - Please try again later");
         }
+        setType("error");
+        setOpen(true);
       })
       .finally(() => {
         setEdit(false);
       });
   };
+  const [password, setPassword] = React.useState({ old: "", password: "" });
+
+  const handlePasswordChange = (e) => {
+    const { name, value } = e.target;
+    setPassword((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+  };
+
+  const uploadButton = (
+    <button
+      style={{
+        height: 80,
+        width: 80,
+        background: "none",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+      }}
+      type="button"
+    >
+      {loading ? (
+        <LoadingOutlined
+          style={{
+            fontSize: 30,
+            color: theme == "light" ? main : colorAccentMain,
+          }}
+        />
+      ) : (
+        <CloudUploadTwoTone
+          style={{
+            color: theme == "light" ? main : colorAccentMain,
+            fontSize: 30,
+          }}
+        />
+      )}
+      <div
+        style={{
+          marginTop: 8,
+        }}
+      ></div>
+    </button>
+  );
 
   return (
-    <Container theme={theme}>
+    <Container
+      style={{ height: location !== "Client" ? "calc(100vh - 80px)" : "" }}
+      theme={theme}
+    >
       <AlertMessage
         open={open}
         setOpen={setOpen}
@@ -272,10 +415,37 @@ const Settings = () => {
         </Top>
         <ImageSetting>
           <Avatar
-            sx={{ width: 80, height: 80, bgcolor: theme == "light" ? "#eeeeee89" : colorAccentDarkTransparent }}
-            src={user?.userimg == null ? "e" : user?.userimg}
+            sx={{
+              width: 80,
+              height: 80,
+              bgcolor:
+                theme == "light" ? "#eeeeee89" : colorAccentDarkTransparent,
+            }}
+            src={user?.userimg == null ? logoImageUrl : user?.userimg}
             alt={user?.username}
           />
+          <UpdateImage>
+            <Upload
+              name="productimage"
+              listType="picture-card"
+              showUploadList={true}
+              beforeUpload={beforeUpload}
+              onChange={(info) => handleChangeImage(info, "logo")}
+            >
+              {logoImageUrl ? (
+                <img
+                  src={logoImageUrl}
+                  alt="avatar"
+                  style={{
+                    width: "100%",
+                    height: "100%",
+                  }}
+                />
+              ) : (
+                uploadButton
+              )}
+            </Upload>
+          </UpdateImage>
           <Options>
             <ButtonGroup>
               <HiddenInput
@@ -284,10 +454,12 @@ const Settings = () => {
                 name="userimg"
                 onChange={handleChange}
               />
-              <UploadButton theme={theme} htmlFor="file-upload">
-                Upload Profile Image
+              <UploadButton theme={theme}>
+                Hover Profile to change image
               </UploadButton>
-              <MyButton theme={theme} type="delete">Delete</MyButton>
+              <MyButton theme={theme} type="delete">
+                Delete
+              </MyButton>
             </ButtonGroup>
             <Required>
               *Image size should be at least 320px big,and less then 500kb .
@@ -300,8 +472,8 @@ const Settings = () => {
             <Information>
               <Label>{item.Label}</Label>
 
-              <Input 
-              theme={theme}
+              <Input
+                theme={theme}
                 name={item.name}
                 placeholder={edit ? "" : item.value}
                 value={edit ? item.value : item.value}
@@ -315,7 +487,16 @@ const Settings = () => {
         <Button
           color="success"
           variant="contained"
-          sx={{ width: 200 , color: theme == "light" ? whiteTextColor : colorAccentMain , bgcolor: theme == "light" ? main : colorAccentMediumTransparent , "&:hover" : {bgcolor: theme == "light" ? lightMain  : colorAccentDarkTransparent , color : theme == "light" ? main  : ""}  }}
+          sx={{
+            width: 200,
+            color: theme == "light" ? whiteTextColor : colorAccentMain,
+            bgcolor: theme == "light" ? main : colorAccentMediumTransparent,
+            "&:hover": {
+              bgcolor:
+                theme == "light" ? lightMain : colorAccentDarkTransparent,
+              color: theme == "light" ? main : "",
+            },
+          }}
           startIcon={<SaveAltTwoToneIcon />}
           onClick={handleSubmit}
         >
@@ -324,13 +505,33 @@ const Settings = () => {
       </SettingGroup>
 
       <SettingContainer>
-        <SettingGroup theme={theme} style={{ gap: 16 }}>
-          <SettingTitle>Change Password</SettingTitle>
-          <Required>Change Password Only If You Feel Unsafe</Required>
-          <MyButton theme={theme} style={{ padding: "12px 0 " }}>
-            Change Your Password
-          </MyButton>
-        </SettingGroup>
+        {changed == true ? (
+          <SettingGroup theme={theme} style={{ gap: 16 }}>
+            <UpdatePassword
+              theme={theme}
+              user={user}
+              password={password}
+              onPasswordChange={handlePasswordChange}
+              setMessage={setMessage}
+              setOpen={setOpen}
+              setType={setType}
+              type={type}
+              setChanged={setChanged}
+            />
+          </SettingGroup>
+        ) : (
+          <SettingGroup theme={theme} style={{ gap: 16 }}>
+            <SettingTitle>Change Password</SettingTitle>
+            <Required>Change Password Only If You Feel Unsafe</Required>
+            <MyButton
+              theme={theme}
+              onClick={() => setChanged(!changed)}
+              style={{ padding: "12px 0 " }}
+            >
+              Change Your Password
+            </MyButton>
+          </SettingGroup>
+        )}
         <SettingGroup theme={theme} style={{ gap: 16 }}>
           <SettingTitle>Delete Account</SettingTitle>
           <Required>If You Deleted You Account It Will Not Restore</Required>

@@ -16,7 +16,6 @@ const Table = styled.table`
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  
   contain: paint;
 `;
 const Row = styled.tr`
@@ -107,7 +106,6 @@ setLoading(false)
   const handleDelete = async (userId) => {
     try {
       const response = await newRequest.delete(`/users/delete/${userId}`);
-      console.log(response.data.message);
       setUsers((prevUsers) => prevUsers.filter((user) => user.idUSER !== userId));
     } catch (error) {
       console.error("Error deleting user:", error.response?.data?.error || error.message);

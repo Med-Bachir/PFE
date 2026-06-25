@@ -56,7 +56,7 @@ export default function RadioGroupRating({rate , theme}) {
       IconContainerComponent={IconContainer}
       getLabelText={(rate) => customIcons[rate]?.label}
       highlightSelectedOnly
-sx={{ mt:'-20px',  bgcolor: theme == "light" ? '' : colorElementBackgroundGray , padding:'2px 4px' , borderRadius:4}}
+sx={{   bgcolor: theme == "light" ? '' : colorElementBackgroundGray , padding:'2px 4px' , borderRadius:4}}
       readOnly
       />
       </Tooltip>

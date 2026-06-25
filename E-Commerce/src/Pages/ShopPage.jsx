@@ -42,7 +42,7 @@ const items = [
 ];
 
 const Container = styled.div`
-  height: 100vh;
+  
 
   height: calc(100vh - 80px);
   @media (max-width: 768px) {
@@ -70,15 +70,18 @@ const ShopProfile = styled.div`
 const InfoContainer = styled.div`
   padding: 32px 0 8px;
   flex: 4;
- 
+  @media (max-width: 768px) {
+    /* Add media query for mobile */
+    padding: 0px 0 ;
+  }
 `;
 const ProductContainer = styled.div`
   flex: 13;
   padding: 32px 32px 32px 0;
   contain: paint;
-  overflow-y: scroll;
+  overflow-y: auto;
   @media (max-width: 768px) {
-    padding: 32px 32px 0 32px;
+    padding: 8px 8px 0 8px;
     
   
 
@@ -122,16 +125,22 @@ const ShopProducts = styled.div`
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 20px;
-  @media (max-width: 768px) {
+  @media (max-width: 968px) {
     
     grid-template-columns: repeat(2, 1fr);
     gap: 20px;
   
 }
+  @media (max-width: 768px) {
+    
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+  
+}
 @media (max-width: 683px) {
     
-    grid-template-columns: repeat(1, 1fr);
-    gap: 20px;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 8px;
   
 }
  
@@ -199,10 +208,7 @@ const Item = styled.div`
   align-items: center;
   gap: 4px;
 `;
-const ItemIcon = styled.img`
-  width: 40px;
-  height: 40px;
-`;
+
 const ItemTitle = styled.span`
   font-size: 14px;
 `;
@@ -260,7 +266,7 @@ const ShopPage = () => {
     };
     getShop();
   }, [Location]);
-  console.log(shop);
+ 
 
   const [products, setProducts] = useState([]);
 
@@ -276,7 +282,7 @@ const ShopPage = () => {
     getProducts();
   }, [Location]);
 
-  console.log(products);
+
 
   return (
     <Container >

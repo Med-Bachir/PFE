@@ -1,33 +1,19 @@
-import { Avatar, Divider } from "@mui/material";
+import { Avatar} from "@mui/material";
 import React, { useEffect, useState } from "react";
 import { Link, Outlet, useNavigate } from "react-router-dom";
 import styled from "styled-components";
-import Header from "../../Components/Header";
-import RemoveRedEyeOutlinedIcon from "@mui/icons-material/RemoveRedEyeOutlined";
-
-import LocationOnTwoToneIcon from "@mui/icons-material/LocationOnTwoTone";
-import LocalShippingTwoToneIcon from "@mui/icons-material/LocalShippingTwoTone";
-import ApartmentTwoToneIcon from "@mui/icons-material/ApartmentTwoTone";
-import WhereToVoteTwoToneIcon from "@mui/icons-material/WhereToVoteTwoTone";
-import LockTwoToneIcon from "@mui/icons-material/LockTwoTone";
 import { useDispatch, useSelector } from "react-redux";
 import { logout } from "../../redux/apiCalls";
 import newRequest from "../../utils/newRequest";
-import { colorAccentDarkTransparent, colorAccentMoreTransparent, colorAccentSub, colorAccentTransparent, colorBackgroundBlack, colorBackgroundGray, colorPrimaryBlack, elementGrayBackground, grayBackground, lightMain, main, primaryTextColor, secondaryTextColor, transparentMain, whiteTextColor } from "../../Colors";
+import { colorAccentDarkTransparent, colorAccentMoreTransparent, colorAccentSub,colorBackgroundBlack, colorBackgroundGray, colorPrimaryBlack, elementGrayBackground, grayBackground, lightMain, main, primaryTextColor, secondaryTextColor, transparentMain, whiteTextColor } from "../../Colors";
+import {resetNotification } from "../../redux/notifications";
+
+
 
 const Container = styled.div`
- height: calc(100vh - 80px);
-`;
-const OrderContainer = styled.div`
   height: calc(100vh - 80px);
-
-  
-
   background-color: ${({theme}) => theme == "light" ? grayBackground : colorBackgroundGray};
   display: flex;
-  padding: 32px 32px 0px;
-  gap: 32px;
-  
   overflow-y: auto;
   @media (max-width: 768px) {
     display: flex;
@@ -43,10 +29,11 @@ const Left = styled.div`
   display: flex;
   flex-direction: column;
   gap: 20px;
-
+  padding: 32px 0 32px 32px;
   @media (max-width: 768px) {
     width: 100%;
-   
+    padding: 12px;
+    gap: 12px;
 
   }
   
@@ -75,7 +62,6 @@ const TotalOrder = styled.div`
   align-items: center;
   flex: 1;
   font-size: 14px;
-
   padding: 8px 4px;
   gap: 8px;
   border-left: ${(props) =>
@@ -139,15 +125,13 @@ const OptionLink = styled.span`
 `;
 
 const Right = styled.div`
-  width: 71%;
+  width: 75%;
   display: flex;
   flex-direction: column;
-  height: calc(100vh - 130px);
-  overflow: auto;
+
+height: max-content;
   @media (max-width: 768px) {
     width: 100%;
-   
-
   }
   &::-webkit-scrollbar {
     width: 8px;
@@ -166,10 +150,10 @@ const Right = styled.div`
 const ClientPf = () => {
   const user = useSelector((state) => state.user?.currentUser);
   const theme = useSelector((state) => state.theme.mode);
-
 const navigate = useNavigate()
   const dispatch = useDispatch()
   const handleLogOut = () => {
+    dispatch(resetNotification());
     logout(dispatch);
     navigate("/login");
   };
@@ -193,10 +177,9 @@ const navigate = useNavigate()
         };
         getOrders();
       }, [user?.idUSER]);
-     
   return (
-    <Container theme={theme}>
-      <OrderContainer theme={theme}>
+ 
+      <Container theme={theme}>
         <Left theme={theme}>
           <Total theme={theme}>
             <Text>Orders</Text>
@@ -242,10 +225,7 @@ const navigate = useNavigate()
               </ProfileInfoContainer>
             </ProfileContainer>
             <Option>
-              <Button theme={theme}>
-                <LockTwoToneIcon />
-                Change Password
-              </Button>
+             
             </Option>
           </Options>
         </Left>
@@ -253,8 +233,8 @@ const navigate = useNavigate()
         <Right theme={theme}>
           <Outlet />
         </Right>
-      </OrderContainer>
-    </Container>
+      </Container>
+    
   );
 };
 

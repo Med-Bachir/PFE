@@ -12,8 +12,8 @@ import { colorBackgroundGray, colorPrimaryBlack, darkRed, elementGrayBackground,
 
 
 const Container = styled.div`
-width: 100%;
-
+width: calc(100% - 64px);
+margin: 32px;
 display: flex;
 flex-direction: column;
   color: ${({theme}) => theme == "light" ? primaryTextColor : elementGrayBackground};

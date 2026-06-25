@@ -200,7 +200,7 @@ const AddCategory = () => {
             break;
           case "type":
             setType({ ...type, image: url });
-            console.log(cat);
+            
             break;
           default:
             console.warn(`Unhandled field: ${field}`);
@@ -220,7 +220,7 @@ const AddCategory = () => {
               break;
             case "type":
               setType({ ...type, image: url });
-              console.log(cat);
+             
               break;
             default:
               console.warn(`Unhandled field: ${field}`);
@@ -244,14 +244,14 @@ const AddCategory = () => {
             break;
           case "type":
             setType({ ...type, image: url });
-            console.log(cat);
+            
             break;
           default:
             console.warn(`Unhandled field: ${field}`);
         }
       });
     }
-    console.log(type);
+ 
   };
 
   // get cat
@@ -281,13 +281,13 @@ const AddCategory = () => {
         break;
       case "type":
         setType((prev) => ({ ...prev, [event.target.name]: value }));
-        console.log(cat);
+        
         break;
       default:
         console.warn(`Unhandled field: ${field}`);
     }
 
-    console.log({ cat, sub, type });
+   
   };
 
   const handleSubmitField = async (event, field) => {

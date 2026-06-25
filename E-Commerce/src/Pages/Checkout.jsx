@@ -225,7 +225,24 @@ const Button = styled.button`
 //const Container = styled.div``
 //const Container = styled.div``
 //const Container = styled.div``
+const ImageContainer = styled.div`
+  
 
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+ height: 54px;
+ 
+
+    
+    img {
+
+      
+   height: 48px;
+    width: 48px;
+    }
+`;
 const CheckOut = () => {
   const user = useSelector((state) => state.user.currentUser);
   const theme = useSelector((state) => state.theme.mode);
@@ -262,7 +279,7 @@ const CheckOut = () => {
         setOpen(true);
       }
     }catch(err){
-console.log(err)
+
     }
     
   };
@@ -275,12 +292,12 @@ console.log(err)
   const handleChange = (e) => {
     e.preventDefault();
     setOrder((prev) => ({ ...prev, [e.target.name]: e.target.value }));
-    console.log(order);
+ 
   };
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    console.log(order);
+
 
     const setMessageWithTimeout = (
       message,
@@ -514,16 +531,19 @@ sx={customTextField}
 
               <ItemContainer key={index}>
                 <Item>
+                  <ImageContainer>
+
                  
                       <LazyAvatar src={item.image} sx={{
   borderRadius: 2,
   mr: 3,
   border:`1px solid ${ theme === "light" ? elementGrayBackground : colorElementBackgroundGray}` ,
   paddingTop: "2px",
-bgcolor:'transparent'
+  bgcolor:'transparent'
 
-              }} />
+}} />
                            
+</ImageContainer>
                   <Detail type="name">{item.name}</Detail>
                 </Item>
                 

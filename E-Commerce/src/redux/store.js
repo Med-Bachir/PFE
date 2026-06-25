@@ -25,7 +25,7 @@ const persistConfig = {
 
 // Combine reducers
 const rootReducer = combineReducers({
-  cart: drawerReducer,
+  drawer: drawerReducer,
   user: userReducer,
   notify : notifyReducer,
   caty:catyReducer,

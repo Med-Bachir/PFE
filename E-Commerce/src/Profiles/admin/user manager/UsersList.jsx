@@ -31,15 +31,6 @@ display: flex;
 flex-direction: column;
 
 `
-const StaticTitle = styled.span`
-font-size: 20px;
-border-left: 4px ${main} solid;
-padding: 0 20px;
-display: flex;
-align-items: center;
-justify-items: center;
-`
-
 
 
 const Table = styled.table`
@@ -78,7 +69,6 @@ const Row = styled.tr`
   align-items: center;
   justify-content: center;
 color: ${props => props.theme == "light" ? colorPrimaryBlack : whiteTextColor };
-
   background-color: ${(props) =>
   props.type === "tag" ? props.theme == "light" ? main : colorAccentLight : props.theme == "light" ? whiteTextColor : colorAccentDarkTransparent};
    @media (max-width: 768px) {
@@ -99,7 +89,6 @@ const Column = styled.th`
   flex: 2;
   display: flex;
   align-items: center;
-  
   font-weight: 300;
   padding: 0 8px;
   gap: 8px;
@@ -121,48 +110,21 @@ text-overflow: ellipsis;
     border-radius: 20px; /* roundness of the scroll thumb */
     /* creates padding around scroll thumb */
   }
-
-  
 `;
 const ColumnInfo = styled.th`
-  
   font-weight: 300;
  width: 100%;
   padding: 4px 12px;
- 
   border-radius: 4px;
   font-size: 14px;
   text-align: center;
-  
 `;
 
 const Text = styled.span`
-
-   
 flex: 1;
-
 `;
-const Search = styled.div`
-width: 50%;
-display: flex;
-justify-content: space-between;
-height: 40px;
-border-radius: 4px;
-border: 1px solid ${props => props.theme == "light" ? grayBackground : colorBackgroundBlack};
-background-color:${props => props.theme == "light" ? whiteTextColor : colorPrimaryBlack};
 
-`
-const Input = styled.input`
-border: none;
-outline: none;
-width: 90%;
-padding: 0 16px;
-font-size: 16px;
 
-background-color:${props => props.theme == "light" ? whiteTextColor : colorAccentDarkTransparent};
-color:${props => props.theme == "light" ?primaryTextColor : whiteTextColor};
-
-`
   
 const UsersList = () => {
   const theme = useSelector(state => state.theme.mode)
@@ -198,16 +160,18 @@ const [currentPage, setCurrentPage] = useState(1);
   const handleDelete = async (userId) => {
     try {
       const response = await newRequest.delete(`/users/delete/${userId}`);
-      console.log(response.data.message);
+     
       setMessage("User Deleted Successfully");
           setType("success");
           setOpen(true);
-      setUsers((prevUsers) => prevUsers.filter((user) => user.idUSER !== userId));
+      
     } catch (error) {
       setMessage("Somthing is wrong!! Please try again later");
           setType("error");
           setOpen(true);
       console.error("Error deleting user:", error.response?.data?.error || error.message);
+    } finally{
+      getUsers()
     }
   };
 
@@ -305,7 +269,7 @@ const [currentPage, setCurrentPage] = useState(1);
         : loading ? 
         <Loading />
         : 
-        <EmptyData />
+        <EmptyData text={'no user found'} />
       }
       </Table>
       <Box sx={{display:'flex' , alignContent:'center' , justifyContent:'center' , mt:2}}>

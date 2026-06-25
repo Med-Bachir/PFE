@@ -21,34 +21,27 @@ align-items: center;
 border-radius:4px;
 padding: 16px;
 contain: paint;
-min-height: 400px;
+
+
 
 `
-const ProductImage = styled.img`
-height: 300px;
-width: 100%;
-object-fit: contain;
 
-`
 const Name = styled.span`
 margin-top: 20px;
 font-size: 15px;
 font-weight: 500;
 `
 const Price = styled.span`
-margin-top: 16px;
 font-size: 15px;
 font-weight: 300;
 `
 const OldPrice = styled.span`
-margin-top: 16px;
 font-size: 13px;
 font-weight: 300;
 text-decoration: line-through;
 color: #c1c1c1;
 `
 const CurrentPrice = styled.span`
-margin-top: 16px;
 font-size: 20px;
 font-weight: 400;
 `
@@ -76,7 +69,17 @@ display: flex;
 align-items: center;
 justify-content: space-between;
 flex-direction: column;
-gap: 8px;
+gap: 20px;
+
+`
+const Bottom = styled.div`
+display: flex;
+align-items: center;
+justify-content: space-between;
+margin-top: 12px;
+gap: 20px;
+
+
 `
 
 const ShopProduct = ({name , price , discount , id , image , rate , theme}) => {
@@ -84,16 +87,19 @@ const ShopProduct = ({name , price , discount , id , image , rate , theme}) => {
     <Product theme={theme}>
         {discount == 0 ? '' : <Discount>{discount}%</Discount>}
     
-    <LazyAvatar src={image} sx={{ width:'100%', height:300  , borderRadius:0 , objectFit:'fill' , bgcolor:'transparent'}} />
+    <LazyAvatar src={image} sx={{ width:'100%', height:300  , borderRadius:0 , objectFit:'fill' , bgcolor:'transparent' , "@media (max-width: 768px)" : {height:200}}} />
 
     <RateContainer>
     <Name>{name}</Name>
     <RadioGroupRating rate={rate}/>
     </RateContainer>
+    <Bottom>
+
     <Price> <CurrentPrice> ${price - price * discount / 100} </CurrentPrice>{discount == 0 ? '' : <OldPrice>${price}</OldPrice>} </Price>
 <Link to={`/cardproduct/${id}`}>
-    <Button style={{padding:'8px 16px' , marginTop:8 , backgroundColor:'#009f7f' ,color:'white' , fontWeight:500 , position:'absolute' , bottom:16, right:20}}>+</Button>
+    <Button style={{padding:'8px 16px' , marginTop:8 , backgroundColor:'#009f7f' ,color:'white' , fontWeight:500  , bottom:16, right:20}}>+</Button>
 </Link>
+    </Bottom>
 
 </Product>
   )

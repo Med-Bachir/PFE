@@ -159,7 +159,6 @@ const rowTagType = [ "ID",
   const getCategories = async () => {
     try {
       const res = await newRequest.get(`/category/getallcat`);
-      console.log("Fetched categories:", res.data);
       setCategories(res.data);
      setLoading(true)
     } catch (err) {

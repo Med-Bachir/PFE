@@ -81,7 +81,7 @@ display: flex;
 align-items: center;
 justify-content: center;
 flex-direction: column;
-background-color: ${whiteTextColor};
+background-color: ${({theme}) => theme == "light" ? whiteTextColor : colorAccentDarkTransparent};
 border-radius: 8px;
 margin-bottom: 20px;
 `;
@@ -158,7 +158,7 @@ const ShopeRequest = ({shop , loading}) => {
         </>
       ))
     :   loading ? <Loading /> :
-    <LottieContainer>
+    <LottieContainer theme={theme}>
             <Lottie  animationData={me} style={{ width:"20%"}} /> 
             No Shop Request Found
             </LottieContainer> 

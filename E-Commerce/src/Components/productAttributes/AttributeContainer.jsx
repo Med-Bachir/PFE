@@ -126,7 +126,7 @@ const AttributeContainer = ({ theme, product, selectedAttributes, handleAttribut
         const value = product?.attributes?.[field.key];
         if (!value) return null;
 
-        if (field.type === "colors") {
+        if (field.type === "colors" || field.type === "color") {
           const colors = field.split ? value.split(",") : [value];
           return (
             <ColorContainer key={field.key}>

@@ -10,6 +10,7 @@ import newRequest from "../../utils/newRequest";
 import Cookies from 'js-cookie'; 
 import SaveAltTwoToneIcon from "@mui/icons-material/SaveAltTwoTone";
 import { colorAccentDarkTransparent, colorAccentLight, colorAccentMain, colorAccentMediumTransparent, colorAccentSub, colorBackgroundBlack, colorBackgroundGray, colorPrimaryBlack, grayBackground, lightMain, main, primaryTextColor, secondaryTextColor, whiteTextColor } from "../../Colors";
+import UpdatePassword from "../../Components/updateForms/UpdatePassword";
 
 const Container = styled.div`
   
@@ -28,7 +29,7 @@ gap: 32px;
 @media (max-width: 768px ){
   flex-direction: column;
   
-  gap: 0px;
+  gap: 20px;
   }
 
 
@@ -151,14 +152,15 @@ username:"",
 email:""
   });
   const token = Cookies.get('accessToken');
-  console.log(token)
+
   
   const [message, setMessage] = React.useState("");
   const [type, setType] = React.useState("");
   const [open, setOpen] = React.useState(false);
   const [edit, setEdit] = React.useState();
+  const [changed, setChanged] = React.useState(false);
   const [profileImage, setProfileImage] = React.useState(null);
-  console.log(newUser)
+
   
   const handleChange = (e) => {
 
@@ -255,7 +257,18 @@ email:""
   };
 
   
-  
+  const [password, setPassword] = React.useState({ old: '', password: '' });
+
+  const handlePasswordChange = (e) => {
+    const { name, value } = e.target;
+    setPassword((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+
+    
+  };
+
   return (
     <Container theme={theme}>
       <AlertMessage open={open} setOpen={setOpen} message={message} type={type} />
@@ -302,12 +315,30 @@ email:""
       </SettingGroup>
       
       <SettingContainer>
+{changed == true ?
+  
+    
 
       <SettingGroup theme={theme} style={{gap:16}} >
-        <SettingTitle >Change Password</SettingTitle>
-        <Required>Change Password Only If You Feel Unsafe</Required>
-        <MyButton theme={theme} style={{padding:'12px 0 '}}>Change Your Password</MyButton>
+<UpdatePassword 
+      theme={theme}
+      user={user}
+      password={password}
+      onPasswordChange={handlePasswordChange}
+      setMessage={setMessage}
+      setOpen={setOpen}
+      setType={setType}
+      type={type}
+      setChanged={setChanged}
+      />
       </SettingGroup>
+      :
+      <SettingGroup theme={theme} style={{gap:16}} >
+      <SettingTitle >Change Password</SettingTitle>
+      <Required>Change Password Only If You Feel Unsafe</Required>
+      <MyButton theme={theme} onClick={() => setChanged(!changed)} style={{padding:'12px 0 '}}>Change Your Password</MyButton>
+    </SettingGroup>
+}
       <SettingGroup theme={theme} style={{gap:16}}>
       <SettingTitle >Delete Account</SettingTitle>
         <Required>If You Deleted You Account It Will Not Restore</Required>

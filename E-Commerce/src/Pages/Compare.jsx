@@ -1,7 +1,7 @@
 
 import React, { useEffect, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import axios from 'axios';
+
 import styled from "styled-components";
 
 
@@ -142,17 +142,17 @@ const [products , setProducts] = useState([]);
     getProducts();
   }, [Location]);
 
-  console.log(products)
+  
 
   const handleCompare = async (idproduct) => {
     try {
       // Make the HTTP request here
       const response = await newRequest.get(`/products/similar-products/${idproduct}`);
-      console.log(response+"hhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhh")
+   
       // Assuming the request is successful, navigate to the compare page with idproduct
       navigate(`/compare/${idproduct}`);
     } catch (error) {
-      console.log(error)
+     
       console.error('Error comparing product:', error);
     }
   };
