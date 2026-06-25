@@ -643,6 +643,9 @@ const CardProduct = () => {
 
   // Convert attributes to an array for mapping
 let att = product?.attributes
+const productPrice = Number(product?.productprice || 0);
+const productDiscount = Number(product?.discount || 0);
+const finalPrice = productPrice - (productPrice * productDiscount) / 100;
   console.log()
   return (
     <Container theme={theme}>
@@ -680,14 +683,11 @@ let att = product?.attributes
                     marginRight: 20,
                   }}
                 >
-                  $ {product?.productprice?.toFixed(2)}{" "}
+                  $ {productPrice.toFixed(2)}{" "}
                 </Price>
               )}{" "}
               ${" "}
-              {(
-                product.productprice -
-                (product.productprice * product.discount) / 100
-              )?.toFixed(2)}{" "}
+              {finalPrice.toFixed(2)}{" "}
             </Price>
 
 <AttributeContainer theme={theme} product={product} selectedAttributes={selectedAttributes} handleAttributes={handleAttributes} Location={Location}/>
